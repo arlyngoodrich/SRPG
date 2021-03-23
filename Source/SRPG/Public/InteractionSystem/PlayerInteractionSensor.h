@@ -9,7 +9,7 @@
 class UInteractableObjectComponent;
 
 
-UCLASS( ClassGroup=(InteractionSystem), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(InteractionSystem), Blueprintable)
 class SRPG_API UPlayerInteractionSensor : public UActorComponent
 {
 	GENERATED_BODY()
