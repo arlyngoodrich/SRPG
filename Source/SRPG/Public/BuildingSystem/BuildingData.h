@@ -12,6 +12,7 @@ class ABuildingPiece;
 
 UENUM(BlueprintType)
 enum class EBuildingPieceStatus : uint8 {
+
 	BPSE_Spawning       UMETA(DisplayName = "Spawning"),
 	BPSE_Set			UMETA(DisplayName = "Set"),
 	BPSE_FullyBuilt     UMETA(DisplayName = "Fully Built"),
@@ -47,15 +48,5 @@ struct FBuildingPieceData : public FTableRowBase
 
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 		TArray<FBuildingCost> BuildingCosts;
-
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-		bool bRequiresTerrain;
-
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "!bRequiresTerrain"))
-		bool bRequiresBuildingPiece;
-
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "bRequiresBuildingPiece"))
-		bool bRequiresSnap;
-
 
 };

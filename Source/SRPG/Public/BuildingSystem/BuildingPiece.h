@@ -26,6 +26,15 @@ protected:
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingPieceStatus BuildStatus;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+	bool bRequiresTerrain;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "!bRequiresTerrain"))
+	bool bRequiresBuildingPiece;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "bRequiresBuildingPiece"))
+	bool bRequiresSnap;
+
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Building System", DisplayName = "Update Piece Build Status")
 	void BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus);

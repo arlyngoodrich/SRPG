@@ -10,7 +10,8 @@
 // Sets default values
 ABuildingPiece::ABuildingPiece()
 {
-
+	bReplicates = true;
+	BuildStatus = EBuildingPieceStatus::BPSE_Spawning;
 
 }
 
@@ -35,6 +36,7 @@ void ABuildingPiece::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutL
 void ABuildingPiece::BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 {
 
+
 	if (GetLocalRole() >= ROLE_Authority)
 	{
 		UpdateBuildStatus(NewBuildStatus);
@@ -48,13 +50,15 @@ void ABuildingPiece::BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 
 void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 {
+		
+	UE_LOG(LogBuildingSystem, Log, TEXT("Build status change request received"))
 
 	if (NewBuildStatus == BuildStatus)
 	{
 		//do nothing it is the same..
 		UE_LOG(LogBuildingSystem, Warning, TEXT("Build status change request is the same"))
 	}
-	else if (NewBuildStatus > BuildStatus)
+	else if (NewBuildStatus < BuildStatus)
 	{
 		//log warning cannot go backwards
 		UE_LOG(LogBuildingSystem, Warning, TEXT("Attempting to set build piece status to lower state"))
