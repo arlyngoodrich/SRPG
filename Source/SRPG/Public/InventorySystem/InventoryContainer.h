@@ -66,7 +66,7 @@ protected:
 	//Blueprint server functions
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_AddItem(FItemData Item, int32 PosX, int32 PosY);
+	void Server_AddItem(FItemData Item, int32 PosX, int32 PosY);
 	bool Server_AddItem_Validate(FItemData Item, int32 PosX, int32 PosY);
 	void Server_AddItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
