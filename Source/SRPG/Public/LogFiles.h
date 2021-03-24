@@ -6,6 +6,7 @@
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTPCharacter, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogInventorySystem, Log, All);
 
 
 class SRPG_API LogFiles;
