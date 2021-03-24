@@ -4,3 +4,4 @@
 #include "LogFiles.h"
 
 DEFINE_LOG_CATEGORY(LogTPCharacter);
+DEFINE_LOG_CATEGORY(LogInventorySystem);
