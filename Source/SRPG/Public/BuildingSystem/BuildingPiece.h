@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-	FBuildingPieceData BuildingPieceData;
+	EBuildingTypes BuildingType;
 
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingPieceStatus BuildStatus;

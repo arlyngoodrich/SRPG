@@ -19,6 +19,18 @@ enum class EBuildingPieceStatus : uint8 {
 };
 
 
+UENUM(BlueprintType)
+enum class EBuildingTypes : uint8 {
+
+	BTE_None			UMETA(DisplayName = "None"),
+	BTE_Foundation		UMETA(DisplayName = "Foundation"),
+	BTE_Wall			UMETA(DisplayName = "Wall"),
+	BTE_Pilar			UMETA(DisplayName = "Pilar"),
+	BTE_Beam			UMETA(DisplayName = "Beam"),
+	BTE_Roof			UMETA(DisplayName = "Roof"),
+};
+
+
 USTRUCT(BlueprintType)
 struct FBuildingCost : public FTableRowBase
 {
@@ -31,6 +43,7 @@ struct FBuildingCost : public FTableRowBase
 	int32 Quantity;
 
 };
+
 
 
 

@@ -12,6 +12,7 @@ ABuildingPiece::ABuildingPiece()
 {
 	bReplicates = true;
 	BuildStatus = EBuildingPieceStatus::BPSE_Spawning;
+	BuildingType = EBuildingTypes::BTE_None;
 
 }
 
@@ -21,8 +22,6 @@ void ABuildingPiece::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-
 
 
 void ABuildingPiece::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimeProps) const
