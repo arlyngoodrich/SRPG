@@ -27,6 +27,7 @@ enum class EBuildingTypes : uint8 {
 	BTE_Wall			UMETA(DisplayName = "Wall"),
 	BTE_Pilar			UMETA(DisplayName = "Pilar"),
 	BTE_Beam			UMETA(DisplayName = "Beam"),
+	BTE_Floor			UMETA(DisplayName = "Floor"),
 	BTE_Roof			UMETA(DisplayName = "Roof"),
 };
 
