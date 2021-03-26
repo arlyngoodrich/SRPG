@@ -75,6 +75,6 @@ void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 		BuildStatus = NewBuildStatus;
 		UE_LOG(LogBuildingSystem, Log, TEXT("Build status changed to FULLY BUILT"))
 
-		BP_OnBuildStatusChangeToSet();
+		BP_OnBuildStatusChangeToBuilt();
 	}
 }
