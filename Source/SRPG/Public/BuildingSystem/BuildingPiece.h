@@ -26,6 +26,9 @@ protected:
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingPieceStatus BuildStatus;
 
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+	EBuildingConnectionLevel ConnectionLevel;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	bool bRequiresTerrain;
 
@@ -33,11 +36,21 @@ protected:
 	bool bRequiresBuildingPiece;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "bRequiresBuildingPiece"))
+	bool bRequiresBuiltBuildingPiece;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (EditCondition = "bRequiresBuildingPiece"))
 	bool bRequiresSnap;
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Building System", DisplayName = "Update Piece Build Status")
 	void BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Building System", DisplayName = "Set Connection Level")
+	void BP_SetConnectionLevel(EBuildingConnectionLevel NewConnectionLevel);
+
+	UFUNCTION(BlueprintCallable, Category = "Building System", DisplayName = "Incrament Connection Level")
+	void BP_IncreaseConnectionLevel(EBuildingConnectionLevel InConnectionLevel, EBuildingConnectionLevel& OutConnecitonLevel);
+	
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintAuthorityOnly, Category = "Building System", DisplayName = "Build Status Changed to Set")
@@ -48,5 +61,7 @@ protected:
 
 private:
 	void UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus);
+
+	void SetConnectionLevel(EBuildingConnectionLevel NewConnectionLevel);
 
 };

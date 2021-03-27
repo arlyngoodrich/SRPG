@@ -30,6 +30,7 @@ void ABuildingPiece::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABuildingPiece, BuildStatus);
+	DOREPLIFETIME(ABuildingPiece, ConnectionLevel);
 }
 
 void ABuildingPiece::BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
@@ -46,6 +47,23 @@ void ABuildingPiece::BP_UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 	}
 
 }
+
+void ABuildingPiece::BP_SetConnectionLevel(EBuildingConnectionLevel NewConnectionLevel)
+{
+	SetConnectionLevel(NewConnectionLevel);
+}
+
+void ABuildingPiece::BP_IncreaseConnectionLevel(EBuildingConnectionLevel InConnectionLevel, EBuildingConnectionLevel& OutConnecitonLevel)
+{
+
+	int8 InConnectionLevelByte = int8(InConnectionLevel);
+	int8 OutConnectionLevelByte = InConnectionLevelByte + int8(1);
+
+	OutConnecitonLevel = EBuildingConnectionLevel(OutConnectionLevelByte);
+
+}
+
+
 
 void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 {
@@ -77,4 +95,15 @@ void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 
 		BP_OnBuildStatusChangeToBuilt();
 	}
+}
+
+void ABuildingPiece::SetConnectionLevel(EBuildingConnectionLevel NewConnectionLevel)
+{
+
+	const TEnumAsByte<EBuildingConnectionLevel> ByteConnectionLevel = NewConnectionLevel;
+	FString EnumAsString = UEnum::GetValueAsString(ByteConnectionLevel.GetValue());
+
+	ConnectionLevel = NewConnectionLevel;
+	UE_LOG(LogBuildingSystem, Log, TEXT("Connection Level Changed to %s"),*EnumAsString)
+
 }

@@ -32,6 +32,21 @@ enum class EBuildingTypes : uint8 {
 };
 
 
+
+UENUM(BlueprintType)
+enum class EBuildingConnectionLevel : uint8 {
+
+	BCLE_Foundation		UMETA(DisplayName = "Foundation"),
+	BCLE_First			UMETA(DisplayName = "First Level"),
+	BCLE_Second			UMETA(DisplayName = "Second Level"),
+	BCLE_Third			UMETA(DisplayName = "Third Level"),
+	BCLE_Fourth			UMETA(DisplayName = "Fourth Level"),
+	BCLE_TooFar			UMETA(DisplayName = "Too Far"),
+	BCLE_None			UMETA(DisplayName = "None")
+
+};
+
+
 USTRUCT(BlueprintType)
 struct FBuildingCost : public FTableRowBase
 {
