@@ -38,7 +38,7 @@ struct FBuildingCost : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-	FName BuildingPieceName;
+	FName ResourceName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (ClampMin = 0))
 	int32 Quantity;
