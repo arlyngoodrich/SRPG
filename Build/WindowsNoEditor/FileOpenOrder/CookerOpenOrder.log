@@ -1,19 +1,19 @@
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/CharacterAssets/BP_PlayerCameraManager.uasset" 0
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/CharacterAssets/BP_SRPGPlayerController.uasset" 1
-"../../../Engine/Content/EditorBlueprintResources/StandardMacros.uasset" 2
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/WBP_InteractionText.uasset" 3
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/BPC_InteractableObjectComponent.uasset" 4
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/BPC_PlayerInteractionSensor.uasset" 5
-"../../../Engine/Content/EditorBlueprintResources/ActorMacros.uasset" 6
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/M_SpawnMaterial.uasset" 7
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/MI_SpawnMaterial.uasset" 8
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPI_BuildSystem.uasset" 9
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_SnapPointActor.uasset" 10
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPC_SnapPointSpawn.uasset" 11
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_BuildingRoot.uasset" 12
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/M_SpawnMaterial.uasset" 2
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/MI_SpawnMaterial.uasset" 3
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/WBP_InteractionText.uasset" 4
+"../../../Engine/Content/EditorBlueprintResources/StandardMacros.uasset" 5
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/BPC_InteractableObjectComponent.uasset" 6
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InteractionSystem/BPC_PlayerInteractionSensor.uasset" 7
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPI_BuildSystem.uasset" 8
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_SnapPointActor.uasset" 9
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPC_SnapPointSpawn.uasset" 10
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_BuildingRoot.uasset" 11
+"../../../Engine/Content/EditorBlueprintResources/ActorMacros.uasset" 12
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_BuildingPieceBase.uasset" 13
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPC_PlayerBuildManager.uasset" 14
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/WBP_BuildButton.uasset" 15
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/WBP_BuildButton.uasset" 14
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BPC_PlayerBuildManager.uasset" 15
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_WallPieceBase.uasset" 16
 "../../../Engine/Content/EngineMaterials/T_Default_Material_Grid_N.uasset" 17
 "../../../Engine/Content/EngineMaterials/T_Default_Material_Grid_M.uasset" 18
@@ -24,14 +24,14 @@
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_SlopedWallBase1.uasset" 23
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_SlopedWall1_LP.uasset" 24
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BuildingSystem/BP_TestSlopedWall1.uasset" 25
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_SlopedWallBase.uasset" 26
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_SlopedWall_LP.uasset" 27
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_SlopedWall_LP.uasset" 26
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_SlopedWallBase.uasset" 27
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BuildingSystem/BP_TestSlopedWall.uasset" 28
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_RoofBase.uasset" 29
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_Roof_LP.uasset" 30
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_Roof_LP.uasset" 29
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_RoofBase.uasset" 30
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BuildingSystem/BP_TestRoof.uasset" 31
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_FoundationPieceBase.uasset" 32
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_Foundation_LP.uasset" 33
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/BuildingPieces/SM_Foundation_LP.uasset" 32
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/BP_FoundationPieceBase.uasset" 33
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BuildingSystem/BP_TestFoundation.uasset" 34
 "../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BuildingSystem/DT_BuildingData.uasset" 35
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/BuildSystem/WBP_BuildingMenu.uasset" 36
@@ -63,12 +63,12 @@
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Characters/UE4Character/Animations/BS_Crouch.uasset" 62
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Characters/UE4Character/Animations/A_FallLoop_Straight.uasset" 63
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Characters/UE4Character/Animations/AnimBP_CharacterMovement.uasset" 64
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/EquipmentSystem/BP_MeleeDamageTrace.uasset" 65
-"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/EquipmentSystem/BP_MeleeWeapon.uasset" 66
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/SM_Ax_LP.uasset" 67
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BP_Ax.uasset" 68
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Animations/UE4_Mannequin_Skeleton_Two_Handed_Swing.uasset" 69
-"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Animations/AM_TwoHandedSwing.uasset" 70
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Animations/UE4_Mannequin_Skeleton_Two_Handed_Swing.uasset" 65
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Animations/AM_TwoHandedSwing.uasset" 66
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/EquipmentSystem/BP_MeleeDamageTrace.uasset" 67
+"../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/EquipmentSystem/BP_MeleeWeapon.uasset" 68
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Meshes/SM_Ax_LP.uasset" 69
+"../../../../GameDev/Z. Projects/SRPG/Content/TestContent/Blueprints/BP_Ax.uasset" 70
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/EquipmentSystem/BPC_PlayerEquipmentManager.uasset" 71
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InventorySystem/BPC_InventoryContainer.uasset" 72
 "../../../../GameDev/Z. Projects/SRPG/Content/SRPG/Blueprints/InventorySystem/BPC_PlayerInventoryManager.uasset" 73
@@ -285,74 +285,74 @@
 "../../Plugins/Experimental/Water/Content/Icons/WaterSprite.uasset" 284
 "../../Plugins/Experimental/Water/Content/Meshes/RiverMesh.uasset" 285
 "../../Plugins/Experimental/Water/Content/Waves/GerstnerWaves_Ocean.uasset" 286
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q4.uasset" 287
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q3.uasset" 288
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q2.uasset" 289
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q1.uasset" 290
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/BlockoutToolsFunctions.uasset" 291
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Cone.uasset" 292
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q4.uasset" 293
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q3.uasset" 294
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q2.uasset" 295
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q1.uasset" 296
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q4.uasset" 297
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q3.uasset" 298
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q2.uasset" 299
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q1.uasset" 300
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Corner_Curved.uasset" 301
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Corner_Ramp.uasset" 302
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Corner_Ramp.uasset" 303
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q4.uasset" 304
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q3.uasset" 305
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q2.uasset" 306
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q1.uasset" 307
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Cylinder.uasset" 308
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box.uasset" 309
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Doorway.uasset" 310
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Pole.uasset" 311
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Open.uasset" 312
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Closed.uasset" 313
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutRailingType.uasset" 314
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Railing.uasset" 315
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Ramp.uasset" 316
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Ramp.uasset" 317
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box_Right.uasset" 318
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box_Centered.uasset" 319
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutAlignment.uasset" 320
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Skewbox.uasset" 321
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q4.uasset" 322
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q3.uasset" 323
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q2.uasset" 324
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q1.uasset" 325
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q4.uasset" 326
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q3.uasset" 327
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q2.uasset" 328
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q1.uasset" 329
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Sphere.uasset" 330
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Sloped_Centered.uasset" 331
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Box_Centered.uasset" 332
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutStairsType.uasset" 333
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Curved.uasset" 334
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Sloped_Linear.uasset" 335
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Box.uasset" 336
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Linear.uasset" 337
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Linear_Manual.uasset" 338
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Tube.uasset" 339
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Window.uasset" 340
-"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Gradient/LinearGradient.uasset" 341
-"../../../Engine/Content/Functions/Engine_MaterialFunctions01/ImageAdjustment/CheapContrast.uasset" 342
-"../../../Engine/Content/EngineMaterials/T_Default_Normal.uasset" 343
+"../../../Engine/Content/ArtTools/RenderToTexture/Materials/Debug/M_Emissive_Color.uasset" 287
+"../../../Engine/Content/BasicShapes/Cylinder.uasset" 288
+"../../Plugins/Lumin/MagicLeapPassableWorld/Content/MagicLeapARPinInfoActor.uasset" 289
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q4.uasset" 290
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q3.uasset" 291
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q2.uasset" 292
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cone_Q1.uasset" 293
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/BlockoutToolsFunctions.uasset" 294
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Cone.uasset" 295
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q4.uasset" 296
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q3.uasset" 297
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q2.uasset" 298
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Outer_Q1.uasset" 299
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q4.uasset" 300
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q3.uasset" 301
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q2.uasset" 302
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Curved_Corner_Inner_Q1.uasset" 303
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Corner_Curved.uasset" 304
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Corner_Ramp.uasset" 305
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Corner_Ramp.uasset" 306
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q4.uasset" 307
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q3.uasset" 308
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q2.uasset" 309
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Cylinder_Q1.uasset" 310
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Cylinder.uasset" 311
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box.uasset" 312
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Doorway.uasset" 313
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Pole.uasset" 314
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Open.uasset" 315
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Railing_Closed.uasset" 316
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutRailingType.uasset" 317
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Railing.uasset" 318
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Ramp.uasset" 319
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Ramp.uasset" 320
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box_Right.uasset" 321
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Box_Centered.uasset" 322
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutAlignment.uasset" 323
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Skewbox.uasset" 324
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q4.uasset" 325
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q3.uasset" 326
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q2.uasset" 327
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Sphere_Q1.uasset" 328
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q4.uasset" 329
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q3.uasset" 330
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q2.uasset" 331
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Hemisphere_Q1.uasset" 332
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Sphere.uasset" 333
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Sloped_Centered.uasset" 334
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Box_Centered.uasset" 335
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Utility/EBlockoutStairsType.uasset" 336
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Curved.uasset" 337
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Sloped_Linear.uasset" 338
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Meshes/SM_Blockout_Step_Box.uasset" 339
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Linear.uasset" 340
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Stairs_Linear_Manual.uasset" 341
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Tube.uasset" 342
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Blueprints/Blockout_Window.uasset" 343
 "../../../Engine/Content/Functions/Engine_MaterialFunctions02/Utility/VectorLength.uasset" 344
 "../../../Engine/Content/Functions/Engine_MaterialFunctions02/WorldPositionOffset/ObjectScale.uasset" 345
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/Functions/MF_Blockout_Triplanar_Normal.uasset" 346
-"../../../Engine/Content/EngineMaterials/T_Default_BaseColor.uasset" 347
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/Functions/MF_Blockout_Triplanar.uasset" 348
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/M_BlockoutTools_Custom.uasset" 349
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/MI_BlockoutTools_Custom.uasset" 350
-"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Textures/T_Blockout_Actor_Icon.uasset" 351
-"../../../Engine/Content/BasicShapes/Cylinder.uasset" 352
-"../../../Engine/Content/ArtTools/RenderToTexture/Materials/Debug/M_Emissive_Color.uasset" 353
-"../../Plugins/Lumin/MagicLeapPassableWorld/Content/MagicLeapARPinInfoActor.uasset" 354
+"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Gradient/LinearGradient.uasset" 346
+"../../../Engine/Content/Functions/Engine_MaterialFunctions01/ImageAdjustment/CheapContrast.uasset" 347
+"../../../Engine/Content/EngineMaterials/T_Default_Normal.uasset" 348
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/Functions/MF_Blockout_Triplanar_Normal.uasset" 349
+"../../../Engine/Content/EngineMaterials/T_Default_BaseColor.uasset" 350
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/Functions/MF_Blockout_Triplanar.uasset" 351
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/M_BlockoutTools_Custom.uasset" 352
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Materials/MI_BlockoutTools_Custom.uasset" 353
+"../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Textures/T_Blockout_Actor_Icon.uasset" 354
 "../../../Engine/Content/Functions/Engine_MaterialFunctions02/Utility/BreakOutFloat4Components.uasset" 355
 "../../../Engine/Content/Functions/Engine_MaterialFunctions02/Utility/MakeFloat3.uasset" 356
 "../../Plugins/Runtime/Oculus/OculusVR/Content/Materials/OculusMR_ChromaKey.uasset" 357
@@ -374,47 +374,47 @@
 "../../Plugins/Marketplace/BlockoutToolsPlugin/Content/Textures/T_Blockout_Grid.uasset" 373
 "../../Plugins/Experimental/Water/Content/Textures/Foam/T_WaterFlow_01_Foam_Tiled_N.uasset" 374
 "../../Plugins/Experimental/Water/Content/Textures/Foam/T_WaterFlow_01_Foam_Tiled.uasset" 375
-"../../Plugins/Experimental/Water/Content/Textures/Normals/T_Water_TilingNormal_With_Height_02_Softened.uasset" 376
-"../../Plugins/Experimental/Water/Content/Materials/MPC/MPC_Water.uasset" 377
-"../../Plugins/Experimental/Water/Content/FluidSimulation/WaveFoam/FoamRT.uasset" 378
-"../../../Engine/Content/EngineResources/Black.uasset" 379
-"../../Plugins/Experimental/Water/Content/Materials/Functions/HighQualityTextureFiltering.uasset" 380
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/PivotPainter2/Black_1x1_EXR_Texture.uasset" 381
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterBodyData.uasset" 382
-"../../../Engine/Content/Functions/Engine_MaterialFunctions03/Procedurals/NormalFromHeightmap.uasset" 383
-"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Gradient/BoxMask-2D.uasset" 384
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Texturing/HeightLerp.uasset" 385
-"../../../Engine/Content/EngineSky/VolumetricClouds/T_NoiseShape.uasset" 386
-"../../../Engine/Content/EngineSky/VolumetricClouds/T_VolumeNoiseShape128.uasset" 387
-"../../Plugins/Experimental/Water/Content/Materials/Layers/BeachFoam.uasset" 388
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaveVelocityMask.uasset" 389
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/water_n.uasset" 390
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/water_d.uasset" 391
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/LowResBlurredNoise.uasset" 392
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/AddComponents.uasset" 393
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/MakeVectorsOrthogonal.uasset" 394
-"../../../Engine/Content/EngineMaterials/DefaultNormal.uasset" 395
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Utility/LinearSine.uasset" 396
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/TimeWithSpeedVariable.uasset" 397
-"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Texturing/ComputeMipLevel.uasset" 398
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/Transform3x3Matrix.uasset" 399
-"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Texturing/Flowmaps.uasset" 400
-"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Coordinates/WorldPosition-XY.uasset" 401
+"../../Plugins/Experimental/Water/Content/FluidSimulation/WaveFoam/FoamRT.uasset" 376
+"../../Plugins/Experimental/Water/Content/FluidSimulation/WaveFoam/WaterDistanceField.uasset" 377
+"../../Plugins/Experimental/Water/Content/Textures/Normals/T_Water_TilingNormal_With_Height_02_Softened.uasset" 378
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/Transform3x3Matrix.uasset" 379
+"../../../Engine/Content/EngineResources/Black.uasset" 380
+"../../Plugins/Experimental/Water/Content/Materials/Functions/HighQualityTextureFiltering.uasset" 381
+"../../Plugins/Experimental/Water/Content/Materials/MPC/MPC_Water.uasset" 382
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/PivotPainter2/Black_1x1_EXR_Texture.uasset" 383
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterBodyData.uasset" 384
+"../../../Engine/Content/Functions/Engine_MaterialFunctions03/Procedurals/NormalFromHeightmap.uasset" 385
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Texturing/HeightLerp.uasset" 386
+"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Gradient/BoxMask-2D.uasset" 387
+"../../../Engine/Content/EngineSky/VolumetricClouds/T_NoiseShape.uasset" 388
+"../../../Engine/Content/EngineSky/VolumetricClouds/T_VolumeNoiseShape128.uasset" 389
+"../../Plugins/Experimental/Water/Content/Materials/Layers/BeachFoam.uasset" 390
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaveVelocityMask.uasset" 391
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/water_n.uasset" 392
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/water_d.uasset" 393
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/ExampleContent/Textures/LowResBlurredNoise.uasset" 394
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/AddComponents.uasset" 395
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/MakeVectorsOrthogonal.uasset" 396
+"../../../Engine/Content/EngineMaterials/DefaultNormal.uasset" 397
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Utility/LinearSine.uasset" 398
+"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Texturing/ComputeMipLevel.uasset" 399
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Math/TimeWithSpeedVariable.uasset" 400
+"../../../Engine/Content/Functions/Engine_MaterialFunctions02/Texturing/Flowmaps.uasset" 401
 "../../../Engine/Content/Functions/Engine_MaterialFunctions01/Texturing/FlattenNormal.uasset" 402
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterRiverFlowmaps.uasset" 403
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterOpacityMaskFromDepth.uasset" 404
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterHeightMappingVS.uasset" 405
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterCoefficientMask.uasset" 406
-"../../Plugins/Experimental/Water/Content/FluidSimulation/Materials/Functions/Fluidsim_WorldPosition_to_UV.uasset" 407
-"../../Plugins/Experimental/Water/Content/FluidSimulation/WaveFoam/WaterDistanceField.uasset" 408
+"../../../Engine/Content/Functions/Engine_MaterialFunctions01/Coordinates/WorldPosition-XY.uasset" 403
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterRiverFlowmaps.uasset" 404
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterOpacityMaskFromDepth.uasset" 405
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterHeightMappingVS.uasset" 406
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterCoefficientMask.uasset" 407
+"../../Plugins/Experimental/Water/Content/FluidSimulation/Materials/Functions/Fluidsim_WorldPosition_to_UV.uasset" 408
 "../../../Engine/Content/Functions/Engine_MaterialFunctions01/Opacity/AlphaOffset.uasset" 409
 "../../Plugins/Experimental/Water/Content/Materials/Functions/SampleFluidSimulation.uasset" 410
 "../../Plugins/Experimental/Water/Content/Materials/Functions/ComputeWavesAttenuationFactor.uasset" 411
 "../../Plugins/Experimental/Water/Content/Materials/Functions/WaveDepthFalloff_Overrides.uasset" 412
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterTextureWaves.uasset" 413
-"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterTextureSurface.uasset" 414
-"../../Plugins/Experimental/Water/Content/Materials/Functions/Water_Underside.uasset" 415
-"../../Plugins/Experimental/Water/Content/Materials/Layers/WaterAttributes.uasset" 416
+"../../Plugins/Experimental/Water/Content/Materials/Layers/WaterAttributes.uasset" 413
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterTextureWaves.uasset" 414
+"../../Plugins/Experimental/Water/Content/Materials/Functions/WaterTextureSurface.uasset" 415
+"../../Plugins/Experimental/Water/Content/Materials/Functions/Water_Underside.uasset" 416
 "../../Plugins/Experimental/Water/Content/Materials/Functions/SetWaveAttributes.uasset" 417
 "../../Plugins/Experimental/Water/Content/Materials/Functions/WorldPositionBehindWater.uasset" 418
 "../../Plugins/Experimental/Water/Content/Materials/Functions/WorldNormalBehindWater.uasset" 419
