@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Runtime/Engine/Classes/Engine/EngineTypes.h"
 #include "FoliageDataTypes.generated.h"
 
 class ACustomFoliageActor;
@@ -50,6 +51,14 @@ struct FFoliageInformation : public FTableRowBase
 	TSubclassOf<ACustomFoliageActor> FoliageActor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
+	bool bUseDestructableMesh;
+
+	// Destructible Meshes need to have the same array index as FoliageMeshes
+	// You must also add a Destructible Mesh Component to your Foliage Actor Blueprint!
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings", meta = (EditCondition = "bUseDestructableMesh"))
+	TArray<class UDestructibleMesh*> FoliageDestructibleMeshes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
 	bool bCanDamageForHarvest;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
@@ -85,7 +94,7 @@ struct FFoliageInformation : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
 	bool bApplyImpulseOnDepletion;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bApplyImpulseOnDepletion"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bApplyImpulseOnDepletion"), meta = (ClampMin = 1))
 	float ForceMultiplyer;
 
 
