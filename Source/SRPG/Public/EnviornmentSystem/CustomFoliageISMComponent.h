@@ -21,5 +21,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Foliage Data")
 	void GetInstancesInRange(FVector TargetLocaiton, float Range, TArray<int32>& OutInstanceIndexies, TArray<FTransform>& OutInstanceTransforms, UStaticMesh*& OutMeshObject);
+
+	UFUNCTION(BlueprintCallable, Category = "Foliage Data")
+	void GetAllInstances(TArray<int32>& OutInstanceIndexies, TArray<FTransform>& OutInstanceTransforms);
 	
 };

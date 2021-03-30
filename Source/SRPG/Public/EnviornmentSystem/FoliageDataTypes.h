@@ -8,6 +8,7 @@
 
 class ACustomFoliageActor;
 class UStaticMesh;
+class UDamageType;
 
 UENUM(BlueprintType)
 enum class EVegitationStatus : uint8 {
@@ -27,9 +28,6 @@ struct FResourceRewardData : public FTableRowBase
 	FName ResourceName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (ClampMin = 0))
-	int32 Quantity;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (ClampMin = 0))
 	int32 MinAmount;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (ClampMin = 0))
@@ -44,37 +42,74 @@ struct FFoliageInformation : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data")
-	bool bCanDamageForHarvest;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanDamageForHarvest"))
-	TArray<FResourceRewardData> RewardsOnDamage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanDamageForHarvest"))
-	float MinDamageAmountForHarvest;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanDamageForHarvest"))
-	int32 MaxNumberOfDamageHarvests;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanInteractForHarvest"))
-	bool bCanInteractForHarvest;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanInteractForHarvest"))
-	FText InteractionPrompt;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanInteractForHarvest"))
-	bool bShouldOutline;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanInteractForHarvest"))
-	TArray<FResourceRewardData> RewardsOnInteract;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (EditCondition = "bCanInteractForHarvest"))
-	int32 MaxNumberOfInteractHarvests;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data")
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
 	TArray<UStaticMesh*> FolliageMeshes;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
 	TSubclassOf<ACustomFoliageActor> FoliageActor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
+	bool bCanDamageForHarvest;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage General Settings")
+	bool bCanInteractForHarvest;
+
+
+
+	// On Damage Settings //
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	TArray <TSubclassOf<UDamageType>> ValidDamangeTypes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	TArray<FResourceRewardData> RewardsOnDamage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	float MinDamageAmountForHarvest;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	int32 MaxNumberOfDamageHarvests;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	bool bRespawnAfterHarvestDepletion;
+
+	// Time in seconds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bRespawnAfterHarvestDepletion"))
+	float TimeToRespawnAfterDamageHarvest;
+
+	// Time in seconds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	float PresistanceAfterDepletion;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bCanDamageForHarvest"))
+	bool bApplyImpulseOnDepletion;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Damage Settings", meta = (EditCondition = "bApplyImpulseOnDepletion"))
+	float ForceMultiplyer;
+
+
+
+	// On Interact Settings
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bCanInteractForHarvest"))
+	FText InteractionPrompt;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bCanInteractForHarvest"))
+	bool bShouldOutline;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bCanInteractForHarvest"))
+	TArray<FResourceRewardData> RewardsOnInteract;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bCanInteractForHarvest"))
+	int32 MaxNumberOfInteractHarvests;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bCanInteractForHarvest"))
+	bool bRespawnAfterInteractDepletion;
+
+	// Time in seconds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "On Interact Settings", meta = (EditCondition = "bRespawnAfterInteractDepletion"))
+	float TimeToRespawnAfterInteractHarvest;
+
 
 };

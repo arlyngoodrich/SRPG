@@ -41,4 +41,28 @@ void UCustomFoliageISMComponent::GetInstancesInRange(FVector TargetLocaiton, flo
 
 }
 
+void UCustomFoliageISMComponent::GetAllInstances(TArray<int32>& OutInstanceIndexies, TArray<FTransform>& OutInstanceTransforms)
+{
 
+	int32 NumInstances;
+	NumInstances = GetInstanceCount();
+
+	TArray<FTransform> Transforms;
+	TArray<int32> Instances;
+
+	for (int32 Index = 0; Index != NumInstances; ++Index)
+	{
+		FTransform TransformToAdd;
+		if (GetInstanceTransform(Index, TransformToAdd, true))
+		{
+			Transforms.Add(TransformToAdd);
+			Instances.Add(Index);
+
+		}
+	}
+
+
+	OutInstanceIndexies = Instances;
+	OutInstanceTransforms = Transforms;
+
+}
