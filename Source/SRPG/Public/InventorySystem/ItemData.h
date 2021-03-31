@@ -34,8 +34,8 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
 		TSubclassOf<AActor> InWorldActorClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
-		bool bCanBeStacked;
+	//This causes a bug for some reason... just set max stack 1
+		bool bCanBeStacked = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
 		bool bIsRotated;

@@ -34,7 +34,10 @@ public:
 	UInventoryContainer();
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Fits")
-		void BP_CheckIfItemFits(FItemData Item, int32 PosX, int32 PosY);
+		bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Could be added")
+		bool BP_CheckIfItemCouldBeAdded(FItemData Item);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Add Item")
 		void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
@@ -47,6 +50,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Direct Transfer Item")
 		void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Auto Transfer Item")
+	void BP_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
 
 	//Must be run on server to receive callback of reamining items
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Server Only Auto Add Item")
@@ -76,17 +82,23 @@ protected:
 	void Server_RemoveItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void Server_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	bool Server_MoveItem_Validate(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	void Server_MoveItem_Implementation(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void Server_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	bool Server_DirectTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	void Server_DirectTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
+	void Server_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+	bool Server_AutoTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+	void Server_AutoTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 	bool Server_SameInventoryDirectStack_Validate(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 	void Server_SameInventoryDirectStack_Implementation(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 
@@ -156,7 +168,9 @@ protected:
 
 	void InitalizeSlots();
 
-	bool CheckIfItemFits(FItemData Item, FVector2D Position);
+	bool CheckIfItemFitsInPosition(FItemData Item, FVector2D Position);
+
+	bool CheckIfItemCouldBeAdded(FItemData Item);
 
 	bool AddItem(FItemData Item, FVector2D Position, bool bCheckWeight);
 
@@ -171,6 +185,8 @@ protected:
 	void AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData);
 
 	bool DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated);
+
+	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory);
 
 	bool SameInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
