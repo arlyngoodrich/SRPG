@@ -56,7 +56,7 @@ public:
 
 	//Must be run on server to receive callback of reamining items
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Server Only Auto Add Item")
-		void BP_AutoAddItem(FItemData Item, bool& OutbHasLeftOver, FItemData& OutRemainingItem);
+	void BP_AutoAddItem(FItemData Item, bool& OutbHasLeftOver, FItemData& OutRemainingItem);
 
 	//Returns true if item fully added, false if not added or partially added
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Same Inventory Direct Stack Item")
@@ -77,7 +77,7 @@ protected:
 	void Server_AddItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
+	void Server_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
 	bool Server_RemoveItem_Validate(FItemData Item, int32 PosX, int32 PosY);
 	void Server_RemoveItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
@@ -109,7 +109,7 @@ protected:
 
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+	void Server_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	bool Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	void Server_SplitStack_Implementation(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
@@ -212,12 +212,12 @@ protected:
 	void UpdateWeight();
 
 	UFUNCTION(Client, Reliable)
-		void Client_InventoryUpdate();
+	void Client_InventoryUpdate();
 	void Client_InventoryUpdate_Implementation();
 
 
 	UFUNCTION()
-		void OnRep_InventoryUpdated();
+	void OnRep_InventoryUpdated();
 
 	void Internal_OnInventoryUpdate();
 
