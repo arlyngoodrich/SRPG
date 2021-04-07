@@ -139,11 +139,11 @@ protected:
 		FString InventoryName;
 
 	//Set in editor
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
 		int32 InventorySizeX;
 
 	//Set in editor
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
 		int32 InventorySizeY;
 
 	UPROPERTY(Replicated)
@@ -158,7 +158,7 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
 		TArray<FInventoryData> Inventory;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration")
 		float MaxWeight;
 
 	UPROPERTY(Replicated, BlueprintReadOnly)

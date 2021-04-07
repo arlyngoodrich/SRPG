@@ -271,7 +271,7 @@ void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer*
 
 	//Find empty eligible slots
 	TArray<EEquipmentSlots> EligibleSlots;
-	EligibleSlots = Item.EquipmentData.EligibleSlots;
+	EligibleSlots = Item.EligibleSlots;
 
 	TArray<int32> EligibleSlotIndexies;
 	TArray<int32> NonOccupiedEligibleSlotIndexies;

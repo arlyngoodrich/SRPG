@@ -20,7 +20,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (ExposeOnSpawn = "true"))
 	FItemData ItemData;
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Item Information")
