@@ -60,10 +60,10 @@ struct FItemData : public FTableRowBase
 		int32 SizeY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
-		UTexture2D* InventoryItemIcon;
+		UTexture2D* InventoryItemIcon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
-		UTexture2D* SmallItemIcon;
+		UTexture2D* SmallItemIcon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
 		TSubclassOf<AActor> InWorldActorClass;
@@ -101,10 +101,10 @@ struct FEquipmentSlot
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment Data", meta = (ClampMin = 0), meta = (ClampMax = 100))
 	EEquipmentSlots Slot;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment Data")
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment Data")
 	bool bIsOccupied;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment Data")
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment Data")
 	FItemData OccupyingItemData;
 
 };

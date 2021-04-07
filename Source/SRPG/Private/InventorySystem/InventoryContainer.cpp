@@ -344,6 +344,11 @@ bool UInventoryContainer::CheckIfItemFitsInPosition(FItemData Item, FVector2D Po
 
 	int32 InitalPositionIndex;
 
+	if(!CheckIfWeightOK(Item))
+	{
+		return false;
+	}
+
 
 	if (!InventorySlots.Find(Position, InitalPositionIndex))
 	{

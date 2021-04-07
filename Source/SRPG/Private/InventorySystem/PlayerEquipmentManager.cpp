@@ -26,9 +26,7 @@ UPlayerEquipmentManager::UPlayerEquipmentManager()
 void UPlayerEquipmentManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
-
-	
+	ValidateSlots();
 }
 
 void UPlayerEquipmentManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimeProps) const
@@ -42,11 +40,30 @@ void UPlayerEquipmentManager::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 TArray<FEquipmentSlot> UPlayerEquipmentManager::GetEquipmentSlotInfo() { return EquipmentSlots; }
 
+void UPlayerEquipmentManager::GetSlotItemData(EEquipmentSlots TargetSlot, bool& OutIsOccuiped, FItemData& OutItemData)
+{
+	int32 SlotIndex;
+	if (FindSlot(TargetSlot, SlotIndex))
+	{
+		OutItemData = EquipmentSlots[SlotIndex].OccupyingItemData;
+		OutIsOccuiped = EquipmentSlots[SlotIndex].bIsOccupied;
+	}
+	else
+	{
+		UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to obtain equipment slot information from slot that does not exisit"))
+	}
+}
+
 
 void UPlayerEquipmentManager::SetOwnerInventories()
 {
-	AActor* Owner = GetOwner();
-	Owner->GetComponents<UInventoryContainer>(OwnerInventories);
+	AActor* Owner = nullptr;
+	Owner = GetOwner();
+	OwnerInventories.Empty();
+	if (Owner)
+	{
+		Owner->GetComponents<UInventoryContainer>(OwnerInventories);
+	}
 
 }
 
@@ -65,10 +82,25 @@ void UPlayerEquipmentManager::BP_EquipItem(EEquipmentSlots TargetSlot, FItemData
 	}
 }
 
+void UPlayerEquipmentManager::BP_AutoEquipItem(FItemData Item, UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
+{
+	AutoEquipItem(Item, LosingInventory, PosX, PosY);
+}
+
 
 void UPlayerEquipmentManager::BP_UnEquipItem(EEquipmentSlots TargetSlot)
 {
 	Server_UnEquipItem(TargetSlot);
+}
+
+void UPlayerEquipmentManager::BP_UnequipItemToPosition(EEquipmentSlots TargetSlot, UInventoryContainer* TargetInventory, int32 PosX, int32 PosY)
+{
+	Server_UnequipItemToPosition(TargetSlot, TargetInventory, PosX, PosY);
+}
+
+void UPlayerEquipmentManager::BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlot, FItemData ItemData)
+{
+	Server_MoveSlots(CurrentSlot, NewSlot, ItemData);
 }
 
 bool UPlayerEquipmentManager::Server_EquipItem_Validate(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
@@ -90,6 +122,7 @@ void UPlayerEquipmentManager::Server_EquipItem_Implementation(EEquipmentSlots Ta
 
 			LosingInventory->BP_RemoveItem(Item, PosX, PosY);
 			OnRep_EquipmentSlots();
+			OnEquipItem(TargetSlot, Item);
 			UE_LOG(LogInventorySystem, Log, TEXT("Item equipped"))
 			return;
 		}
@@ -124,8 +157,9 @@ void UPlayerEquipmentManager::Server_UnEquipItem_Implementation(EEquipmentSlots 
 				EquipmentSlots[SlotIndex].bIsOccupied = false;
 				EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
 				UE_LOG(LogInventorySystem, Log, TEXT("Item sucessfully unequiped by transfring back to inventory"))
-					OnRep_EquipmentSlots();
-					return;
+				OnRep_EquipmentSlots();
+				OnUnequipItem(TargetSlot);
+				return;
 			}
 
 			UE_LOG(LogInventorySystem, Log, TEXT("Item was not unequiped, please drop from BP"))
@@ -137,9 +171,178 @@ void UPlayerEquipmentManager::Server_UnEquipItem_Implementation(EEquipmentSlots 
 				EquipmentSlots[SlotIndex].bIsOccupied = false;
 				EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
 				OnRep_EquipmentSlots();
+				OnUnequipItem(TargetSlot);
 				UE_LOG(LogInventorySystem, Log, TEXT("Item sucessfully by dropping"))
+				return;
 			}
 			UE_LOG(LogInventorySystem, Log, TEXT("Item was not unequipped by dropping"))
+		}
+	}
+}
+
+bool UPlayerEquipmentManager::Server_UnequipItemToPosition_Validate(EEquipmentSlots TargetSlot, UInventoryContainer* TargetInventory, int32 PosX, int32 PosY)
+{
+	return true;
+}
+
+void UPlayerEquipmentManager::Server_UnequipItemToPosition_Implementation(EEquipmentSlots TargetSlot, UInventoryContainer* TargetInventory, int32 PosX, int32 PosY)
+{
+	if (TargetInventory == nullptr) { UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to unequip to null inventory")) return; }
+
+	int32 SlotIndex;
+	FindSlot(TargetSlot, SlotIndex);
+	if (!EquipmentSlots[SlotIndex].bIsOccupied) { UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to unequip item from empty slot")) return; }
+
+	FItemData Item;
+	Item = EquipmentSlots[SlotIndex].OccupyingItemData;
+
+	if (TargetInventory->BP_CheckIfItemFitsInPosition(Item, PosX, PosY))
+	{
+		FItemData NullData;
+		
+		TargetInventory->BP_AddItem(Item, PosX, PosY);
+		EquipmentSlots[SlotIndex].bIsOccupied = false;
+		EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
+		OnUnequipItem(TargetSlot);
+		OnRep_EquipmentSlots();
+
+		return;
+	}
+	else
+	{
+		UE_LOG(LogInventorySystem, Log, TEXT("Could not unequip item to position"))
+	}
+
+}
+
+bool UPlayerEquipmentManager::Server_MoveSlots_Validate(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlow, FItemData ItemData)
+{
+	return true;
+}
+
+void UPlayerEquipmentManager::Server_MoveSlots_Implementation(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlot, FItemData ItemData)
+{
+	int32 CurrentSlotIndex;
+	int32 NewSlotIndex;
+
+	if (GetOwnerRole() < ROLE_Authority) { UE_LOG(LogInventorySystem, Warning, TEXT("Attempted to move equipment from client, request ignored")) return; }
+	
+	//Make sure valid Indexies
+	if (FindSlot(CurrentSlot, CurrentSlotIndex) && FindSlot(NewSlot, NewSlotIndex))
+	{
+		if (EquipmentSlots[CurrentSlotIndex].bIsOccupied)
+		{
+
+			if (EquipmentSlots[NewSlotIndex].bIsOccupied)
+			{
+				//unequipe current item 
+				Server_UnEquipItem(NewSlot);
+			}
+
+			//equip new item
+			FItemData NullItemData;
+			EquipmentSlots[CurrentSlotIndex].bIsOccupied = false;
+			EquipmentSlots[CurrentSlotIndex].OccupyingItemData = NullItemData;
+			OnUnequipItem(CurrentSlot);
+
+			EquipmentSlots[NewSlotIndex].bIsOccupied = true;
+			EquipmentSlots[NewSlotIndex].OccupyingItemData = ItemData;
+			OnEquipItem(NewSlot, ItemData);
+			OnRep_EquipmentSlots();
+
+			UE_LOG(LogInventorySystem, Log, TEXT("Item successfully moved"))
+				return;
+
+		}
+		else
+		{
+
+			UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to move equipment from empty slot"))
+			return;
+		}
+	}
+
+}
+
+void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
+{
+	if (!LosingInventory) {	UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to equipment from null inventory")) return;}
+
+
+	//Find empty eligible slots
+	TArray<EEquipmentSlots> EligibleSlots;
+	EligibleSlots = Item.EquipmentData.EligibleSlots;
+
+	TArray<int32> EligibleSlotIndexies;
+	TArray<int32> NonOccupiedEligibleSlotIndexies;
+
+	for (int32 Index = 0; Index != EligibleSlots.Num(); ++Index)
+	{
+		int32 TargetIndex;
+		if (FindSlot(EligibleSlots[Index], TargetIndex))
+		{
+			//Add eligible slot
+			EligibleSlotIndexies.Add(TargetIndex);
+
+			if (!EquipmentSlots[TargetIndex].bIsOccupied)
+			{
+				//Add eligible empty slot
+				NonOccupiedEligibleSlotIndexies.Add(TargetIndex);
+			}
+		}
+	}
+
+	//See if any empty, if 1 or more, pick first to equip
+	if (NonOccupiedEligibleSlotIndexies.Num() >= 1)
+	{
+		int32 NonOccupiedEligibleTargetSlotIndex;
+		NonOccupiedEligibleTargetSlotIndex = NonOccupiedEligibleSlotIndexies[0];
+		EEquipmentSlots TargetSlot;
+
+		TargetSlot = EquipmentSlots[NonOccupiedEligibleTargetSlotIndex].Slot;
+
+		Server_EquipItem(TargetSlot, Item, LosingInventory, PosX, PosY);
+		return;
+	}
+	else
+	{
+		if (EligibleSlotIndexies.Num() > 0)
+		{
+			int32 EligibleTargetSlotIndex;
+			EligibleTargetSlotIndex = EligibleSlotIndexies[0];
+			EEquipmentSlots TargetSlot;
+
+			TargetSlot = EquipmentSlots[EligibleTargetSlotIndex].Slot;
+
+			Server_EquipItem(TargetSlot, Item, LosingInventory, PosX, PosY);
+			return;
+
+		}
+	}
+
+	UE_LOG(LogInventorySystem, Log, TEXT("Auto Equip operation failed"))
+}
+
+
+void UPlayerEquipmentManager::ValidateSlots()
+{
+	for (int32 Index = 0; Index != EquipmentSlots.Num(); ++Index)
+	{
+		int32 Count = 0;
+		EEquipmentSlots ActiveSlot;
+
+		ActiveSlot = EquipmentSlots[Index].Slot;
+
+		for (int32 Index_Count = 0; Index_Count != EquipmentSlots.Num(); ++Index_Count)
+		{
+			//Check to see if there are more than one of the same slot types
+			if (ActiveSlot == EquipmentSlots[Index_Count].Slot) { Count++; }
+		}
+
+		if (Count > 1)
+		{
+			//If there are more than one, then log an error
+			UE_LOG(LogInventorySystem,Error,TEXT("Duplicate Slot types in player Equipment Manager.  Equipment system will not work correctly"))
 		}
 	}
 }
@@ -150,7 +353,7 @@ bool UPlayerEquipmentManager::ReturnItemToInventory(FItemData Item)
 	
 	for (int32 Index = 0; Index != OwnerInventories.Num(); Index++)
 	{
-		UInventoryContainer* TargetInventory;
+		UInventoryContainer* TargetInventory = nullptr;
 		TargetInventory = OwnerInventories[Index];
 		
 		if (TargetInventory)
