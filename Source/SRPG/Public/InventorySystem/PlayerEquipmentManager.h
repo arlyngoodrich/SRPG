@@ -63,6 +63,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Equipment Data")
 	void OnUnequipItem(EEquipmentSlots Slot);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment Data", meta = (DisplayName = "Multicast Call Set Skeletal Mesh"))
+	void BP_CallSetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Equipment Data", meta = (DisplayName = "Set Skeletal Mesh"))
+	void BP_SetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData);
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_EquipItem(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY);
 	bool Server_EquipItem_Validate(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY);
@@ -82,6 +88,9 @@ protected:
 	void Server_UnequipItemToPosition(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 	bool Server_UnequipItemToPosition_Validate(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 	void Server_UnequipItemToPosition_Implementation(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Server_SetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData);
 
 	void AutoEquipItem(FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY);
 	

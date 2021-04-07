@@ -103,6 +103,11 @@ void UPlayerEquipmentManager::BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmen
 	Server_MoveSlots(CurrentSlot, NewSlot, ItemData);
 }
 
+void UPlayerEquipmentManager::BP_CallSetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData)
+{
+	Server_SetSkeletalMesh(TargetSlot, ItemData);
+}
+
 bool UPlayerEquipmentManager::Server_EquipItem_Validate(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
 {
 	return true;
@@ -393,4 +398,8 @@ bool UPlayerEquipmentManager::FindSlot(EEquipmentSlots TargetSlot, int32& Index)
 	return false;
 }
 
+void UPlayerEquipmentManager::Server_SetSkeletalMesh_Implementation(EEquipmentSlots TargetSlot, FItemData ItemData)
+{
+	BP_SetSkeletalMesh(TargetSlot, ItemData);
+}
 
