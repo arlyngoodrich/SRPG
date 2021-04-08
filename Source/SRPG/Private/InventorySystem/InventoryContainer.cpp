@@ -34,6 +34,7 @@ void UInventoryContainer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >&
 	DOREPLIFETIME(UInventoryContainer, MaxWeight);
 	DOREPLIFETIME(UInventoryContainer, CurrentWeight);
 	DOREPLIFETIME(UInventoryContainer, InventoryName);
+	DOREPLIFETIME(UInventoryContainer, EquippedSlot);
 
 }
 
@@ -253,6 +254,20 @@ void UInventoryContainer::BP_SplitStack(FItemData OriginalItem, int32 PositionX,
 	}
 }
 
+void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory)
+{
+	Inventory = NewInventory;
+	Client_InventoryUpdate();
+	Internal_OnInventoryUpdate();
+
+	UE_LOG(LogInventorySystem,Log,TEXT("Inventory overwritten from abstract"))
+}
+
+TArray<FInventoryData> UInventoryContainer::GetInventoryForAbstract()
+{
+	return Inventory;
+}
+
 bool UInventoryContainer::Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount)
 {
 	return true;
@@ -306,6 +321,18 @@ void UInventoryContainer::GetInventoryData(TArray<FItemData>& OutItems, TArray<i
 	OutXPositions = XPositions;
 	OutYPositions = YPositions;
 
+}
+
+FItemData UInventoryContainer::GetItemAtPosition(FVector2D Position)
+{
+	for (int32 Index = 0; Index != Inventory.Num(); Index++)
+	{
+		if (Inventory[Index].Position == Position)
+		{
+			return Inventory[Index].ItemData;
+		}
+	}
+return FItemData();
 }
 
 // Called when the game starts
@@ -419,28 +446,31 @@ bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 
 bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bCheckWeight)
 {
+	FItemData ItemData;
+	ItemData = GetServerVersionOfItem(Item, this, Position);
 
-	if (CheckIfWeightOK(Item) || !bCheckWeight)
+
+	if (CheckIfWeightOK(ItemData) || !bCheckWeight)
 	{
-		if (CheckIfItemFitsInPosition(Item, Position))
+		if (CheckIfItemFitsInPosition(ItemData, Position))
 		{
 			//Set slots to occupied
-			SetSlotsAsOccupied(Item.SizeX, Item.SizeY, Position, true);
+			SetSlotsAsOccupied(ItemData.SizeX, ItemData.SizeY, Position, true);
 
 			FInventoryData InventoryData;
-			InventoryData.ItemData = Item;
+			InventoryData.ItemData = ItemData;
 			InventoryData.Position = Position;
 
 			Inventory.Add(InventoryData);
 
 
-			UE_LOG(LogInventorySystem, Log, TEXT("%s added to positon (%s,%s)"), *Item.DisplayName.ToString(), *FString::SanitizeFloat(Position.X), *FString::SanitizeFloat(Position.Y))
+			UE_LOG(LogInventorySystem, Log, TEXT("%s added to positon (%s,%s)"), *ItemData.DisplayName.ToString(), *FString::SanitizeFloat(Position.X), *FString::SanitizeFloat(Position.Y))
 			Internal_OnInventoryUpdate();
 			return true;
 		}
 		else
 		{
-			UE_LOG(LogInventorySystem, Log, TEXT("%s could not fit"), *Item.DisplayName.ToString())
+			UE_LOG(LogInventorySystem, Log, TEXT("%s could not fit"), *ItemData.DisplayName.ToString())
 				return false;
 		}
 	}
@@ -482,7 +512,7 @@ bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position)
 bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, FVector2D EndingPosition, bool bIsRotated)
 {
 	FItemData ItemData;
-	ItemData = Item;
+	ItemData = GetServerVersionOfItem(Item, this, StartingPosition);
 
 	//Find Item Index
 	int32 ItemIndex;
@@ -739,43 +769,46 @@ bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosit
 	FItemData OriginalItem;
 	OriginalItem = Item;
 
+	FItemData ItemData;
+	ItemData = GetServerVersionOfItem(Item, this, StartingPosition);
+
 	if (bIsRotated)
 	{
 		int32 ItemSizeX;
 		int32 ItemSizeY;
 
-		ItemSizeX = Item.SizeX;
-		ItemSizeY = Item.SizeY;
+		ItemSizeX = ItemData.SizeX;
+		ItemSizeY = ItemData.SizeY;
 
-		Item.bIsRotated = bIsRotated;
-		Item.SizeX = ItemSizeY;
-		Item.SizeY = ItemSizeX;
+		ItemData.bIsRotated = bIsRotated;
+		ItemData.SizeX = ItemSizeY;
+		ItemData.SizeY = ItemSizeX;
 	}
 
 	//Add items already checks if it can fit so no need to add here
 
 	int32 ItemIndex;
-	if (!FindInventoryItemIndex(Item, StartingPosition, ItemIndex))
+	if (!FindInventoryItemIndex(ItemData, StartingPosition, ItemIndex))
 	{
-		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed, could not find in inventory"), *Item.DisplayName.ToString())
+		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed, could not find in inventory"), *ItemData.DisplayName.ToString())
 			return false;
 	}
 
 	if (RecievingInventory == nullptr)
 	{
-		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed, receiving inventory not valid"), *Item.DisplayName.ToString())
+		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed, receiving inventory not valid"), *ItemData.DisplayName.ToString())
 			return false;
 	}
 
 
-	if (RecievingInventory->AddItem(Item, EndingPosition, true) && RemoveItem(OriginalItem, StartingPosition))
+	if (RecievingInventory->AddItem(ItemData, EndingPosition, true) && RemoveItem(OriginalItem, StartingPosition))
 	{
-		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *Item.DisplayName.ToString())
+		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
 	}
 	else
 	{
-		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed"), *Item.DisplayName.ToString())
+		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s failed"), *ItemData.DisplayName.ToString())
 			Internal_OnInventoryUpdate();
 		RecievingInventory->Internal_OnInventoryUpdate();
 
@@ -788,12 +821,15 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 {
 	if (IsValidItem(Item, StartingPosition) && ReceivingInventory)
 	{
+		FItemData ItemData;
+		ItemData = GetServerVersionOfItem(Item, this, StartingPosition);
+
 		FItemData LeftOverItem;
-		if (ReceivingInventory->AutoAddItem(Item, Item.bCanBeStacked, LeftOverItem))
+		if (ReceivingInventory->AutoAddItem(ItemData, ItemData.bCanBeStacked, LeftOverItem))
 		{
-			RemoveItem(Item, StartingPosition);
+			RemoveItem(ItemData, StartingPosition);
 			Internal_OnInventoryUpdate();
-			UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *Item.DisplayName.ToString())
+			UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
 		}
 		else
@@ -801,7 +837,7 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 
 			//Failed or leftoverItem
 			int32 ItemIndex;
-			FindInventoryItemIndex(Item, StartingPosition, ItemIndex);
+			FindInventoryItemIndex(ItemData, StartingPosition, ItemIndex);
 			Inventory[ItemIndex].ItemData = LeftOverItem;
 			Internal_OnInventoryUpdate();
 			return true;
@@ -1102,5 +1138,21 @@ void UInventoryContainer::Internal_OnInventoryUpdate()
 		InventoryUpdated_Onupdate.Broadcast();
 		Client_InventoryUpdate();
 	}
+}
+
+FItemData UInventoryContainer::GetServerVersionOfItem(FItemData ClientItem, UInventoryContainer* TargetInventory, FVector2D Position)
+{
+
+	if (TargetInventory)
+	{
+		FItemData NewItem;
+		NewItem = TargetInventory->GetItemAtPosition(Position);
+		if (NewItem.DisplayName == ClientItem.DisplayName)
+		{
+			return NewItem;
+		}
+	}
+	return ClientItem;
+
 }
 

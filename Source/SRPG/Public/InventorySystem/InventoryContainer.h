@@ -10,16 +10,17 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
+
 USTRUCT(BlueprintType)
 struct FInventoryData
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-		FItemData ItemData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
+	FItemData ItemData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-		FVector2D Position;
+	FVector2D Position;
 
 };
 
@@ -60,13 +61,20 @@ public:
 
 	//Returns true if item fully added, false if not added or partially added
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Same Inventory Direct Stack Item")
-		void BP_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
+	void BP_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Different Inventory Direct Stack Item")
-		void BP_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
+	void BP_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Split Stack")
-		void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	TArray<FInventoryData> GetInventoryForAbstract();
+
 
 protected:
 	//Blueprint server functions
@@ -117,54 +125,57 @@ public:
 
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetInventorySize(int32& OutSizeX, int32& OutSizeY);
+	void GetInventorySize(int32& OutSizeX, int32& OutSizeY);
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetSlotInformation(TArray<int32>& OutXPositions, TArray<int32>& OutYPositions, TArray<bool>& OutbIsOccupied);
+	void GetSlotInformation(TArray<int32>& OutXPositions, TArray<int32>& OutYPositions, TArray<bool>& OutbIsOccupied);
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetInventoryData(TArray<FItemData>& OutItems, TArray<int32>& OutXPositions, TArray<int32>& OutYPositions);
+	void GetInventoryData(TArray<FItemData>& OutItems, TArray<int32>& OutXPositions, TArray<int32>& OutYPositions);
 
 	UPROPERTY(BlueprintAssignable)
-		FOnInventoryUpdated InventoryUpdated_Onupdate;
+	FOnInventoryUpdated InventoryUpdated_Onupdate;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory")
-		void InventoryUpdated();
+	void InventoryUpdated();
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	EEquipmentSlots EquippedSlot;
+
+	FItemData GetItemAtPosition(FVector2D Position);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration")
-		FString InventoryName;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	FString InventoryName;
 
 	//Set in editor
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
-		int32 InventorySizeX;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
+	int32 InventorySizeX;
 
 	//Set in editor
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
-		int32 InventorySizeY;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
+	int32 InventorySizeY;
 
 	UPROPERTY(Replicated)
-		FVector2D InventorySize;
+	FVector2D InventorySize;
 
 	UPROPERTY(Replicated)
-		TArray<FVector2D> InventorySlots;
+	TArray<FVector2D> InventorySlots;
 
 	UPROPERTY(Replicated)
-		TArray<bool> bIsSlotOccupied;
+	TArray<bool> bIsSlotOccupied;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
-		TArray<FInventoryData> Inventory;
+	TArray<FInventoryData> Inventory;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration")
-		float MaxWeight;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	float MaxWeight;
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
-		float CurrentWeight;
-
-
+	float CurrentWeight;
 
 	void InitalizeSlots();
 
@@ -221,5 +232,5 @@ protected:
 
 	void Internal_OnInventoryUpdate();
 
-
+	FItemData GetServerVersionOfItem(FItemData ClientItem, UInventoryContainer* TargetInventory, FVector2D Position);
 };

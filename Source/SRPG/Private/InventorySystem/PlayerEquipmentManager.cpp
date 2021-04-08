@@ -3,6 +3,7 @@
 
 #include "InventorySystem/PlayerEquipmentManager.h"
 #include "InventorySystem/InventoryContainer.h"
+#include "InventorySystem/AbstractInventoryContainer.h"
 #include "LogFiles.h"
 
 
@@ -14,11 +15,7 @@ UPlayerEquipmentManager::UPlayerEquipmentManager()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
 	
-
-
-
 }
 
 
@@ -103,9 +100,60 @@ void UPlayerEquipmentManager::BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmen
 	Server_MoveSlots(CurrentSlot, NewSlot, ItemData);
 }
 
+bool UPlayerEquipmentManager::EquipFromPickup(FItemData ItemData, UInventoryContainer* Inventory)
+{
+	if (Inventory)
+	{
+		UAbstractInventoryContainer* Abstract = nullptr;
+		CreateAbstractFromInventory(Inventory, Abstract);
+		ItemData.AbstractInventory = Abstract;
+	}
+
+
+	TArray<EEquipmentSlots> EligibleSlots;
+	EligibleSlots = ItemData.EligibleSlots;
+
+	for (int32 Index = 0; Index  != EligibleSlots.Num(); Index++)
+	{
+		int32 TargetIndex;
+		if (FindSlot(EligibleSlots[Index], TargetIndex))
+		{
+			if (EquipmentSlots[TargetIndex].bIsOccupied == false)
+			{
+				EquipmentSlots[TargetIndex].bIsOccupied = true;
+				EquipmentSlots[TargetIndex].OccupyingItemData = ItemData;
+				OnEquipItem(EquipmentSlots[TargetIndex].Slot, ItemData);
+				OnRep_EquipmentSlots();
+				UE_LOG(LogInventorySystem, Log, TEXT("Added equipment from pickup"))
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void UPlayerEquipmentManager::BP_CallSetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData)
 {
 	Server_SetSkeletalMesh(TargetSlot, ItemData);
+}
+
+bool UPlayerEquipmentManager::FindPairedInventory(EEquipmentSlots TargetSlot, UInventoryContainer*& OutPairedInventory)
+{
+	SetOwnerInventories();
+	for (int32 Index = 0; Index != OwnerInventories.Num(); Index++)
+	{
+		if (OwnerInventories[Index])
+		{
+			if (OwnerInventories[Index]->EquippedSlot == TargetSlot)
+			{
+				OutPairedInventory = OwnerInventories[Index];
+				return true;
+			}
+		}
+
+	}
+
+	return false;
 }
 
 bool UPlayerEquipmentManager::Server_EquipItem_Validate(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
@@ -115,6 +163,12 @@ bool UPlayerEquipmentManager::Server_EquipItem_Validate(EEquipmentSlots TargetSl
 
 void UPlayerEquipmentManager::Server_EquipItem_Implementation(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY)
 {
+
+	if (!LosingInventory) { return; }
+
+	FItemData ItemData;
+	ItemData = GetServerVersionOfItem(Item, LosingInventory, PosX, PosY);
+
 	int32 SlotIndex;
 	if (FindSlot(TargetSlot, SlotIndex))
 	{
@@ -123,11 +177,11 @@ void UPlayerEquipmentManager::Server_EquipItem_Implementation(EEquipmentSlots Ta
 		if (!TargetEquipmentSlot.bIsOccupied && TargetEquipmentSlot.Slot == TargetSlot)
 		{
 			EquipmentSlots[SlotIndex].bIsOccupied = true;
-			EquipmentSlots[SlotIndex].OccupyingItemData = Item;
+			EquipmentSlots[SlotIndex].OccupyingItemData = ItemData;
 
-			LosingInventory->BP_RemoveItem(Item, PosX, PosY);
+			LosingInventory->BP_RemoveItem(ItemData, PosX, PosY);
 			OnRep_EquipmentSlots();
-			OnEquipItem(TargetSlot, Item);
+			OnEquipItem(TargetSlot, ItemData);
 			UE_LOG(LogInventorySystem, Log, TEXT("Item equipped"))
 			return;
 		}
@@ -156,7 +210,7 @@ void UPlayerEquipmentManager::Server_UnEquipItem_Implementation(EEquipmentSlots 
 		FEquipmentSlot EquipmentSlot = EquipmentSlots[SlotIndex];
 		if (EquipmentSlot.bIsOccupied)
 		{
-			if (ReturnItemToInventory(EquipmentSlot.OccupyingItemData))
+			if (ReturnItemToInventory(EquipmentSlot.OccupyingItemData, TargetSlot))
 			{
 				FItemData NullData;
 				EquipmentSlots[SlotIndex].bIsOccupied = false;
@@ -201,10 +255,19 @@ void UPlayerEquipmentManager::Server_UnequipItemToPosition_Implementation(EEquip
 	FItemData Item;
 	Item = EquipmentSlots[SlotIndex].OccupyingItemData;
 
-	if (TargetInventory->BP_CheckIfItemFitsInPosition(Item, PosX, PosY))
+	if (TargetInventory->BP_CheckIfItemFitsInPosition(Item, PosX, PosY) && TargetInventory->EquippedSlot != TargetSlot)
 	{
 		FItemData NullData;
 		
+		//Create abstract inventory
+		UInventoryContainer* PairedInventory = nullptr;
+		if (FindPairedInventory(TargetSlot, PairedInventory))
+		{
+			UAbstractInventoryContainer* Abstract = nullptr;
+			CreateAbstractFromInventory(PairedInventory, Abstract);
+			Item.AbstractInventory = Abstract;
+		}
+
 		TargetInventory->BP_AddItem(Item, PosX, PosY);
 		EquipmentSlots[SlotIndex].bIsOccupied = false;
 		EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
@@ -273,10 +336,13 @@ void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer*
 {
 	if (!LosingInventory) {	UE_LOG(LogInventorySystem, Warning, TEXT("Attempting to equipment from null inventory")) return;}
 
+	FItemData ItemData;
+	ItemData = GetServerVersionOfItem(Item, LosingInventory, PosX, PosY);
+
 
 	//Find empty eligible slots
 	TArray<EEquipmentSlots> EligibleSlots;
-	EligibleSlots = Item.EligibleSlots;
+	EligibleSlots = ItemData.EligibleSlots;
 
 	TArray<int32> EligibleSlotIndexies;
 	TArray<int32> NonOccupiedEligibleSlotIndexies;
@@ -306,7 +372,7 @@ void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer*
 
 		TargetSlot = EquipmentSlots[NonOccupiedEligibleTargetSlotIndex].Slot;
 
-		Server_EquipItem(TargetSlot, Item, LosingInventory, PosX, PosY);
+		Server_EquipItem(TargetSlot, ItemData, LosingInventory, PosX, PosY);
 		return;
 	}
 	else
@@ -319,7 +385,7 @@ void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer*
 
 			TargetSlot = EquipmentSlots[EligibleTargetSlotIndex].Slot;
 
-			Server_EquipItem(TargetSlot, Item, LosingInventory, PosX, PosY);
+			Server_EquipItem(TargetSlot, ItemData, LosingInventory, PosX, PosY);
 			return;
 
 		}
@@ -352,7 +418,7 @@ void UPlayerEquipmentManager::ValidateSlots()
 	}
 }
 
-bool UPlayerEquipmentManager::ReturnItemToInventory(FItemData Item)
+bool UPlayerEquipmentManager::ReturnItemToInventory(FItemData Item, EEquipmentSlots OriginatingSlot)
 {
 	SetOwnerInventories();
 	
@@ -361,18 +427,30 @@ bool UPlayerEquipmentManager::ReturnItemToInventory(FItemData Item)
 		UInventoryContainer* TargetInventory = nullptr;
 		TargetInventory = OwnerInventories[Index];
 		
+		//Check if TargetInventory matches slot, if yes grab inventory data
+
 		if (TargetInventory)
 		{
-			if (TargetInventory->BP_CheckIfItemCouldBeAdded(Item))
+			if (TargetInventory->BP_CheckIfItemCouldBeAdded(Item) && TargetInventory->EquippedSlot != OriginatingSlot)
 			{
 				FItemData OutData;
 				bool OutBool;
+
+				UInventoryContainer* PairedInventory = nullptr;
+				if (FindPairedInventory(OriginatingSlot, PairedInventory))
+				{
+					UAbstractInventoryContainer* Abstract = nullptr;
+					CreateAbstractFromInventory(PairedInventory, Abstract);
+					Item.AbstractInventory = Abstract;
+				}
+
 				TargetInventory->BP_AutoAddItem(Item, OutBool, OutData);
 				return true;
 			}
-
 		}
+
 	}
+
 	return false;
 }
 
@@ -397,6 +475,37 @@ bool UPlayerEquipmentManager::FindSlot(EEquipmentSlots TargetSlot, int32& Index)
 	}
 	return false;
 }
+
+void UPlayerEquipmentManager::CreateAbstractFromInventory(UInventoryContainer* Inventory, UAbstractInventoryContainer*& OutAbstract)
+{
+	if (Inventory)
+	{
+		UAbstractInventoryContainer* AbstractInvetory = nullptr;
+		AbstractInvetory = NewObject<UAbstractInventoryContainer>();
+		AbstractInvetory->SetInventory(Inventory->GetInventoryForAbstract());
+		OutAbstract = AbstractInvetory;
+		UE_LOG(LogInventorySystem, Log, TEXT("Abstract created"))
+		return;
+	}
+
+}
+
+FItemData UPlayerEquipmentManager::GetServerVersionOfItem(FItemData ClientItem, UInventoryContainer* TargetInventory, int32 PosX, int32 PosY)
+{
+
+	if (TargetInventory)
+	{
+		FItemData NewItem;
+		NewItem = TargetInventory->GetItemAtPosition(FVector2D(PosX, PosY));
+		if (NewItem.DisplayName == ClientItem.DisplayName)
+		{
+			return NewItem;
+		}
+	}
+	return ClientItem;
+}
+
+
 
 void UPlayerEquipmentManager::Server_SetSkeletalMesh_Implementation(EEquipmentSlots TargetSlot, FItemData ItemData)
 {

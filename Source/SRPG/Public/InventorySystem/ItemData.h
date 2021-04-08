@@ -24,6 +24,8 @@ enum class EEquipmentSlots : uint8 {
 };
 
 
+
+
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
@@ -65,8 +67,6 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Info", meta = (ClampMin = 0))
 	float PerItemWeight;
 
-	// Equipment Data 
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment Data")
 	bool bIsEquipable;
 
@@ -79,7 +79,28 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data", meta = (EditCondition = "bIsMesh"))
 	USkeletalMesh* SkeletalMesh = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data", meta = (EditCondition = "bIsEquipable"))
+	bool bHasInventory;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (EditCondition = "bHasInventory"))
+	FString InventoryName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (EditCondition = "bHasInventory"))
+	int32 InventorySizeX;
+
+	//Set in editor
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (EditCondition = "bHasInventory"))
+	int32 InventorySizeY;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (EditCondition = "bHasInventory"))
+	float MaxWeight;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory Configuration")
+	class UAbstractInventoryContainer* AbstractInventory = nullptr;
+
 };
+
+
 
 USTRUCT(BlueprintType)
 struct FEquipmentSlot

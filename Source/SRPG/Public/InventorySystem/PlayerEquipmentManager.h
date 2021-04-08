@@ -41,6 +41,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equipment Data", meta = (DisplayName = "Move Slot"))
 	void BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlot, FItemData ItemData);
 
+	//Will Handle Abstract Creation
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment Data")
+	bool EquipFromPickup(FItemData ItemData, class UInventoryContainer* Inventory);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -68,6 +72,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Equipment Data", meta = (DisplayName = "Set Skeletal Mesh"))
 	void BP_SetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData);
+
+	UFUNCTION(BlueprintCallable, Category = "Equipment Data")
+	bool FindPairedInventory(EEquipmentSlots TargetSlot, class UInventoryContainer*& OutPairedInventory);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_EquipItem(EEquipmentSlots TargetSlot, FItemData Item, class UInventoryContainer* LosingInventory, int32 PosX, int32 PosY);
@@ -98,8 +105,12 @@ protected:
 
 	void SetOwnerInventories();
 
-	bool ReturnItemToInventory(FItemData Item);
+	bool ReturnItemToInventory(FItemData Item, EEquipmentSlots OriginatingSlot);
 
 	bool FindSlot(EEquipmentSlots TargetSlot, int32& Index);
+	
+	void CreateAbstractFromInventory(class UInventoryContainer* Inventory, class UAbstractInventoryContainer*& OutAbstract);
+
+	FItemData GetServerVersionOfItem(FItemData ClientItem, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 
 };
