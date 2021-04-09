@@ -222,6 +222,10 @@ protected:
 
 	void UpdateWeight();
 
+	void RefreshSlotOccupancy();
+
+	bool CheckIfSlotIsOccupied(FVector2D Position);
+
 	UFUNCTION(Client, Reliable)
 	void Client_InventoryUpdate();
 	void Client_InventoryUpdate_Implementation();

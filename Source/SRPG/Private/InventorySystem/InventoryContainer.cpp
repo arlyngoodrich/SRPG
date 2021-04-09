@@ -257,6 +257,7 @@ void UInventoryContainer::BP_SplitStack(FItemData OriginalItem, int32 PositionX,
 void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory)
 {
 	Inventory = NewInventory;
+	RefreshSlotOccupancy();
 	Client_InventoryUpdate();
 	Internal_OnInventoryUpdate();
 
@@ -1113,6 +1114,35 @@ void UInventoryContainer::UpdateWeight()
 		CurrentWeight += StackWeight;
 	}
 
+}
+
+void UInventoryContainer::RefreshSlotOccupancy()
+{
+	for (int32 Index = 0; Index != InventorySlots.Num(); Index++)
+	{
+		bIsSlotOccupied[Index] = CheckIfSlotIsOccupied(InventorySlots[Index]);
+	}
+
+}
+
+bool UInventoryContainer::CheckIfSlotIsOccupied(FVector2D Position)
+{
+	if (Inventory.Num() == 0)
+	{
+		return false;
+	}
+	else
+	{
+		for (int32 Index = 0; Index != Inventory.Num(); ++Index)
+		{
+			if(Inventory[Index].Position == Position)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void UInventoryContainer::Client_InventoryUpdate_Implementation()
