@@ -23,11 +23,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction System")
-		void TriggerInteraction(UInteractableObjectComponent* InteractableComponent);
+	void TriggerInteraction(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_TriggerInteraction(UInteractableObjectComponent* InteractableComponent);
-	bool Server_TriggerInteraction_Validate(UInteractableObjectComponent* InteractableComponent);
-	void Server_TriggerInteraction_Implementation(UInteractableObjectComponent* InteractableComponent);
+	void Server_TriggerInteraction(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex);
+	bool Server_TriggerInteraction_Validate(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex);
+	void Server_TriggerInteraction_Implementation(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex);
 
 };

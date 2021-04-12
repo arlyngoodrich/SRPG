@@ -28,33 +28,33 @@ void UPlayerInteractionSensor::BeginPlay()
 
 }
 
-void UPlayerInteractionSensor::TriggerInteraction(UInteractableObjectComponent* InteractableComponent)
+void UPlayerInteractionSensor::TriggerInteraction(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex)
 {
 	//If one of the components is not valid, exit function
 	if (!InteractableComponent) { return; }
 
 	if (GetOwnerRole() < ROLE_Authority)
 	{
-		Server_TriggerInteraction(InteractableComponent);
+		Server_TriggerInteraction(InteractableComponent, InteractionIndex);
 	}
 	else
 	{
 
-		InteractableComponent->InteractionTriggered(this);
+		InteractableComponent->InteractionTriggered(this, InteractionIndex);
 
 	}
 
 
 }
 
-bool UPlayerInteractionSensor::Server_TriggerInteraction_Validate(UInteractableObjectComponent* InteractableComponent)
+bool UPlayerInteractionSensor::Server_TriggerInteraction_Validate(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex)
 {
 	return true;
 }
 
-void UPlayerInteractionSensor::Server_TriggerInteraction_Implementation(UInteractableObjectComponent* InteractableComponent)
+void UPlayerInteractionSensor::Server_TriggerInteraction_Implementation(UInteractableObjectComponent* InteractableComponent, int32 InteractionIndex)
 {
-	TriggerInteraction(InteractableComponent);
+	TriggerInteraction(InteractableComponent, InteractionIndex);
 }
 
 
