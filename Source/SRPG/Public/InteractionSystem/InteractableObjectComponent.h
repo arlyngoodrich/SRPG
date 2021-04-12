@@ -20,7 +20,7 @@ public:
 	UInteractableObjectComponent();
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Interaction Triggered"))
-		void InteractionTriggered(UPlayerInteractionSensor* InstigatingComponent);
+		void InteractionTriggered(UPlayerInteractionSensor* InstigatingComponent, int32 InteractionIndex);
 
 protected:
 	// Called when the game starts

@@ -10,16 +10,17 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
+
 USTRUCT(BlueprintType)
 struct FInventoryData
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-		FItemData ItemData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
+	FItemData ItemData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-		FVector2D Position;
+	FVector2D Position;
 
 };
 
@@ -34,7 +35,10 @@ public:
 	UInventoryContainer();
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Fits")
-		void BP_CheckIfItemFits(FItemData Item, int32 PosX, int32 PosY);
+		bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Could be added")
+		bool BP_CheckIfItemCouldBeAdded(FItemData Item);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Add Item")
 		void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
@@ -48,19 +52,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Direct Transfer Item")
 		void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Auto Transfer Item")
+	void BP_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Transfer All Items")
+	void BP_TransferAll(UInventoryContainer* RecievingInventory);
+
 	//Must be run on server to receive callback of reamining items
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Server Only Auto Add Item")
-		void BP_AutoAddItem(FItemData Item, bool& OutbHasLeftOver, FItemData& OutRemainingItem);
+	void BP_AutoAddItem(FItemData Item, bool& OutbHasLeftOver, FItemData& OutRemainingItem);
 
 	//Returns true if item fully added, false if not added or partially added
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Same Inventory Direct Stack Item")
-		void BP_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
+	void BP_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Different Inventory Direct Stack Item")
-		void BP_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
+	void BP_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Split Stack")
-		void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	TArray<FInventoryData> GetInventoryForAbstract();
+
 
 protected:
 	//Blueprint server functions
@@ -71,33 +88,43 @@ protected:
 	void Server_AddItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
+	void Server_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
 	bool Server_RemoveItem_Validate(FItemData Item, int32 PosX, int32 PosY);
 	void Server_RemoveItem_Implementation(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void Server_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	bool Server_MoveItem_Validate(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	void Server_MoveItem_Implementation(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void Server_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	bool Server_DirectTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 	void Server_DirectTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
+	void Server_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+	bool Server_AutoTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+	void Server_AutoTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_TransferAll(UInventoryContainer* RecievingInventory);
+	bool Server_TransferAll_Validate(UInventoryContainer* RecievingInventory);
+	void Server_TransferAll_Implementation(UInventoryContainer* RecievingInventory);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 	bool Server_SameInventoryDirectStack_Validate(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 	void Server_SameInventoryDirectStack_Implementation(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
+	void Server_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 	bool Server_DifferentInventoryStack_Validate(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 	void Server_DifferentInventoryStack_Implementation(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
+	void Server_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	bool Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	void Server_SplitStack_Implementation(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
@@ -105,58 +132,63 @@ public:
 
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetInventorySize(int32& OutSizeX, int32& OutSizeY);
+	void GetInventorySize(int32& OutSizeX, int32& OutSizeY);
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetSlotInformation(TArray<int32>& OutXPositions, TArray<int32>& OutYPositions, TArray<bool>& OutbIsOccupied);
+	void GetSlotInformation(TArray<int32>& OutXPositions, TArray<int32>& OutYPositions, TArray<bool>& OutbIsOccupied);
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-		void GetInventoryData(TArray<FItemData>& OutItems, TArray<int32>& OutXPositions, TArray<int32>& OutYPositions);
+	void GetInventoryData(TArray<FItemData>& OutItems, TArray<int32>& OutXPositions, TArray<int32>& OutYPositions);
 
 	UPROPERTY(BlueprintAssignable)
-		FOnInventoryUpdated InventoryUpdated_Onupdate;
+	FOnInventoryUpdated InventoryUpdated_Onupdate;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory")
-		void InventoryUpdated();
+	void InventoryUpdated();
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	EEquipmentSlots EquippedSlot;
+
+	FItemData GetItemAtPosition(FVector2D Position);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration")
-		FString InventoryName;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	FString InventoryName;
 
 	//Set in editor
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
-		int32 InventorySizeX;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
+	int32 InventorySizeX;
 
 	//Set in editor
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1))
-		int32 InventorySizeY;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
+	int32 InventorySizeY;
 
 	UPROPERTY(Replicated)
-		FVector2D InventorySize;
+	FVector2D InventorySize;
 
 	UPROPERTY(Replicated)
-		TArray<FVector2D> InventorySlots;
+	TArray<FVector2D> InventorySlots;
 
 	UPROPERTY(Replicated)
-		TArray<bool> bIsSlotOccupied;
+	TArray<bool> bIsSlotOccupied;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
-		TArray<FInventoryData> Inventory;
+	TArray<FInventoryData> Inventory;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Configuration")
-		float MaxWeight;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	float MaxWeight;
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
-		float CurrentWeight;
-
-
+	float CurrentWeight;
 
 	void InitalizeSlots();
 
-	bool CheckIfItemFits(FItemData Item, FVector2D Position);
+	bool CheckIfItemFitsInPosition(FItemData Item, FVector2D Position);
+
+	bool CheckIfItemCouldBeAdded(FItemData Item);
 
 	bool AddItem(FItemData Item, FVector2D Position, bool bCheckWeight);
 
@@ -171,6 +203,8 @@ protected:
 	void AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData);
 
 	bool DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated);
+
+	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory);
 
 	bool SameInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
@@ -195,15 +229,19 @@ protected:
 
 	void UpdateWeight();
 
+	void RefreshSlotOccupancy();
+
+	bool CheckIfSlotIsOccupied(FVector2D Position);
+
 	UFUNCTION(Client, Reliable)
-		void Client_InventoryUpdate();
+	void Client_InventoryUpdate();
 	void Client_InventoryUpdate_Implementation();
 
 
 	UFUNCTION()
-		void OnRep_InventoryUpdated();
+	void OnRep_InventoryUpdated();
 
 	void Internal_OnInventoryUpdate();
 
-
+	FItemData GetServerVersionOfItem(FItemData ClientItem, UInventoryContainer* TargetInventory, FVector2D Position);
 };
