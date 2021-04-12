@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equipment Data", meta = (DisplayName = "Unequip Item to Position"))
 	void BP_UnequipItemToPosition(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 
+	UFUNCTION(BlueprintCallable, Category = "Equipment Data", meta = (DisplayName = "Unequip Item with Auto Transfer"))
+	void BP_UnequipItemWithAutoTransfer(EEquipmentSlots TargetSlots, class UInventoryContainer* TargetInventory);
+
 	UFUNCTION(BlueprintCallable, Category = "Equipment Data", meta = (DisplayName = "Move Slot"))
 	void BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlot, FItemData ItemData);
 
@@ -95,6 +98,12 @@ protected:
 	void Server_UnequipItemToPosition(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 	bool Server_UnequipItemToPosition_Validate(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
 	void Server_UnequipItemToPosition_Implementation(EEquipmentSlots TargetSlot, class UInventoryContainer* TargetInventory, int32 PosX, int32 PosY);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_UnequipItemWithAutoTransfer(EEquipmentSlots TargetSlots, class UInventoryContainer* TargetInventory);
+	bool Server_UnequipItemWithAutoTransfer_Validate(EEquipmentSlots TargetSlots, class UInventoryContainer* TargetInventory);
+	void Server_UnequipItemWithAutoTransfer_Implementation(EEquipmentSlots TargetSlots, class UInventoryContainer* TargetInventory);
+
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Server_SetSkeletalMesh(EEquipmentSlots TargetSlot, FItemData ItemData);

@@ -95,6 +95,11 @@ void UPlayerEquipmentManager::BP_UnequipItemToPosition(EEquipmentSlots TargetSlo
 	Server_UnequipItemToPosition(TargetSlot, TargetInventory, PosX, PosY);
 }
 
+void UPlayerEquipmentManager::BP_UnequipItemWithAutoTransfer(EEquipmentSlots TargetSlots, UInventoryContainer* TargetInventory)
+{
+	Server_UnequipItemWithAutoTransfer(TargetSlots, TargetInventory);
+}
+
 void UPlayerEquipmentManager::BP_MoveSlot(EEquipmentSlots CurrentSlot, EEquipmentSlots NewSlot, FItemData ItemData)
 {
 	Server_MoveSlots(CurrentSlot, NewSlot, ItemData);
@@ -268,11 +273,13 @@ void UPlayerEquipmentManager::Server_UnequipItemToPosition_Implementation(EEquip
 			Item.AbstractInventory = Abstract;
 		}
 
-		TargetInventory->BP_AddItem(Item, PosX, PosY);
+
 		EquipmentSlots[SlotIndex].bIsOccupied = false;
 		EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
 		OnUnequipItem(TargetSlot);
 		OnRep_EquipmentSlots();
+
+		TargetInventory->BP_AddItem(Item, PosX, PosY);
 
 		return;
 	}
@@ -280,6 +287,52 @@ void UPlayerEquipmentManager::Server_UnequipItemToPosition_Implementation(EEquip
 	{
 		UE_LOG(LogInventorySystem, Log, TEXT("Could not unequip item to position"))
 	}
+
+}
+
+bool UPlayerEquipmentManager::Server_UnequipItemWithAutoTransfer_Validate(EEquipmentSlots TargetSlots, UInventoryContainer* TargetInventory)
+{
+	return true;
+}
+
+void UPlayerEquipmentManager::Server_UnequipItemWithAutoTransfer_Implementation(EEquipmentSlots TargetSlot, UInventoryContainer* TargetInventory)
+{
+	UE_LOG(LogInventorySystem, Log, TEXT("Unequip with transfer called"))
+
+	if (TargetInventory)
+	{
+		int32 SlotIndex;
+		if (FindSlot(TargetSlot, SlotIndex))
+		{
+			FItemData EquipmentItemData;
+			EquipmentItemData = EquipmentSlots[SlotIndex].OccupyingItemData;
+
+			if (TargetInventory->BP_CheckIfItemCouldBeAdded(EquipmentItemData))
+			{				
+				FItemData NullData;
+
+				//Create abstract inventory
+				UInventoryContainer* PairedInventory = nullptr;
+				if (FindPairedInventory(TargetSlot, PairedInventory))
+				{
+					UAbstractInventoryContainer* Abstract = nullptr;
+					CreateAbstractFromInventory(PairedInventory, Abstract);
+					EquipmentItemData.AbstractInventory = Abstract;
+				}
+
+				EquipmentSlots[SlotIndex].bIsOccupied = false;
+				EquipmentSlots[SlotIndex].OccupyingItemData = NullData;
+				OnUnequipItem(TargetSlot);
+				OnRep_EquipmentSlots();
+
+				bool bOut;
+				FItemData OutItemData;
+				TargetInventory->BP_AutoAddItem(EquipmentItemData, bOut, OutItemData);
+			}
+
+		}
+	}
+
 
 }
 

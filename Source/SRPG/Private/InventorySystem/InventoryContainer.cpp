@@ -153,6 +153,11 @@ void UInventoryContainer::BP_AutoTransfer(FItemData Item, int32 StartXPos, int32
 	}
 }
 
+void UInventoryContainer::BP_TransferAll(UInventoryContainer* RecievingInventory)
+{
+	Server_TransferAll(RecievingInventory);
+}
+
 
 bool UInventoryContainer::Server_DirectTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated)
 {
@@ -172,6 +177,49 @@ bool UInventoryContainer::Server_AutoTransfer_Validate(FItemData Item, int32 Sta
 void UInventoryContainer::Server_AutoTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory)
 {
 	BP_AutoTransfer(Item, StartXPos, StartYPox, RecievingInventory);
+}
+
+bool UInventoryContainer::Server_TransferAll_Validate(UInventoryContainer* RecievingInventory)
+{
+	return true;
+}
+
+void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer* RecievingInventory)
+{
+	if (RecievingInventory)
+	{
+
+		TArray<bool> InventoryIndexiesToRemove;
+		TArray<FItemData> LeftOverItemDataArray;
+
+	for (int32 Index = 0; Index != Inventory.Num(); Index++)
+		{
+			FItemData LeftOverItemData;
+			InventoryIndexiesToRemove.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, LeftOverItemData));
+			LeftOverItemDataArray.Add(LeftOverItemData);
+		}
+
+		
+	for (int32 Index = Inventory.Num() - 1; Index > -1; Index--)
+		{
+			if (InventoryIndexiesToRemove[Index])
+			{//was fully removed
+
+				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
+			}
+			else
+			{//Was not fully removed
+
+				Inventory[Index].ItemData = LeftOverItemDataArray[Index];
+		
+			}
+		}
+
+	Internal_OnInventoryUpdate();
+
+	}
+
+
 }
 
 // BP AutoAdd Item //
@@ -499,7 +547,7 @@ bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position)
 			Inventory.RemoveAt(Index);
 
 			UE_LOG(LogInventorySystem, Log, TEXT("%s removed from (%s,%s)"), *Item.DisplayName.ToString(), *FString::SanitizeFloat(Position.X), *FString::SanitizeFloat(Position.Y))
-				Internal_OnInventoryUpdate();
+			Internal_OnInventoryUpdate();
 			return true;
 		}
 
@@ -537,7 +585,7 @@ bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, F
 			Inventory[ItemIndex].ItemData = ItemData;
 			SetSlotsAsOccupied(ItemData.SizeX, ItemData.SizeY, EndingPosition, true);
 			UE_LOG(LogInventorySystem, Log, TEXT("%s has been moved to (%s,%s)"), *ItemData.DisplayName.ToString(), *FString::SanitizeFloat(EndingPosition.X), *FString::SanitizeFloat(EndingPosition.Y))
-				Internal_OnInventoryUpdate();
+			Internal_OnInventoryUpdate();
 			return true;
 
 		}

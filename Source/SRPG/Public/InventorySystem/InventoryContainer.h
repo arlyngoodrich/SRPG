@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Auto Transfer Item")
 	void BP_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Transfer All Items")
+	void BP_TransferAll(UInventoryContainer* RecievingInventory);
+
 	//Must be run on server to receive callback of reamining items
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Server Only Auto Add Item")
 	void BP_AutoAddItem(FItemData Item, bool& OutbHasLeftOver, FItemData& OutRemainingItem);
@@ -104,6 +107,10 @@ protected:
 	bool Server_AutoTransfer_Validate(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
 	void Server_AutoTransfer_Implementation(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_TransferAll(UInventoryContainer* RecievingInventory);
+	bool Server_TransferAll_Validate(UInventoryContainer* RecievingInventory);
+	void Server_TransferAll_Implementation(UInventoryContainer* RecievingInventory);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SameInventoryDirectStack(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
@@ -111,7 +118,7 @@ protected:
 	void Server_SameInventoryDirectStack_Implementation(FItemData IncomingItem, int32 IncomingPosX, int32 IncomingPosY, FItemData ReceivingItem, int32 RecPosX, int32 RecPosY);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
+	void Server_DifferentInventoryStack(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 	bool Server_DifferentInventoryStack_Validate(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 	void Server_DifferentInventoryStack_Implementation(FItemData IncomingItem, int32 IncomingItemPosX, int32 IncomingItemPosY, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, int32 TargetPosX, int32 TargetPosY);
 
