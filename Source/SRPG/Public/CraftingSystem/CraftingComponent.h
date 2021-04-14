@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CraftingData.h"
 #include "CraftingComponent.generated.h"
 
 
@@ -16,13 +17,29 @@ public:
 	// Sets default values for this component's properties
 	UCraftingComponent();
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	void SetAssociatedInputInventories(TArray<class UInventoryContainer*> InputInventories);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	void SetCraftingRecipes(TArray<FCraftingRecipe> CraftingRecipes);
+
+	UFUNCTION(BlueprintPure, Category = "Crafting Information")
+	TArray<FCraftingRecipe> GetCraftingRecipes();
+
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	bool CanRecipeBeCrafted(FCraftingRecipe Recipe);
 
-		
+	bool IsItemPartOfRecipe(FItemData Item, FCraftingRecipe Recipe);
+
+	void GetQuantityOfIngredientFromInventory(FCraftingPart Ingredient, UInventoryContainer* TargetInventory, int32& OutQuantityFound);
+	
+	void GetTotalQuantityOfIngredient(FCraftingPart Ingredient, int32& OutQuantityFound);
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
+	TArray<class UInventoryContainer*> AssociatedInputInventories;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
+	TArray<FCraftingRecipe> CraftableRecipes;
+
 };

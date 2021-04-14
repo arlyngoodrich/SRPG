@@ -54,7 +54,7 @@ enum class ECraftingStationType : uint8 {
 
 
 USTRUCT(BlueprintType)
-struct FCraftingData : public FTableRowBase
+struct FCraftingRecipe : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
