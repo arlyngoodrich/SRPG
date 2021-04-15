@@ -17,18 +17,33 @@ public:
 	// Sets default values for this component's properties
 	UCraftingComponent();
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crafting Setup")
 	void SetAssociatedInputInventories(TArray<class UInventoryContainer*> InputInventories);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crafting Setup")
+	void SetAssociatedOutputInventories(TArray<class UInventoryContainer*> OutputInventories);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crafting Setup")
 	void SetCraftingRecipes(TArray<FCraftingRecipe> CraftingRecipes);
+
+	UFUNCTION(BlueprintCallable, Category = "Crafting")
+	void CraftRecipe(FCraftingRecipe Recipe);
 
 	UFUNCTION(BlueprintPure, Category = "Crafting Information")
 	TArray<FCraftingRecipe> GetCraftingRecipes();
 
 protected:
 
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_CraftRecipe(FCraftingRecipe Recipe);
+	bool Server_CraftRecipe_Validate(FCraftingRecipe Recipe);
+	void Server_CraftRecipe_Implementation(FCraftingRecipe Recipe);
+
+
 	bool CanRecipeBeCrafted(FCraftingRecipe Recipe);
+
+	bool EnoughSpaceForCraftedRecipe(FCraftingRecipe Recipe);
 
 	bool IsItemPartOfRecipe(FItemData Item, FCraftingRecipe Recipe);
 
@@ -36,8 +51,15 @@ protected:
 	
 	void GetTotalQuantityOfIngredient(FCraftingPart Ingredient, int32& OutQuantityFound);
 
+	void GetItemDataFromRecipe(FCraftingRecipe Recipe, TArray<FItemData>& OutInputItems, TArray<FItemData>& OutOutputItems);
+
+	bool GetItemDataFromClass(UClass* Class, FItemData& OutItemData);
+
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	TArray<class UInventoryContainer*> AssociatedInputInventories;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
+	TArray<class UInventoryContainer*> AssociatedOutputInventories;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	TArray<FCraftingRecipe> CraftableRecipes;

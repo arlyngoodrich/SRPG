@@ -7,3 +7,4 @@ DEFINE_LOG_CATEGORY(LogTPCharacter);
 DEFINE_LOG_CATEGORY(LogInventorySystem);
 DEFINE_LOG_CATEGORY(LogBuildingSystem);
 DEFINE_LOG_CATEGORY(LogEnviornmentSystem);
+DEFINE_LOG_CATEGORY(LogCraftingSystem);
