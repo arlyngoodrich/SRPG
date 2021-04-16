@@ -224,11 +224,11 @@ void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer*
 
 // BP AutoAdd Item //
 
-void UInventoryContainer::BP_AutoAddItem(FItemData Item, bool& bOutFullyStacked, FItemData& OutRemainingItem)
+void UInventoryContainer::BP_AutoAddItem(FItemData Item, bool& bOutWasFullyAdded, FItemData& OutRemainingItem)
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		bOutFullyStacked = AutoAddItem(Item, true, OutRemainingItem);
+		bOutWasFullyAdded = AutoAddItem(Item, true, OutRemainingItem);
 	}
 }
 

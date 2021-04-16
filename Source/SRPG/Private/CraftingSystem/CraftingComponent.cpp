@@ -50,7 +50,8 @@ bool UCraftingComponent::Server_CraftRecipe_Validate(FCraftingRecipe Recipe)
 
 void UCraftingComponent::Server_CraftRecipe_Implementation(FCraftingRecipe Recipe)
 {
-	if (!CanRecipeBeCrafted(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Recipe could not be crafted")) return; }
+	if(AssociatedInputInventories.Num() == 0){UE_LOG(LogCraftingSystem,Warning,TEXT("No input inventory for crafting")) }
+	if (!CanRecipeBeCrafted(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Recipe can not be crafted")) return; }
 	if (!EnoughSpaceForCraftedRecipe(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Not enough space for output")) return; }
 
 	//Remove Input Items from Inventories;
@@ -124,18 +125,19 @@ void UCraftingComponent::Server_CraftRecipe_Implementation(FCraftingRecipe Recip
 			UInventoryContainer* ActiveInventory = AssociatedOutputInventories[i_INV];
 			if (ActiveInventory != nullptr)
 			{
-				bool bHasLeftOver;
+				bool bWasFullyAdded;
 				FItemData LeftOverItemData;
-				ActiveInventory->BP_AutoAddItem(OutputItemData, bHasLeftOver, LeftOverItemData);
-				if (bHasLeftOver)
-				{
-					OutputItemData = LeftOverItemData;
-				}
-				else
+				ActiveInventory->BP_AutoAddItem(OutputItemData, bWasFullyAdded, LeftOverItemData);
+				if (bWasFullyAdded)
 				{
 					OutputItemData.StackQuantity = 0;
 					UE_LOG(LogCraftingSystem, Log, TEXT("Output Item %s succesfully created"), *OutputItemData.DisplayName.ToString())
 					break;
+				}
+				else
+				{
+					OutputItemData = LeftOverItemData;
+				
 				}
 			}
 		}
@@ -177,6 +179,10 @@ bool UCraftingComponent::CanRecipeBeCrafted(FCraftingRecipe Recipe)
 		int32 QuantityFound = 0;
 
 		GetTotalQuantityOfIngredient(ActiveIngredient, QuantityFound);
+		
+		FItemData ItemData;
+		GetItemDataFromClass(ActiveIngredient.InWorldActorClass, ItemData);
+		UE_LOG(LogCraftingSystem, Log, TEXT("%d of %s found"), QuantityFound, *ItemData.DisplayName.ToString())
 
 		//Check if enough of the active ingredent was found,
 		if (QuantityFound >= ActiveIngredient.StackQuantity)
@@ -337,12 +343,27 @@ void UCraftingComponent::GetQuantityOfIngredientFromInventory(FCraftingPart Ingr
 			ItemClass = TargetItem.InWorldActorClass.Get();
 			InputClass = Ingredient.InWorldActorClass.Get();
 
+			FString ItemClassName = ItemClass->GetName();
+			FString InputClassName = InputClass->GetName();
+			UE_LOG(LogCraftingSystem,Log,TEXT("Item class = %s"),*ItemClassName)
+			UE_LOG(LogCraftingSystem, Log, TEXT("Input class = %s"), *InputClassName)
+
+
 			//If it is the ingredient we are looking for, add to quantity found
-			if (ItemClass->IsChildOf(InputClass))
+			if (ItemClass->IsChildOf(InputClass) || ItemClass == InputClass)
 			{
 				OutQuantityFound += TargetItem.StackQuantity;
+				UE_LOG(LogCraftingSystem,Log,TEXT("%d found"), OutQuantityFound)
+			}
+			else
+			{
+				UE_LOG(LogCraftingSystem,Log,TEXT("Classes do not match"))
 			}
 		}
+	}
+	else
+	{
+		UE_LOG(LogCraftingSystem,Warning,TEXT("Cannot get quantity from invalid inventory reference"))
 	}
 }
 
