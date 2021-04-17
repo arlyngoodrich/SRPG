@@ -16,12 +16,13 @@ public:
 	// Sets default values for this actor's properties
 	AItemBase();
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (ExposeOnSpawn = "true"))
+	FItemData ItemData;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (ExposeOnSpawn = "true"))
-	FItemData ItemData;
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Item Information")
 	void UpdateItemInformation(FItemData NewItemData);

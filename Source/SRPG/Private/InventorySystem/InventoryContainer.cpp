@@ -224,11 +224,11 @@ void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer*
 
 // BP AutoAdd Item //
 
-void UInventoryContainer::BP_AutoAddItem(FItemData Item, bool& bOutFullyStacked, FItemData& OutRemainingItem)
+void UInventoryContainer::BP_AutoAddItem(FItemData Item, bool& bOutWasFullyAdded, FItemData& OutRemainingItem)
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		bOutFullyStacked = AutoAddItem(Item, true, OutRemainingItem);
+		bOutWasFullyAdded = AutoAddItem(Item, true, OutRemainingItem);
 	}
 }
 
@@ -382,6 +382,58 @@ FItemData UInventoryContainer::GetItemAtPosition(FVector2D Position)
 		}
 	}
 return FItemData();
+}
+
+void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQuantity, int32& OutQuantityRemoved)
+{
+	if (GetOwnerRole() < ROLE_Authority) { UE_LOG(LogInventorySystem, Warning, TEXT("Canno run 'Remove QTY Of Items Function' on client")) return; }
+
+	int32 FoundQuantity;
+	FindTotalQuantityOfItem(Item, FoundQuantity);
+	if (FoundQuantity == 0)
+	{
+		OutQuantityRemoved = 0;
+		UE_LOG(LogInventorySystem, Log, TEXT("Could not find any %s to remove"), *Item.DisplayName.ToString())
+		return;
+	}
+
+	TArray<int32> ItemIndexices;
+	FindAllItemIndexices(Item, ItemIndexices);
+	TArray<FInventoryData> InventoryDataToRemove;
+
+	int32 QuantityNeeded = RequestedQuantity;
+
+	for (int32 i = 0; i < ItemIndexices.Num(); i++)
+	{
+		int32 ActiveItemIndex = ItemIndexices[i];
+		FInventoryData ActiveInventoryData = Inventory[ActiveItemIndex];
+
+		int32 ItemAmount;
+		ItemAmount = ActiveInventoryData.ItemData.StackQuantity;
+		
+		//If not enough
+		if (ItemAmount <= QuantityNeeded)
+		{
+			QuantityNeeded -= ItemAmount;
+			InventoryDataToRemove.Add(ActiveInventoryData);
+			if (QuantityNeeded == 0) { break; }
+		}
+		//If more than needed
+		if (ItemAmount > QuantityNeeded)
+		{
+			Inventory[ActiveItemIndex].ItemData.StackQuantity = ItemAmount - QuantityNeeded;
+			QuantityNeeded = 0;
+			break;
+		}
+	}
+
+	OutQuantityRemoved = RequestedQuantity - QuantityNeeded;
+
+	//Remove Data
+	for (int32 Index = InventoryDataToRemove.Num() - 1; Index > -1; Index--)
+	{
+		RemoveItem(InventoryDataToRemove[Index].ItemData, InventoryDataToRemove[Index].Position);
+	}
 }
 
 // Called when the game starts

@@ -78,7 +78,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	TArray<FInventoryData> GetInventoryForAbstract();
 
-
 protected:
 	//Blueprint server functions
 
@@ -127,7 +126,7 @@ protected:
 	void Server_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	bool Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 	void Server_SplitStack_Implementation(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
-
+	
 public:
 
 
@@ -150,6 +149,9 @@ public:
 	EEquipmentSlots EquippedSlot;
 
 	FItemData GetItemAtPosition(FVector2D Position);
+
+	//Must be run on server
+	void RemoveQuantityOfItem(FItemData Item, int32 RequestedQuantity, int32& QuantityRemoved);
 
 protected:
 	// Called when the game starts
@@ -221,6 +223,7 @@ protected:
 
 	bool FindAllItemIndexices(FItemData Item, TArray<int32>& OutItemIndexices);
 
+	//returns false if no quantity was found
 	bool FindTotalQuantityOfItem(FItemData Item, int32& OutQuantity);
 
 	bool IsValidItem(FItemData Item, FVector2D Position);
