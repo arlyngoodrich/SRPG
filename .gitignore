@@ -12,3 +12,7 @@ Saved
 *.suo
 *.xcodeproj
 *.xcworkspace
+Content/MSPresets/
+Content/TestContent/
+Content/Enviornment/
+Conent/Props/
