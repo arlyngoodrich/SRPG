@@ -610,7 +610,7 @@ bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position)
 		return false;
 }
 
-bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, FVector2D EndingPosition, bool bIsRotated)
+bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, FVector2D EndingPosition, bool bPerformRotationOnSet)
 {
 	FItemData ItemData;
 	ItemData = GetServerVersionOfItem(Item, this, StartingPosition);
@@ -623,12 +623,14 @@ bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, F
 		//Set inital slot as empty so they are not part of the 'If It Fitz' check
 		SetSlotsAsOccupied(ItemData.SizeX, ItemData.SizeY, StartingPosition, false);
 
-		if (bIsRotated)
+		if (bPerformRotationOnSet)
 		{
-			ItemData.bIsRotated = true;
+			bool bOriginalRotation = ItemData.bIsRotated;
+			ItemData.bIsRotated = !bOriginalRotation;
 			ItemData.SizeX = Item.SizeY;
 			ItemData.SizeY = Item.SizeX;
 		}
+	
 
 		if (CheckIfItemFitsInPosition(ItemData, EndingPosition))
 		{
