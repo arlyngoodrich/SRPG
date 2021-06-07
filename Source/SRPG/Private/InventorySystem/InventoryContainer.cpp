@@ -627,6 +627,7 @@ bool UInventoryContainer::MoveItem(FItemData Item, FVector2D StartingPosition, F
 		{
 			bool bOriginalRotation = ItemData.bIsRotated;
 			ItemData.bIsRotated = !bOriginalRotation;
+
 			ItemData.SizeX = Item.SizeY;
 			ItemData.SizeY = Item.SizeX;
 		}
