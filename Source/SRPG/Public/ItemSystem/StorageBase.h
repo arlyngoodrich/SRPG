@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "StorageBase.generated.h"
 
+
+
+/////// INVALID CLASS -- TODO DELETE
+
 UCLASS()
 class SRPG_API AStorageBase : public AActor
 {

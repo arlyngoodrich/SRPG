@@ -321,6 +321,7 @@ bool UCraftingComponent::GetItemDataFromClass(UClass* Class, FItemData& OutItemD
 
 void UCraftingComponent::GetQuantityOfIngredientFromInventory(FCraftingPart Ingredient, UInventoryContainer* TargetInventory, int32& OutQuantityFound)
 {
+	OutQuantityFound = 0;
 
 	//Make sure inventory isn't null
 	if (TargetInventory != nullptr)
