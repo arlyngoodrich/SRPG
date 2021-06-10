@@ -10,6 +10,7 @@
 class ACustomFoliageActor;
 class UStaticMesh;
 class UDamageType;
+class AItemBase;
 
 UENUM(BlueprintType)
 enum class EVegitationStatus : uint8 {
@@ -26,7 +27,7 @@ struct FResourceRewardData : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data")
-	FName ResourceName;
+	TSubclassOf<AItemBase> HarvestedItem;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Foliage Data", meta = (ClampMin = 0))
 	int32 MinAmount;
