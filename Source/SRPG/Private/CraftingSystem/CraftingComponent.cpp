@@ -58,7 +58,7 @@ void UCraftingComponent::Server_CraftRecipe_Implementation(FCraftingRecipe Recip
 
 	ActiveRecipe = Recipe;
 
-	GetWorld()->GetTimerManager().SetTimer(CraftingTimer, this, &UCraftingComponent::FinalizeCraft, Recipe.DefaultCraftingTime, false, 0.f);
+	GetWorld()->GetTimerManager().SetTimer(CraftingTimer, this, &UCraftingComponent::FinalizeCraft, Recipe.DefaultCraftingTime, false);
 
 }
 

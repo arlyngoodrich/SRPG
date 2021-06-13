@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Crafting Information")
 	TArray<FCraftingRecipe> GetCraftingRecipes();
 
+
+	
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
@@ -76,7 +79,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	TArray<FCraftingRecipe> CraftableRecipes;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	FTimerHandle CraftingTimer;
 
 };
