@@ -82,4 +82,7 @@ struct FCraftingRecipe : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe Info")
 	TArray<FCraftingPart> RecipeOutputs;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe Info")
+	float DefaultCraftingTime = 1.f;
+
 };

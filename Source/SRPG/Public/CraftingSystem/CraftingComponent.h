@@ -34,12 +34,16 @@ public:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
+	bool bRequiresFuelToCraft;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
+	bool bAutoCraftsWhenFueled;
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_CraftRecipe(FCraftingRecipe Recipe);
 	bool Server_CraftRecipe_Validate(FCraftingRecipe Recipe);
 	void Server_CraftRecipe_Implementation(FCraftingRecipe Recipe);
-
 
 	bool CanRecipeBeCrafted(FCraftingRecipe Recipe);
 
@@ -55,6 +59,14 @@ protected:
 
 	bool GetItemDataFromClass(UClass* Class, FItemData& OutItemData);
 
+	bool Crafting_RemoveItems(FCraftingRecipe Recipe);
+
+	void Crafting_AddOutputs(FCraftingRecipe Recipe);
+
+	void FinalizeCraft();
+
+	FCraftingRecipe ActiveRecipe;
+
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	TArray<class UInventoryContainer*> AssociatedInputInventories;
 
@@ -63,5 +75,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	TArray<FCraftingRecipe> CraftableRecipes;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
+	FTimerHandle CraftingTimer;
 
 };
