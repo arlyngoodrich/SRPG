@@ -400,6 +400,9 @@ void UPlayerEquipmentManager::AutoEquipItem(FItemData Item, UInventoryContainer*
 	TArray<int32> EligibleSlotIndexies;
 	TArray<int32> NonOccupiedEligibleSlotIndexies;
 
+	EligibleSlotIndexies.Empty();
+	NonOccupiedEligibleSlotIndexies.Empty();
+
 	for (int32 Index = 0; Index != EligibleSlots.Num(); ++Index)
 	{
 		int32 TargetIndex;
