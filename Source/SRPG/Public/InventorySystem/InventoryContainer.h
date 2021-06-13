@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Could be added")
 		bool BP_CheckIfItemCouldBeAdded(FItemData Item);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Valid Item")
+		bool BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY);
+
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Add Item")
 		void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
 

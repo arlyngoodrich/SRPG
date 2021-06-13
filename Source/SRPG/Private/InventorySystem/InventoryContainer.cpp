@@ -49,6 +49,11 @@ bool UInventoryContainer::BP_CheckIfItemCouldBeAdded(FItemData Item)
 	return CheckIfItemCouldBeAdded(Item);
 }
 
+bool UInventoryContainer::BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY)
+{
+	return IsValidItem(Item, FVector2D(PosX, PosY));
+}
+
 
 //BP ADD ITEM//
 
