@@ -32,8 +32,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Crafting Information")
 	TArray<FCraftingRecipe> GetCraftingRecipes();
 
+	UFUNCTION(BlueprintPure, Category = "Crafting Information")
+	bool GetIsFuelAvailable();
 
-	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crafting")
+	void OnFuelBurnStart();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crafting")
+	void OnFuelBurnStop();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crafting")
+	void OnCraftStart(FCraftingRecipe RecipeBeingCrafted);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crafting")
+	void OnCraftFinish();
+
+			
 
 protected:
 
@@ -42,6 +56,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
 	bool bAutoCraftsWhenFueled;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Crafting Information")
+	bool bIsFuelAvailable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
+	TArray<FCraftingFuel> FuelTypes;
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_CraftRecipe(FCraftingRecipe Recipe);
@@ -54,6 +74,8 @@ protected:
 
 	bool IsItemPartOfRecipe(FItemData Item, FCraftingRecipe Recipe);
 
+	bool CheckIfIngredientIsAvailable(FCraftingPart Ingredient);
+
 	void GetQuantityOfIngredientFromInventory(FCraftingPart Ingredient, UInventoryContainer* TargetInventory, int32& OutQuantityFound);
 	
 	void GetTotalQuantityOfIngredient(FCraftingPart Ingredient, int32& OutQuantityFound);
@@ -64,10 +86,27 @@ protected:
 
 	bool Crafting_RemoveItems(FCraftingRecipe Recipe);
 
+	bool RemoveIngredientFromInventories(FCraftingPart Ingredient);
+
 	void Crafting_AddOutputs(FCraftingRecipe Recipe);
 
 	void FinalizeCraft();
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crafting Setup")
+	void StartBuriningFuel();
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crafting Setup")
+	void StopBurningFuel();
+
+	void BurnFuel(FCraftingFuel TargetFuel);
+
+	bool IsFuelAvailable();
+
+	bool bFuelIsBurning;
+
+	void StartAutoCrafting();
+	
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
 	FCraftingRecipe ActiveRecipe;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "References")
@@ -80,5 +119,9 @@ protected:
 	TArray<FCraftingRecipe> CraftableRecipes;
 
 	FTimerHandle CraftingTimer;
+
+	FTimerHandle FuelBurnTimer;
+
+	bool bIsCrafting;
 
 };

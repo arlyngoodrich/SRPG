@@ -21,6 +21,18 @@ struct FCraftingPart
 
 };
 
+USTRUCT(BlueprintType)
+struct FCraftingFuel
+{
+	GENERATED_USTRUCT_BODY()
+
+	FCraftingPart FuelIngredient;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fuel Info")
+	float TimeToConsumeOne = 1.f;
+
+};
+
 UENUM(BlueprintType)
 enum class ERecipeCategory : uint8 {
 
