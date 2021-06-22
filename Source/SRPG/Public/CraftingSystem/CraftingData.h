@@ -26,6 +26,7 @@ struct FCraftingFuel
 {
 	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fuel Info")
 	FCraftingPart FuelIngredient;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fuel Info")

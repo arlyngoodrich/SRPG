@@ -439,6 +439,8 @@ void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQu
 	{
 		RemoveItem(InventoryDataToRemove[Index].ItemData, InventoryDataToRemove[Index].Position);
 	}
+
+	Internal_OnInventoryUpdate();
 }
 
 // Called when the game starts

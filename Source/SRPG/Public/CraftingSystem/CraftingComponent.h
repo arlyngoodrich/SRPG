@@ -47,15 +47,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Crafting")
 	void OnCraftFinish();
 
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configuration")
+	bool bRequiresFuelToCraft;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configuration")
+	bool bAutoCraftsWhenFueled;
 			
 
 protected:
-
-	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
-	bool bRequiresFuelToCraft;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
-	bool bAutoCraftsWhenFueled;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Crafting Information")
 	bool bIsFuelAvailable;
