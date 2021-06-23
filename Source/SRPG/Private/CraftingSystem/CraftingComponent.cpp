@@ -40,7 +40,14 @@ void UCraftingComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& 
 	DOREPLIFETIME(UCraftingComponent, AssociatedInputInventories);
 	DOREPLIFETIME(UCraftingComponent, AssociatedOutputInventories);
 	DOREPLIFETIME(UCraftingComponent, CraftableRecipes);
-	
+	DOREPLIFETIME(UCraftingComponent, bIsFuelAvailable);
+	DOREPLIFETIME(UCraftingComponent, ActiveRecipe);
+}
+
+bool UCraftingComponent::GetIsFuelAvailable()
+{
+	IsFuelAvailable();
+	return bIsFuelAvailable;
 }
 
 bool UCraftingComponent::Server_CraftRecipe_Validate(FCraftingRecipe Recipe)
@@ -50,119 +57,143 @@ bool UCraftingComponent::Server_CraftRecipe_Validate(FCraftingRecipe Recipe)
 
 void UCraftingComponent::Server_CraftRecipe_Implementation(FCraftingRecipe Recipe)
 {
-	if(AssociatedInputInventories.Num() == 0){UE_LOG(LogCraftingSystem,Warning,TEXT("No input inventory for crafting")) }
-	if (!CanRecipeBeCrafted(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Recipe can not be crafted")) return; }
-	if (!EnoughSpaceForCraftedRecipe(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Not enough space for output")) return; }
 
-	//Remove Input Items from Inventories;
-	TArray<FCraftingPart> Inputs;
-	TArray<bool> InputResults;
-	Inputs = Recipe.RecipeInputs;
+	if (bIsCrafting) { UE_LOG(LogCraftingSystem, Log, TEXT("Crafting in progress, please wait")) return; }
+	if (bRequiresFuelToCraft && bFuelIsBurning == false) {UE_LOG(LogCraftingSystem,Log,TEXT("Cannot craft without fuel burning")) }
 
-	for (int32 i = 0; i < Inputs.Num(); i++)
+
+	bool bItemsRemoved = false;
+	bItemsRemoved = Crafting_RemoveItems(Recipe);
+
+	if (bItemsRemoved == false) { UE_LOG(LogCraftingSystem, Log, TEXT("Failed to remove input items for %s"), *Recipe.DisplayName.ToString()) return; }
+
+	ActiveRecipe = Recipe;
+	bIsCrafting = true;
+
+	OnCraftStart(ActiveRecipe);
+	GetWorld()->GetTimerManager().SetTimer(CraftingTimer, this, &UCraftingComponent::FinalizeCraft, Recipe.DefaultCraftingTime, false);
+
+}
+
+void UCraftingComponent::FinalizeCraft()
+{
+	Crafting_AddOutputs(ActiveRecipe);
+	bIsCrafting = false;
+	OnCraftFinish();
+
+	if (bAutoCraftsWhenFueled && bFuelIsBurning)
 	{
-		FCraftingPart ActiveInput = Inputs[i];
-		UClass* InputClass = ActiveInput.InWorldActorClass.Get();
-		int32 InputAmount = ActiveInput.StackQuantity;
-		FItemData InputItemData;
+		StartAutoCrafting();
+	}
+}
 
-		GetItemDataFromClass(InputClass, InputItemData);
-	
+void UCraftingComponent::StartBuriningFuel()
+{
 
-		//Cycle through inventories until input amount is removed
-		for (int32 i_INV = 0; i_INV < AssociatedInputInventories.Num(); i_INV++)
+
+	if (IsFuelAvailable())
+	{
+		FCraftingFuel TargetFuel;
+
+		//Get target fuel
+		for (int32 i = 0; i < FuelTypes.Num(); i++)
 		{
-			UInventoryContainer* ActiveInventory = nullptr;
-			ActiveInventory = AssociatedInputInventories[i_INV];
-			if (ActiveInventory != nullptr)
+			if (CheckIfIngredientIsAvailable(FuelTypes[i].FuelIngredient))
 			{
-				int32 AmountRemoved;
-				ActiveInventory->RemoveQuantityOfItem(InputItemData, InputAmount, AmountRemoved);
-				InputAmount -= AmountRemoved;
-				if (InputAmount == 0) { break; }
+				TargetFuel = FuelTypes[i];
+				break;
 			}
 		}
 
-		if(InputAmount == 0)
-		{
-			InputResults.Add(true);
-		}
-		else
-		{
-
-			InputResults.Add(false);
-			UE_LOG(LogCraftingSystem,Warning,TEXT("%s input does not equal 0"),*InputItemData.DisplayName.ToString())
-		}
-	}
-
-	if(InputResults.Contains(false))
-	{ 
-		UE_LOG(LogCraftingSystem, Warning, TEXT("Not all inputs were succesfully removed from inventorys for *s"), *Recipe.DisplayName.ToString()) 
-		return;
+		BurnFuel(TargetFuel);
 	}
 	else
 	{
-		UE_LOG(LogCraftingSystem, Log, TEXT("Inputs succesfully used for %s receipe"), *Recipe.DisplayName.ToString())
+		StopBurningFuel();
 	}
 
 
-	//Add Output Items to Inventories;
-	TArray<FCraftingPart> Outputs;
-	TArray<bool> OutputResults;
-	Outputs = Recipe.RecipeOutputs;
-	
-	for (int32 i = 0; i < Outputs.Num(); i++)
+}
+
+void UCraftingComponent::BurnFuel(FCraftingFuel TargetFuel)
+{
+
+	//burn fuel removes fuel and then waits for it to burn
+
+	if (RemoveIngredientFromInventories(TargetFuel.FuelIngredient))
 	{
-		FCraftingPart ActiveOutput = Outputs[i];
-		UClass* OutputClass = ActiveOutput.InWorldActorClass.Get();
-		FItemData OutputItemData;
-		GetItemDataFromClass(OutputClass, OutputItemData);
-		OutputItemData.StackQuantity = ActiveOutput.StackQuantity;
 
-
-		for (int32 i_INV = 0; i_INV < AssociatedOutputInventories.Num(); i_INV++)
+		if (bFuelIsBurning == false)
 		{
-			UInventoryContainer* ActiveInventory = AssociatedOutputInventories[i_INV];
-			if (ActiveInventory != nullptr)
-			{
-				bool bWasFullyAdded;
-				FItemData LeftOverItemData;
-				ActiveInventory->BP_AutoAddItem(OutputItemData, bWasFullyAdded, LeftOverItemData);
-				if (bWasFullyAdded)
-				{
-					OutputItemData.StackQuantity = 0;
-					UE_LOG(LogCraftingSystem, Log, TEXT("Output Item %s succesfully created"), *OutputItemData.DisplayName.ToString())
-					break;
-				}
-				else
-				{
-					OutputItemData = LeftOverItemData;
-				
-				}
-			}
+			bFuelIsBurning = true;
+			OnFuelBurnStart();
 		}
 
-		if (OutputItemData.StackQuantity == 0)
-		{
-			OutputResults.Add(true);
+		UE_LOG(LogCraftingSystem, Log, TEXT("Fuel was burned"))
+		
+		if(bAutoCraftsWhenFueled)
+		{ 
+			StartAutoCrafting();
 		}
-		else
-		{
-			OutputResults.Add(false);
-			UE_LOG(LogCraftingSystem,Warning,TEXT("Could not fully create %s output"),*OutputItemData.DisplayName.ToString())
-		}
-	}
 
-	if (OutputResults.Contains(false))
-	{
-		UE_LOG(LogCraftingSystem,Warning,TEXT("Not all outputs could be created"))
+		//calls start burning fuel again
+		GetWorld()->GetTimerManager().SetTimer(FuelBurnTimer, this, &UCraftingComponent::StartBuriningFuel, TargetFuel.TimeToConsumeOne, false);
+
 	}
 	else
 	{
-		UE_LOG(LogCraftingSystem,Log,TEXT("Outputs succesfully created for %s receipe"), *Recipe.DisplayName.ToString())
+		UE_LOG(LogCraftingSystem,Warning,TEXT("Burn Fuel was given invalid fuel"))
+		StopBurningFuel();
 	}
 
 
+}
+
+void UCraftingComponent::StopBurningFuel()
+{
+	bFuelIsBurning = false;
+	OnFuelBurnStop();
+}
+
+bool UCraftingComponent::IsFuelAvailable()
+{
+	int32 TotalQtyFound = 0;
+	int32 OutQtyFound = 0;
+	TArray<bool> bFuelAvailable;
+
+	for (int32 i = 0; i < FuelTypes.Num(); i++)
+	{
+		bFuelAvailable.Add(CheckIfIngredientIsAvailable(FuelTypes[i].FuelIngredient));
+	}
+
+	if (bFuelAvailable.Contains(true))
+	{
+		bIsFuelAvailable = true;
+		return true;
+	}
+	else
+	{
+		bIsFuelAvailable = false;
+		return false;
+	}
+
+}
+
+void UCraftingComponent::StartAutoCrafting()
+{
+	FCraftingRecipe TargetRecipe;
+
+	if (bIsCrafting == true) { return; }
+
+	for (int32 i = 0; i < CraftableRecipes.Num(); i++)
+	{
+		if (CanRecipeBeCrafted(CraftableRecipes[i]))
+		{
+			TargetRecipe = CraftableRecipes[i];
+			break;
+		}
+	}
+	CraftRecipe(TargetRecipe);
 }
 
 bool UCraftingComponent::CanRecipeBeCrafted(FCraftingRecipe Recipe)
@@ -174,25 +205,7 @@ bool UCraftingComponent::CanRecipeBeCrafted(FCraftingRecipe Recipe)
 	//Go through each recipe input and check to see if there is enough ingredients;
 	for (int32 Index = 0; Index != Inputs.Num(); Index++)
 	{
-		FCraftingPart ActiveIngredient = Inputs[Index];
-		int32 QuantityNeeded = ActiveIngredient.StackQuantity;
-		int32 QuantityFound = 0;
-
-		GetTotalQuantityOfIngredient(ActiveIngredient, QuantityFound);
-		
-		FItemData ItemData;
-		GetItemDataFromClass(ActiveIngredient.InWorldActorClass, ItemData);
-		UE_LOG(LogCraftingSystem, Log, TEXT("%d of %s found"), QuantityFound, *ItemData.DisplayName.ToString())
-
-		//Check if enough of the active ingredent was found,
-		if (QuantityFound >= ActiveIngredient.StackQuantity)
-		{
-			EnoughIngredients.Add(true);
-		}
-		else
-		{
-			EnoughIngredients.Add(false);
-		}
+		EnoughIngredients.Add(CheckIfIngredientIsAvailable(Inputs[Index]));
 	}
 
 	// If there is not enough of one ingredient, return false
@@ -204,6 +217,31 @@ bool UCraftingComponent::CanRecipeBeCrafted(FCraftingRecipe Recipe)
 	{
 		return true;
 	}
+
+}
+
+
+bool UCraftingComponent::CheckIfIngredientIsAvailable(FCraftingPart Ingredient)
+{
+	FCraftingPart ActiveIngredient = Ingredient;
+	int32 QuantityNeeded = ActiveIngredient.StackQuantity;
+	int32 QuantityFound = 0;
+
+	GetTotalQuantityOfIngredient(ActiveIngredient, QuantityFound);
+
+	FItemData ItemData;
+	GetItemDataFromClass(ActiveIngredient.InWorldActorClass, ItemData);
+	UE_LOG(LogCraftingSystem, Log, TEXT("%d of %s found"), QuantityFound, *ItemData.DisplayName.ToString())
+
+		//Check if enough of the active ingredent was found,
+		if (QuantityFound >= ActiveIngredient.StackQuantity)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 
 }
 
@@ -319,6 +357,141 @@ bool UCraftingComponent::GetItemDataFromClass(UClass* Class, FItemData& OutItemD
 	return false;
 }
 
+bool UCraftingComponent::Crafting_RemoveItems(FCraftingRecipe Recipe)
+{
+	if (AssociatedInputInventories.Num() == 0) { UE_LOG(LogCraftingSystem, Warning, TEXT("No input inventory for crafting")) }
+	if (!CanRecipeBeCrafted(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Recipe can not be crafted")) return false; }
+	if (!EnoughSpaceForCraftedRecipe(Recipe)) { UE_LOG(LogCraftingSystem, Log, TEXT("Not enough space for output")) return false; }
+
+	//Remove Input Items from Inventories;
+	TArray<FCraftingPart> Inputs;
+	TArray<bool> InputResults;
+	Inputs = Recipe.RecipeInputs;
+
+	for (int32 i = 0; i < Inputs.Num(); i++)
+	{
+		InputResults.Add(RemoveIngredientFromInventories(Inputs[i]));
+	}
+
+	if (InputResults.Contains(false))
+	{
+		UE_LOG(LogCraftingSystem, Warning, TEXT("Not all inputs were succesfully removed from inventorys for *s"), *Recipe.DisplayName.ToString())
+			return false;
+	}
+	else
+	{
+		UE_LOG(LogCraftingSystem, Log, TEXT("Inputs succesfully used for %s receipe"), *Recipe.DisplayName.ToString())
+		return true;
+	}
+	
+	
+	return false;
+}
+
+bool UCraftingComponent::RemoveIngredientFromInventories(FCraftingPart Ingredient)
+{
+	FCraftingPart ActiveInput = Ingredient;
+	UClass* InputClass = ActiveInput.InWorldActorClass.Get();
+	int32 InputAmount = ActiveInput.StackQuantity;
+	FItemData InputItemData;
+
+	GetItemDataFromClass(InputClass, InputItemData);
+
+
+	//Cycle through inventories until input amount is removed
+	for (int32 i_INV = 0; i_INV < AssociatedInputInventories.Num(); i_INV++)
+	{
+		UInventoryContainer* ActiveInventory = nullptr;
+		ActiveInventory = AssociatedInputInventories[i_INV];
+		if (ActiveInventory != nullptr)
+		{
+			int32 AmountRemoved;
+			ActiveInventory->RemoveQuantityOfItem(InputItemData, InputAmount, AmountRemoved);
+			InputAmount -= AmountRemoved;
+			if (InputAmount == 0) { break; }
+		}
+	}
+
+	if (InputAmount == 0)
+	{
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogCraftingSystem, Warning, TEXT("%s input does not equal 0"), *InputItemData.DisplayName.ToString())
+		return false;
+		}
+
+
+	return false;
+}
+
+
+
+void UCraftingComponent::Crafting_AddOutputs(FCraftingRecipe Recipe)
+{
+
+	//Add Output Items to Inventories;
+	TArray<FCraftingPart> Outputs;
+	TArray<bool> OutputResults;
+	Outputs = Recipe.RecipeOutputs;
+
+	for (int32 i = 0; i < Outputs.Num(); i++)
+	{
+		FCraftingPart ActiveOutput = Outputs[i];
+		UClass* OutputClass = ActiveOutput.InWorldActorClass.Get();
+		FItemData OutputItemData;
+		GetItemDataFromClass(OutputClass, OutputItemData);
+		OutputItemData.StackQuantity = ActiveOutput.StackQuantity;
+
+
+		for (int32 i_INV = 0; i_INV < AssociatedOutputInventories.Num(); i_INV++)
+		{
+			UInventoryContainer* ActiveInventory = AssociatedOutputInventories[i_INV];
+			if (ActiveInventory != nullptr)
+			{
+				bool bWasFullyAdded;
+				FItemData LeftOverItemData;
+				ActiveInventory->BP_AutoAddItem(OutputItemData, bWasFullyAdded, LeftOverItemData);
+				if (bWasFullyAdded)
+				{
+					OutputItemData.StackQuantity = 0;
+					UE_LOG(LogCraftingSystem, Log, TEXT("Output Item %s succesfully created"), *OutputItemData.DisplayName.ToString())
+						break;
+				}
+				else
+				{
+					OutputItemData = LeftOverItemData;
+
+				}
+			}
+		}
+
+		if (OutputItemData.StackQuantity == 0)
+		{
+			OutputResults.Add(true);
+		}
+		else
+		{
+			OutputResults.Add(false);
+			UE_LOG(LogCraftingSystem, Warning, TEXT("Could not fully create %s output"), *OutputItemData.DisplayName.ToString())
+		}
+	}
+
+	if (OutputResults.Contains(false))
+	{
+		UE_LOG(LogCraftingSystem, Warning, TEXT("Not all outputs could be created"))
+	}
+	else
+	{
+		UE_LOG(LogCraftingSystem, Log, TEXT("Outputs succesfully created for %s receipe"), *Recipe.DisplayName.ToString())
+	}
+
+	return;
+}
+
+
+
 void UCraftingComponent::GetQuantityOfIngredientFromInventory(FCraftingPart Ingredient, UInventoryContainer* TargetInventory, int32& OutQuantityFound)
 {
 	OutQuantityFound = 0;
@@ -388,4 +561,6 @@ bool UCraftingComponent::IsItemPartOfRecipe(FItemData Item, FCraftingRecipe Reci
 
 	return false;
 }
+
+
 

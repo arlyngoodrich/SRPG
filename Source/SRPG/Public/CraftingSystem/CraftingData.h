@@ -21,6 +21,19 @@ struct FCraftingPart
 
 };
 
+USTRUCT(BlueprintType)
+struct FCraftingFuel
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fuel Info")
+	FCraftingPart FuelIngredient;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fuel Info")
+	float TimeToConsumeOne = 1.f;
+
+};
+
 UENUM(BlueprintType)
 enum class ERecipeCategory : uint8 {
 
@@ -81,5 +94,8 @@ struct FCraftingRecipe : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe Info")
 	TArray<FCraftingPart> RecipeOutputs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe Info")
+	float DefaultCraftingTime = 1.f;
 
 };
