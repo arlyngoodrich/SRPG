@@ -32,6 +32,9 @@ enum class EBuildingTypes : uint8 {
 	BTE_Stair			UMETA(DisplayName = "Stair"),
 	BTE_RoofCornerOut	UMETA(DisplayName = "Roof Corner Out"),
 	BTE_RoofCornerIn	UMETA(DisplayName = "Roof Corner In"),
+	BTE_Fireplace		UMETA(DisplayName = "Fireplace"),
+	BTE_Field			UMETA(DisplayName = "Field"),
+	BTE_Crop			UMETA(DisplayName = "Crop"),
 };
 
 
