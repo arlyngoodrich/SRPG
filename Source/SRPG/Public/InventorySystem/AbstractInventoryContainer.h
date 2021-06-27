@@ -18,10 +18,13 @@ class SRPG_API UAbstractInventoryContainer : public UObject
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory Data")
-	void SetInventory(TArray<FInventoryData> NewInventory);
+	void SetInventory(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory Data")
-	TArray<FInventoryData> GetInventory();
+	void GetInventory(TArray<FInventoryData>& OutInventory, int32& OutAbstractInventoryPairID);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory Data")
+	int32 Abstract_AbstractInventoryPairID;
 
 protected:
 	UPROPERTY()

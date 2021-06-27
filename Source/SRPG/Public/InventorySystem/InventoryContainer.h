@@ -76,10 +76,13 @@ public:
 	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory);
+	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	TArray<FInventoryData> GetInventoryForAbstract();
+	void GetInventoryForAbstract(TArray<FInventoryData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 Inventory_AbstractInventoryPairID;
 
 protected:
 	//Blueprint server functions

@@ -307,9 +307,10 @@ void UInventoryContainer::BP_SplitStack(FItemData OriginalItem, int32 PositionX,
 	}
 }
 
-void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory)
+void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID)
 {
 	Inventory = NewInventory;
+	Inventory_AbstractInventoryPairID = NewAbstractInventoryPairID;
 	RefreshSlotOccupancy();
 	Client_InventoryUpdate();
 	Internal_OnInventoryUpdate();
@@ -317,10 +318,13 @@ void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInv
 	UE_LOG(LogInventorySystem,Log,TEXT("Inventory overwritten from abstract"))
 }
 
-TArray<FInventoryData> UInventoryContainer::GetInventoryForAbstract()
+void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryData>& OutInventoryData, int32& OutAbstractInventoryPairID)
 {
-	return Inventory;
+	OutInventoryData = Inventory;
+	OutAbstractInventoryPairID = Inventory_AbstractInventoryPairID;
 }
+
+
 
 bool UInventoryContainer::Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount)
 {

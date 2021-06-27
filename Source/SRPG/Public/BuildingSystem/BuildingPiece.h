@@ -23,7 +23,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingTypes BuildingType;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+	UPROPERTY(SaveGame, Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingPieceStatus BuildStatus;
 
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
@@ -58,6 +58,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintAuthorityOnly, Category = "Building System", DisplayName = "Build Status Changed to Built")
 	void BP_OnBuildStatusChangeToBuilt();
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Building System")
+	void SetBuildStatusFromLoad(EBuildingPieceStatus LoadedBuildStatus);
 
 private:
 	void UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus);

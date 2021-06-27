@@ -65,6 +65,26 @@ void ABuildingPiece::BP_IncreaseConnectionLevel(EBuildingConnectionLevel InConne
 
 
 
+void ABuildingPiece::SetBuildStatusFromLoad(EBuildingPieceStatus LoadedBuildStatus)
+{
+	BuildStatus = LoadedBuildStatus;
+
+	switch (BuildStatus)
+	{
+	case EBuildingPieceStatus::BPSE_Spawning:
+		break;
+	case EBuildingPieceStatus::BPSE_Set:
+		BP_OnBuildStatusChangeToSet();
+		break;
+	case EBuildingPieceStatus::BPSE_FullyBuilt:
+		BP_OnBuildStatusChangeToBuilt();
+		break;
+	default:
+		break;
+	}
+
+}
+
 void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 {
 		
