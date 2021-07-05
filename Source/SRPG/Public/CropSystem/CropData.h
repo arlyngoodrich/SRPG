@@ -53,6 +53,17 @@ enum class EHealthState : uint8 {
 };
 
 
+UENUM(BlueprintType)
+enum class EGeneType : uint8 {
+
+	EGT_A		UMETA(DisplayName = "A"),
+	EGT_B		UMETA(DisplayName = "B"),
+	EGT_C		UMETA(DisplayName = "C"),
+	EGT_D		UMETA(DisplayName = "D"),
+	EGT_E		UMETA(DisplayName = "E"),
+};
+
+
 USTRUCT(BlueprintType)
 struct FWaterData
 {
@@ -78,13 +89,10 @@ struct FWaterData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
 	float TargetWaterZoneLow;
 
-	//Damage per day caused by water level being above Max Water.  
+	//Damage per day caused by water level being above Max Water or below Min Water. 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float HighWaterDamage;
+	float WaterDamage;
 
-	//Damage per day caused by water level being below Min Water.  
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float LowWaterDamage;
 };
 
 USTRUCT(BlueprintType)
@@ -128,13 +136,10 @@ struct FTempData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
 	float TargetTempZoneLow;
 
-	//Damage per day caused by temperture being above Max Temp
+	//Damage per day caused by temperture being above Max Temp or below Min Temp.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float HighTempDamage;
+	float TempDamage;
 
-	//Damage per day caused by temperture being below Min Temp
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float LowTempDamage;
 };
 
 
@@ -164,29 +169,86 @@ struct FCropGrowthData
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		class UStaticMesh* GrowthLevelMesh;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	class UStaticMesh* GrowthLevelMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		int32 DaysToNextGrowthLevel;
+	int32 DaysToNextGrowthLevel;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		float WaterConsumptionPerDay;
+	float WaterConsumptionPerDay;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		float MaxHealth;
+	float MaxHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		TArray<FCropYieldData> WinterYield;
+	FWaterData WaterData;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	FFertilizerData FertilizerData;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	FTempData TempData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		TArray<FCropYieldData> SpringYield;
+	TArray<FCropYieldData> WinterYield;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		TArray<FCropYieldData> SummerYield;
+	TArray<FCropYieldData> SpringYield;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-		TArray<FCropYieldData> FallYield;
+	TArray<FCropYieldData> SummerYield;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	TArray<FCropYieldData> FallYield;
+};
+
+
+USTRUCT(BlueprintType)
+struct FGeneData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	EGeneType ActiveGene;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	EGeneType Gene_1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	EGeneType Gene_2;
 
 };
 
+
+
+USTRUCT(BlueprintType)
+struct FCropGeneData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData TargetWaterZone;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData WaterDamage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData TargetFertilizerZone;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData TargetTempZone;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData TempDamage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData HarvestYield;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData SeedYield;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
+	FGeneData GrowthRate;
+
+};
