@@ -18,6 +18,27 @@ public:
 	// Sets default values for this actor's properties
 	ACrop();
 
+	//Blueprint Accessor Functions
+	
+	
+	UFUNCTION(BlueprintCallable, Category = "Crop Data", meta = (DisplayName = "Get Random Gene Set"))
+	FCropGeneData BP_GetRandomGeneSet();
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "Set Genes"))
+	void BP_SetGenes(FCropGeneData NewGenes);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "Set Growth Stage"))
+	void BP_SetGrowhtStage(EGrowthState NewGrowthState);
+
+	//GetCropData
+	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Growth Data"))
+	FCropGrowthData GetCropData();
+
+	//GetGeneData
+	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Gene Data"))
+	FCropGeneData GetGeneData();
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -72,13 +93,21 @@ protected:
 
 	float CalculateGeneEffect(EGeneType ActiveGene);
 
-	EGeneType SetActiveGene(EGeneType Gene1, EGeneType Gene2);
+	void GetCrossbredSeedGeneticData(FCropGeneData PartnerGeneData, FCropGeneData& OutGeneticData);
+
+	void CreateRandomGeneDataSet(FCropGeneData& OutRandomGeneDataSet);
+
+	FGeneData CreateRandomeGene();
+
+	EGeneType ConvertIntToGene(int32 GeneInt);
+
+	FGeneData GetNewGene(FGeneData GenePairA, FGeneData GenePairB);
 
 	void ApplyGrowthStage(FCropGrowthData NewGrowthStageData, EGrowthState NewGrowthState);
 
 	void SetGrowthStage(EGrowthState NewGrowthState);
 
-	void ModifyYieldData(float YieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData);
+	void ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData);
 
 	void CalculateHighLowRanges(float GeneticEffect, float& OutHighModifer, float& OutLowModifer);
 

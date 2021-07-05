@@ -15,6 +15,34 @@ ACrop::ACrop()
 
 }
 
+FCropGeneData ACrop::BP_GetRandomGeneSet()
+{
+	FCropGeneData OutGeneData;
+	CreateRandomGeneDataSet(OutGeneData);
+
+	return OutGeneData;
+}
+
+void ACrop::BP_SetGenes(FCropGeneData NewGenes)
+{
+	GeneticData = NewGenes;
+}
+
+void ACrop::BP_SetGrowhtStage(EGrowthState NewGrowthState)
+{
+	SetGrowthStage(NewGrowthState);
+}
+
+FCropGrowthData ACrop::GetCropData()
+{
+	return CurrentGrowthData;
+}
+
+FCropGeneData ACrop::GetGeneData()
+{
+	return GeneticData;
+}
+
 // Called when the game starts or when spawned
 void ACrop::BeginPlay()
 {
@@ -68,27 +96,185 @@ float ACrop::CalculateGeneEffect(EGeneType ActiveGene)
 	return 0.0f;
 }
 
-EGeneType ACrop::SetActiveGene(EGeneType Gene1, EGeneType Gene2)
-{
-	EGeneType ActiveGene;
 
-	if (Gene1 >= Gene2)
+
+void ACrop::GetCrossbredSeedGeneticData(FCropGeneData PartnerGeneData, FCropGeneData& OutGeneticData)
+{
+	OutGeneticData = GeneticData;
+
+	OutGeneticData.GrowthRate = GetNewGene(GeneticData.GrowthRate, PartnerGeneData.GrowthRate);
+	OutGeneticData.HarvestYield = GetNewGene(GeneticData.HarvestYield, PartnerGeneData.HarvestYield);
+	OutGeneticData.SeedYield = GetNewGene(GeneticData.SeedYield, PartnerGeneData.SeedYield);
+	OutGeneticData.TargetFertilizerZone = GetNewGene(GeneticData.TargetFertilizerZone, PartnerGeneData.TargetFertilizerZone);
+	OutGeneticData.TargetTempZone = GetNewGene(GeneticData.TargetTempZone, PartnerGeneData.TargetTempZone);
+	OutGeneticData.TargetWaterZone = GetNewGene(GeneticData.TargetWaterZone, PartnerGeneData.TargetWaterZone);
+	OutGeneticData.TempDamage = GetNewGene(GeneticData.TempDamage, PartnerGeneData.TempDamage);
+	OutGeneticData.WaterDamage = GetNewGene(GeneticData.WaterDamage, PartnerGeneData.WaterDamage);
+}
+
+void ACrop::CreateRandomGeneDataSet(FCropGeneData& OutRandomGeneDataSet)
+{
+	OutRandomGeneDataSet.GrowthRate = CreateRandomeGene();
+	OutRandomGeneDataSet.HarvestYield = CreateRandomeGene();
+	OutRandomGeneDataSet.SeedYield = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetFertilizerZone = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetTempZone = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetWaterZone = CreateRandomeGene();
+	OutRandomGeneDataSet.TempDamage = CreateRandomeGene();
+	OutRandomGeneDataSet.WaterDamage = CreateRandomeGene();
+}
+
+FGeneData ACrop::CreateRandomeGene()
+{
+
+	int32 RandomGeneType1;
+	int32 RandomeGeneType2;
+
+	FGeneData OutRandomeGene;
+
+	RandomGeneType1 = FMath::RandRange(1, 5);
+	RandomeGeneType2 = FMath::RandRange(1, 5);
+
+	if (RandomGeneType1 >= RandomeGeneType2)
 	{
-		ActiveGene = Gene1;
+		OutRandomeGene.ActiveGene = ConvertIntToGene(RandomeGeneType2);
+		OutRandomeGene.RecessiveGene = ConvertIntToGene(RandomGeneType1);
 	}
 	else
 	{
-		ActiveGene = Gene2;
+		OutRandomeGene.ActiveGene = ConvertIntToGene(RandomGeneType1);
+		OutRandomeGene.RecessiveGene = ConvertIntToGene(RandomeGeneType2);
 	}
 
-	return ActiveGene;
+	return OutRandomeGene;
 }
+
+EGeneType ACrop::ConvertIntToGene(int32 GeneInt)
+{
+	EGeneType GeneType;
+
+	switch (GeneInt)
+	{
+		case(1):
+			GeneType = EGeneType::EGT_A;
+			break;
+		case(2):
+			GeneType = EGeneType::EGT_B;
+			break;
+		case(3):
+			GeneType = EGeneType::EGT_C;
+			break;
+		case(4):
+			GeneType = EGeneType::EGT_D;
+			break;
+		case(5):
+			GeneType = EGeneType::EGT_E;
+			break;
+	default:
+		break;
+	}
+
+	return GeneType;
+}
+
+FGeneData ACrop::GetNewGene(FGeneData GenePairA, FGeneData GenePairB)
+{
+
+	EGeneType GenePairA_Dominate;
+	EGeneType GenePairA_Recessive;
+
+	EGeneType GenePairB_Dominate;
+	EGeneType GenePairB_Recessive;
+
+	FGeneData NewGene;
+
+	GenePairA_Dominate = GenePairA.ActiveGene;
+	GenePairA_Recessive = GenePairA.RecessiveGene;
+
+	GenePairB_Dominate = GenePairB.ActiveGene;
+	GenePairB_Recessive = GenePairB.RecessiveGene;
+
+	int32 i = FMath::RandRange(1,4);
+
+	switch (i)
+	{
+	case(1):
+
+		if (GenePairA_Dominate >= GenePairB_Dominate)
+		{
+			NewGene.ActiveGene = GenePairB_Dominate;
+			NewGene.RecessiveGene = GenePairA_Dominate;
+		}
+		else
+		{
+			NewGene.ActiveGene = GenePairA_Dominate;
+			NewGene.RecessiveGene = GenePairB_Dominate;
+		}
+
+		break;
+	case(2):
+
+		if (GenePairA_Dominate >= GenePairB_Recessive)
+		{
+			NewGene.ActiveGene = GenePairB_Recessive;
+			NewGene.RecessiveGene = GenePairA_Dominate;
+		}
+		else
+		{
+			NewGene.ActiveGene = GenePairA_Dominate;
+			NewGene.RecessiveGene = GenePairB_Recessive;
+		}
+
+		break;
+	case(3):
+
+		if (GenePairA_Recessive >= GenePairB_Dominate)
+		{
+			NewGene.ActiveGene = GenePairB_Dominate;
+			NewGene.RecessiveGene = GenePairA_Recessive;
+		}
+		else
+		{
+			NewGene.ActiveGene = GenePairA_Recessive;
+			NewGene.RecessiveGene = GenePairB_Dominate;
+		}
+
+
+		break;
+	case(4):
+
+		if (GenePairA_Recessive >= GenePairB_Recessive)
+		{
+			NewGene.ActiveGene = GenePairB_Recessive;
+			NewGene.RecessiveGene = GenePairA_Recessive;
+		}
+		else
+		{
+			NewGene.ActiveGene = GenePairA_Recessive;
+			NewGene.RecessiveGene = GenePairB_Recessive;
+		}
+
+		break;
+	default:
+		break;
+	}
+	
+
+	return NewGene;
+}
+
+
 
 void ACrop::ApplyGrowthStage(FCropGrowthData NewGrowthStageData, EGrowthState NewGrowthState)
 {
-	CropMesh->SetStaticMesh(NewGrowthStageData.GrowthLevelMesh);
-	CurrentGrowthData = NewGrowthStageData;
-	DaysToNextGrowthLevel = NewGrowthStageData.DaysToNextGrowthLevel;
+
+	FCropGrowthData ModifiedGrowthData;
+
+	ApplyGeneticEffect(NewGrowthStageData, ModifiedGrowthData);
+
+	CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
+	CurrentGrowthData = ModifiedGrowthData;
+	DaysToNextGrowthLevel = ModifiedGrowthData.DaysToNextGrowthLevel;
 	//TODO add UI and client notify
 }
 
@@ -111,7 +297,7 @@ void ACrop::SetGrowthStage(EGrowthState NewGrowthState)
 
 }
 
-void ACrop::ModifyYieldData(float YieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData)
+void ACrop::ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData)
 {
 	for (int32 i = 0; i < CropYieldData.Num(); i++)
 	{
@@ -120,6 +306,7 @@ void ACrop::ModifyYieldData(float YieldModifer, TArray<FCropYieldData> CropYield
 
 		NewYield.MaxYield = CropYieldData[i].MaxYield * YieldModifer;
 		NewYield.MinYield = CropYieldData[i].MinYield * YieldModifer;
+		NewYield.SeedYield = CropYieldData[i].SeedYield * SeedYieldModifer;
 
 		OutNewYieldData.Add(NewYield);
 	}
@@ -139,10 +326,10 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
 
 	//Update Yeilds
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), NewGrowthData.FallYield, OutModifiedGrowthData.FallYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), NewGrowthData.SpringYield, OutModifiedGrowthData.SpringYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), NewGrowthData.WinterYield, OutModifiedGrowthData.WinterYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), NewGrowthData.SummerYield, OutModifiedGrowthData.SummerYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.FallYield, OutModifiedGrowthData.FallYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.SpringYield, OutModifiedGrowthData.SpringYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.WinterYield, OutModifiedGrowthData.WinterYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.SummerYield, OutModifiedGrowthData.SummerYield);
 
 
 	//Fertilizer

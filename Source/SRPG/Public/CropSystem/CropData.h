@@ -155,11 +155,19 @@ struct FCropYieldData
 
 	//Max amount of item possible when harvested by player
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Yield Data")
-	float MinYield;
+	int32 MinYield;
 
 	//Min amount of item possible when harvested by player
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Yield Data")
-	float MaxYield;
+	int32 MaxYield;
+
+	//Item that will be created when harvested by player
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Yield Data")
+	TSubclassOf <class AItemBase> SeedYieldItem;
+
+	//Min amount of item possible when harvested by player
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Yield Data")
+	int32 SeedYield;
 
 };
 
@@ -213,10 +221,7 @@ struct FGeneData
 	EGeneType ActiveGene;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
-	EGeneType Gene_1;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Gene Data")
-	EGeneType Gene_2;
+	EGeneType RecessiveGene;
 
 };
 
