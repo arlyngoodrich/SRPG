@@ -272,7 +272,8 @@ void ACrop::ApplyGrowthStage(FCropGrowthData NewGrowthStageData, EGrowthState Ne
 
 	ApplyGeneticEffect(NewGrowthStageData, ModifiedGrowthData);
 
-	CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
+	//CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
+	//CropMesh->SetWorldScale3D(ModifiedGrowthData.Scale);
 	CurrentGrowthData = ModifiedGrowthData;
 	DaysToNextGrowthLevel = ModifiedGrowthData.DaysToNextGrowthLevel;
 	//TODO add UI and client notify
@@ -323,7 +324,8 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 {
 	OutModifiedGrowthData = NewGrowthData;
 
-	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
+	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * ( 2 - CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene));
+	OutModifiedGrowthData.Scale = NewGrowthData.Scale * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
 
 	//Update Yeilds
 	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.FallYield, OutModifiedGrowthData.FallYield);
@@ -358,7 +360,6 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 	OutModifiedGrowthData.TempData.MinTemp = NewGrowthData.TempData.MinTemp * TempModiferLow;
 	OutModifiedGrowthData.TempData.TempDamage = NewGrowthData.TempData.TempDamage * CalculateGeneEffect(GeneticData.TempDamage.ActiveGene);
 
-	//TODO Seed Yeild?
 }
 
 

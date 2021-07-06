@@ -539,7 +539,7 @@ void UPlayerEquipmentManager::CreateAbstractFromInventory(UInventoryContainer* T
 		UAbstractInventoryContainer* AbstractInvetory = nullptr;
 		AbstractInvetory = NewObject<UAbstractInventoryContainer>();
 		
-		TArray<FInventoryData>  NewInventory;
+		TArray<FInventoryItemData>  NewInventory;
 		int32 NewInventoryPaidID;
 
 		TargetInventory->GetInventoryForAbstract(NewInventory, NewInventoryPaidID);

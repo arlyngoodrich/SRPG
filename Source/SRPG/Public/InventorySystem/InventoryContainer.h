@@ -11,18 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
 
-USTRUCT(BlueprintType)
-struct FInventoryData
-{
-	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-	FItemData ItemData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-	FVector2D Position;
-
-};
 
 
 UCLASS(ClassGroup = (Inventory), blueprintable, meta = (BlueprintSpawnableComponent))
@@ -76,10 +65,10 @@ public:
 	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID);
+	void SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	void GetInventoryForAbstract(TArray<FInventoryData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
+	void GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	int32 Inventory_AbstractInventoryPairID;
@@ -184,7 +173,7 @@ protected:
 	TArray<bool> bIsSlotOccupied;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
-	TArray<FInventoryData> Inventory;
+	TArray<FInventoryItemData> Inventory;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
 	float MaxWeight;

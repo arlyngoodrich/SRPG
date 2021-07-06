@@ -35,6 +35,8 @@ enum class EItemType : uint8 {
 };
 
 
+
+
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
@@ -121,7 +123,18 @@ struct FItemData : public FTableRowBase
 
 };
 
+USTRUCT(BlueprintType)
+struct FInventoryItemData
+{
+	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
+	FItemData ItemData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
+	FVector2D Position;
+
+};
 
 USTRUCT(BlueprintType)
 struct FEquipmentSlot

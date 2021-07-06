@@ -307,7 +307,7 @@ void UInventoryContainer::BP_SplitStack(FItemData OriginalItem, int32 PositionX,
 	}
 }
 
-void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID)
+void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID)
 {
 	Inventory = NewInventory;
 	Inventory_AbstractInventoryPairID = NewAbstractInventoryPairID;
@@ -318,7 +318,7 @@ void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInv
 	UE_LOG(LogInventorySystem,Log,TEXT("Inventory overwritten from abstract"))
 }
 
-void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryData>& OutInventoryData, int32& OutAbstractInventoryPairID)
+void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPairID)
 {
 	OutInventoryData = Inventory;
 	OutAbstractInventoryPairID = Inventory_AbstractInventoryPairID;
@@ -408,14 +408,14 @@ void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQu
 
 	TArray<int32> ItemIndexices;
 	FindAllItemIndexices(Item, ItemIndexices);
-	TArray<FInventoryData> InventoryDataToRemove;
+	TArray<FInventoryItemData> InventoryDataToRemove;
 
 	int32 QuantityNeeded = RequestedQuantity;
 
 	for (int32 i = 0; i < ItemIndexices.Num(); i++)
 	{
 		int32 ActiveItemIndex = ItemIndexices[i];
-		FInventoryData ActiveInventoryData = Inventory[ActiveItemIndex];
+		FInventoryItemData ActiveInventoryData = Inventory[ActiveItemIndex];
 
 		int32 ItemAmount;
 		ItemAmount = ActiveInventoryData.ItemData.StackQuantity;
@@ -569,7 +569,7 @@ bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bChec
 			//Set slots to occupied
 			SetSlotsAsOccupied(ItemData.SizeX, ItemData.SizeY, Position, true);
 
-			FInventoryData InventoryData;
+			FInventoryItemData InventoryData;
 			InventoryData.ItemData = ItemData;
 			InventoryData.Position = Position;
 

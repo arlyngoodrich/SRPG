@@ -4,13 +4,13 @@
 #include "InventorySystem/AbstractInventoryContainer.h"
 #include "LogFiles.h"
 
-void UAbstractInventoryContainer::SetInventory(TArray<FInventoryData> NewInventory, int32 NewAbstractInventoryPairID)
+void UAbstractInventoryContainer::SetInventory(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID)
 {
     Inventory = NewInventory;
     Abstract_AbstractInventoryPairID = NewAbstractInventoryPairID;
 }
 
-void UAbstractInventoryContainer::GetInventory(TArray<FInventoryData>& OutInventory, int32& OutAbstractInventoryPairID)
+void UAbstractInventoryContainer::GetInventory(TArray<FInventoryItemData>& OutInventory, int32& OutAbstractInventoryPairID)
 {
     OutInventory = Inventory;
     OutAbstractInventoryPairID = Abstract_AbstractInventoryPairID;

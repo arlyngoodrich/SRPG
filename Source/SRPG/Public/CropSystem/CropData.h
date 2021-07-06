@@ -181,6 +181,9 @@ struct FCropGrowthData
 	class UStaticMesh* GrowthLevelMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	FVector Scale = FVector(1,1,1);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
 	int32 DaysToNextGrowthLevel;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
