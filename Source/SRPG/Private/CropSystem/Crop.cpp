@@ -2,6 +2,7 @@
 
 
 #include "CropSystem/Crop.h"
+#include "LogFiles.h"
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
@@ -13,10 +14,8 @@ ACrop::ACrop()
 	CropMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CropMesh"));
 	RootComponent = CropMesh;
 	SetDefaultGrowthData();
+	bReplicates = true;
 }
-
-
-
 
 
 // Called when the game starts or when spawned
@@ -181,7 +180,7 @@ FCropSaveData ACrop::GetCropSaveData()
 	SaveData.SaveData_WaterState = WaterState;
 	SaveData.SaveData_TempState = TempState;
 	SaveData.SaveData_HealthState = HealthState;
-
+	
 	return SaveData;
 }
 
@@ -196,6 +195,8 @@ void ACrop::LoadCropSaveData(FCropSaveData SaveData)
 	WaterState = SaveData.SaveData_WaterState;
 	TempState = SaveData.SaveData_TempState;
 	HealthState = SaveData.SaveData_HealthState;
+
+	UE_LOG(LogCropSystem, Log, TEXT("Crop Data Loaded"))
 
 	ApplyGrowthStage(SaveData.SaveData_CurrentGrowthStateData, SaveData.SaveData_CurrentGrowthState);
 }
@@ -251,6 +252,8 @@ void ACrop::GetCrossbredSeedGeneticData(FCropGeneData PartnerGeneData, FCropGene
 	OutGeneticData.TargetWaterZone = GetNewGene(GeneticData.TargetWaterZone, PartnerGeneData.TargetWaterZone);
 	OutGeneticData.TempDamage = GetNewGene(GeneticData.TempDamage, PartnerGeneData.TempDamage);
 	OutGeneticData.WaterDamage = GetNewGene(GeneticData.WaterDamage, PartnerGeneData.WaterDamage);
+
+	UE_LOG(LogCropSystem, Log, TEXT("Calculated crossbred seed gene data"))
 }
 
 void ACrop::CreateRandomGeneDataSet(FCropGeneData& OutRandomGeneDataSet)
@@ -263,6 +266,8 @@ void ACrop::CreateRandomGeneDataSet(FCropGeneData& OutRandomGeneDataSet)
 	OutRandomGeneDataSet.TargetWaterZone = CreateRandomeGene();
 	OutRandomGeneDataSet.TempDamage = CreateRandomeGene();
 	OutRandomGeneDataSet.WaterDamage = CreateRandomeGene();
+
+	UE_LOG(LogCropSystem, Log, TEXT("Calculated random gene data set"))
 }
 
 FGeneData ACrop::CreateRandomeGene()
@@ -419,8 +424,13 @@ void ACrop::ApplyGrowthStage(FCropGrowthData NewGrowthStageData, EGrowthState Ne
 	CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
 	CropMesh->SetWorldScale3D(ModifiedGrowthData.Scale);
 	CurrentGrowthData = ModifiedGrowthData;
+	CurrentGrowthState = NewGrowthState;
 	DaysToNextGrowthLevel = ModifiedGrowthData.DaysToNextGrowthLevel;
-	//TODO add UI and client notify
+
+	UE_LOG(LogCropSystem, Log, TEXT("%s moved to new %s stage"), *GetName(), *StaticEnum<EGrowthState>()->GetValueAsString(NewGrowthState))
+
+	OnCropDataUpdate();
+
 }
 
 void ACrop::SetGrowthStage(EGrowthState NewGrowthState)
@@ -463,6 +473,7 @@ void ACrop::AdvanceDay(float PreviousDayAverageTemp)
 	//GetFertilizerState
 	FertilizerState = CalculateFertilizerState();
 
+	//GetHealthChange
 	float ChangeInHealth;
 	CalculateHealthChange(ChangeInHealth);
 
@@ -470,6 +481,11 @@ void ACrop::AdvanceDay(float PreviousDayAverageTemp)
 	float NewHealth;
 	NewHealth = FMath::Clamp(CurrentHealth + ChangeInHealth, 0.f, CurrentGrowthData.MaxHealth);
 	CurrentHealth = NewHealth;
+
+	UE_LOG(LogCropSystem, Log, TEXT("%s health changed %s. New health is: %s"), 
+		*GetName(), *FString::SanitizeFloat(ChangeInHealth), *FString::SanitizeFloat(CurrentHealth))
+
+	//TODO die if 0 health
 
 	//GetOverallState
 	HealthState = CalculateHealthState(ChangeInHealth);
@@ -486,7 +502,7 @@ void ACrop::AdvanceDay(float PreviousDayAverageTemp)
 				SetGrowthStage(EGrowthState::EGS_Middling);
 				break;
 			case EGrowthState::EGS_Middling:
-				SetGrowthStage(EGrowthState::EGS_Seedling);
+				SetGrowthStage(EGrowthState::EGS_Mature);
 				break;
 			case EGrowthState::EGS_Mature:
 				break;
@@ -497,6 +513,7 @@ void ACrop::AdvanceDay(float PreviousDayAverageTemp)
 		else
 		{
 			CurrentGrowthData.DaysToNextGrowthLevel -= 1;
+			OnCropDataUpdate();
 		}
 	}
 
@@ -509,6 +526,11 @@ void ACrop::AddWater(float WaterAmount)
 	NewWater = FMath::Clamp(CurrentWater + WaterAmount, 0.f, CurrentGrowthData.WaterData.WaterCap);
 	CurrentWater = NewWater;
 
+	OnWaterUpdate();
+
+	UE_LOG(LogCropSystem,Log,TEXT("%s water added to %s.  Current water is: %s"), 
+		*FString::SanitizeFloat(WaterAmount),*GetName(),*FString::SanitizeFloat(CurrentWater))
+
 }
 
 void ACrop::AddFertilizer(float FertilizerAmount)
@@ -516,6 +538,11 @@ void ACrop::AddFertilizer(float FertilizerAmount)
 	float NewFertilizer;
 	NewFertilizer = FMath::Clamp(CurrentFertilizer + FertilizerAmount, 0.f, CurrentGrowthData.FertilizerData.FertilizerCap);
 	CurrentFertilizer = NewFertilizer;
+
+	UE_LOG(LogCropSystem, Log, TEXT("%s fertililzer added to %s.  Current fertilizer is: %s"),
+		*FString::SanitizeFloat(FertilizerAmount), *GetName(), *FString::SanitizeFloat(CurrentFertilizer))
+
+	OnFertilizerUpdate();
 }
 
 
@@ -538,7 +565,6 @@ void ACrop::CalculateHighLowRanges(float GeneticEffect, float& OutHighModifer, f
 {
 	OutHighModifer = GeneticEffect;
 	OutLowModifer = 2 - GeneticEffect;
-
 }
 
 void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& OutModifiedGrowthData)

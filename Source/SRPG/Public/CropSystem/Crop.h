@@ -55,6 +55,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Gene Data"))
 	FCropGeneData GetGeneData();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crop Data")
+	void OnCropDataUpdate();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crop Data")
+	void OnWaterUpdate();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Crop Data")
+	void OnFertilizerUpdate();
 
 protected:
 	// Called when the game starts or when spawned
