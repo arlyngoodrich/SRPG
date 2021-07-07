@@ -71,27 +71,27 @@ struct FWaterData
 	
 	//Clamps the max amount of water a plant can hold
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float WaterCap;
+	float WaterCap = 100;
 	
 	//Max water tollerance for a plant. Will cause damage if water level is above this value.  Is clamped to not exceed max water
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float MatxWater;
+	float MatxWater = 90;
 
 	//Min water tollerance for a plant.  Will cause damage if water level goes below this value.  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float MinWater;
+	float MinWater = 20;
 
 	//High value of target zone for water.  A water level in the target zone will provide a buff to growth and yeild.  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float TargetWaterZoneHigh;
+	float TargetWaterZoneHigh= 80;
 
 	//Low value of target zone for water.  A water level in the target zone will provide a buff to growth and yeild. 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float TargetWaterZoneLow;
+	float TargetWaterZoneLow = 40;
 
 	//Damage per day caused by water level being above Max Water or below Min Water. 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Water Data", meta = (ClampMin = "0.0"))
-	float WaterDamage;
+	float WaterDamage = 20;
 
 };
 
@@ -102,15 +102,15 @@ struct FFertilizerData
 
 	//Clamps the max amount of fertilizer a plant can hold
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
-	float FertilizerCap;
+	float FertilizerCap = 100;
 
 	//High value of target zone for fertilizer. A fertilizer level in the target zone will provide a buff to growth and yeild
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
-	float TargetFertilizerZoneHigh;
+	float TargetFertilizerZoneHigh = 90;
 
 	//Low value of target zone for fertilizer. A fertilizer level in the target zone will provide a buff to growth and yeild
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
-	float TargetFertilzerZoneLow;
+	float TargetFertilzerZoneLow = 50;
 
 };
 
@@ -122,23 +122,23 @@ struct FTempData
 
 	//Max temperture tollerance for a plant. Will cause damage if temp level is above this value.  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float MaxTemp;
+	float MaxTemp = 35;
 
 	//Min temperture tollerance for a plant. Will cause damage if temp level is below this value.  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float MinTemp;
+	float MinTemp = 0;
 
 	//High value of target zone for temperture. A temp level in the target zone will provide a buff to growth and yeild 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float TargetTempZoneHigh;
+	float TargetTempZoneHigh = 30;
 
 	//Low value of target zone for temperture. A temp level in the target zone will provide a buff to growth and yeild 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float TargetTempZoneLow;
+	float TargetTempZoneLow = 20;
 
 	//Damage per day caused by temperture being above Max Temp or below Min Temp.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Temp Data", meta = (ClampMin = "0.0"))
-	float TempDamage;
+	float TempDamage = 20;
 
 };
 
@@ -184,13 +184,13 @@ struct FCropGrowthData
 	FVector Scale = FVector(1,1,1);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-	int32 DaysToNextGrowthLevel;
+	int32 DaysToNextGrowthLevel = 7;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-	float WaterConsumptionPerDay;
+	float WaterConsumptionPerDay = 5;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
-	float MaxHealth;
+	float MaxHealth = 100;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
 	FWaterData WaterData;
@@ -260,3 +260,37 @@ struct FCropGeneData
 	FGeneData GrowthRate;
 
 };
+
+
+
+USTRUCT(BlueprintType)
+struct FCropSaveData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	float SaveData_CurrentWater;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	float SaveData_CurrentFertilizer;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	float SaveData_CurrentTemp;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	float SaveData_CurrentHealth;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	int32 SaveData_DaysToNextGrowthLevel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	EGrowthState SaveData_CurrentGrowthState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	FCropGrowthData SaveData_CurrentGrowthStateData;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	FCropGeneData SaveData_GeneticData;
+
+};
+

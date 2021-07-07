@@ -12,6 +12,124 @@ ACrop::ACrop()
 {
 	CropMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CropMesh"));
 	RootComponent = CropMesh;
+	SetDefaultGrowthData();
+}
+
+
+
+
+
+// Called when the game starts or when spawned
+void ACrop::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (bRandomizeGenesAtBeginPlay)
+	{
+		CreateRandomGeneDataSet(GeneticData);
+	}
+
+	SetGrowthStage(EGrowthState::EGS_Seedling);
+}
+
+
+void ACrop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimeProps) const
+{
+
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACrop, CurrentWater);
+	DOREPLIFETIME(ACrop, CurrentFertilizer);
+	DOREPLIFETIME(ACrop, CurrentTemp);
+	DOREPLIFETIME(ACrop, CurrentHealth);
+	DOREPLIFETIME(ACrop, SeedlingGrowthData);
+	DOREPLIFETIME(ACrop, MiddlingGrowthData);
+	DOREPLIFETIME(ACrop, MatureGrowthData);
+	DOREPLIFETIME(ACrop, GeneticData);
+	DOREPLIFETIME(ACrop, DaysToNextGrowthLevel);
+	DOREPLIFETIME(ACrop, CurrentGrowthState);
+	DOREPLIFETIME(ACrop, CurrentGrowthData);
+	DOREPLIFETIME(ACrop, bRandomizeGenesAtBeginPlay);
+}
+
+
+
+void ACrop::SetDefaultGrowthData()
+{
+	//Seedling Growth Defaults---------//
+	SeedlingGrowthData.DaysToNextGrowthLevel = 5;
+	SeedlingGrowthData.MaxHealth = 20;
+
+	//Fertilizer Defaults
+	SeedlingGrowthData.FertilizerData.FertilizerCap = 20;
+	SeedlingGrowthData.FertilizerData.TargetFertilizerZoneHigh = 15;
+	SeedlingGrowthData.FertilizerData.TargetFertilzerZoneLow = 5;
+
+	//Temp Defaults
+	SeedlingGrowthData.TempData.MaxTemp = 25;
+	SeedlingGrowthData.TempData.MinTemp = 0;
+	SeedlingGrowthData.TempData.TargetTempZoneHigh = 20;
+	SeedlingGrowthData.TempData.TargetTempZoneLow = 10;
+	SeedlingGrowthData.TempData.TempDamage = 10;
+
+	//Water Defaults
+	SeedlingGrowthData.WaterConsumptionPerDay = 5;
+	SeedlingGrowthData.WaterData.WaterCap = 25;
+	SeedlingGrowthData.WaterData.MatxWater = 20;
+	SeedlingGrowthData.WaterData.MinWater = 5;
+	SeedlingGrowthData.WaterData.TargetWaterZoneHigh = 18;
+	SeedlingGrowthData.WaterData.TargetWaterZoneLow = 6;
+	SeedlingGrowthData.WaterData.WaterDamage = 2;
+
+	//Middling Growth Defaults ---------//
+	MiddlingGrowthData.DaysToNextGrowthLevel = 7;
+	MiddlingGrowthData.MaxHealth = 50;
+
+	//Fertilizer Defaults
+	MiddlingGrowthData.FertilizerData.FertilizerCap = 50;
+	MiddlingGrowthData.FertilizerData.TargetFertilizerZoneHigh = 35;
+	MiddlingGrowthData.FertilizerData.TargetFertilzerZoneLow = 15;
+
+	//Temp Defaults
+	MiddlingGrowthData.TempData.MaxTemp = 35;
+	MiddlingGrowthData.TempData.MinTemp = 0;
+	MiddlingGrowthData.TempData.TargetTempZoneHigh = 25;
+	MiddlingGrowthData.TempData.TargetTempZoneLow = 10;
+	MiddlingGrowthData.TempData.TempDamage = 10;
+
+	//Water Defaults
+	MiddlingGrowthData.WaterConsumptionPerDay = 10;
+	MiddlingGrowthData.WaterData.WaterCap = 50;
+	MiddlingGrowthData.WaterData.MatxWater = 40;
+	MiddlingGrowthData.WaterData.MinWater = 10;
+	MiddlingGrowthData.WaterData.TargetWaterZoneHigh = 30;
+	MiddlingGrowthData.WaterData.TargetWaterZoneLow = 15;
+	MiddlingGrowthData.WaterData.WaterDamage = 5;
+
+	//Mature Growth Defaults ---------//
+	MatureGrowthData.DaysToNextGrowthLevel = 7;
+	MatureGrowthData.MaxHealth = 100;
+
+	//Fertilizer Defaults
+	MatureGrowthData.FertilizerData.FertilizerCap = 100;
+	MatureGrowthData.FertilizerData.TargetFertilizerZoneHigh = 75;
+	MatureGrowthData.FertilizerData.TargetFertilzerZoneLow = 25;
+
+	//Temp Defaults
+	MatureGrowthData.TempData.MaxTemp = 35;
+	MatureGrowthData.TempData.MinTemp = 0;
+	MatureGrowthData.TempData.TargetTempZoneHigh = 25;
+	MatureGrowthData.TempData.TargetTempZoneLow = 10;
+	MatureGrowthData.TempData.TempDamage = 10;
+
+	//Water Defaults
+	MatureGrowthData.WaterConsumptionPerDay = 15;
+	MatureGrowthData.WaterData.WaterCap = 100;
+	MatureGrowthData.WaterData.MatxWater = 80;
+	MatureGrowthData.WaterData.MinWater = 10;
+	MatureGrowthData.WaterData.TargetWaterZoneHigh = 60;
+	MatureGrowthData.WaterData.TargetWaterZoneLow = 20;
+	MatureGrowthData.WaterData.WaterDamage = 5;
 
 }
 
@@ -33,6 +151,33 @@ void ACrop::BP_SetGrowhtStage(EGrowthState NewGrowthState)
 	SetGrowthStage(NewGrowthState);
 }
 
+FCropSaveData ACrop::GetCropSaveData()
+{
+	FCropSaveData SaveData;
+	SaveData.SaveData_CurrentFertilizer = CurrentFertilizer;
+	SaveData.SaveData_CurrentGrowthState = CurrentGrowthState;
+	SaveData.SaveData_CurrentGrowthStateData = CurrentGrowthData;
+	SaveData.SaveData_CurrentHealth = CurrentHealth;
+	SaveData.SaveData_CurrentTemp = CurrentTemp;
+	SaveData.SaveData_CurrentWater = CurrentWater;
+	SaveData.SaveData_DaysToNextGrowthLevel = DaysToNextGrowthLevel;
+	SaveData.SaveData_GeneticData = GeneticData;
+
+	return SaveData;
+}
+
+void ACrop::LoadCropSaveData(FCropSaveData SaveData)
+{
+	CurrentFertilizer = SaveData.SaveData_CurrentFertilizer;
+	CurrentHealth = SaveData.SaveData_CurrentHealth;
+	CurrentTemp = SaveData.SaveData_CurrentTemp;
+	CurrentWater = SaveData.SaveData_CurrentWater;
+	DaysToNextGrowthLevel = SaveData.SaveData_DaysToNextGrowthLevel;
+	GeneticData = SaveData.SaveData_GeneticData;
+
+	ApplyGrowthStage(SaveData.SaveData_CurrentGrowthStateData, SaveData.SaveData_CurrentGrowthState);
+}
+
 FCropGrowthData ACrop::GetCropData()
 {
 	return CurrentGrowthData;
@@ -43,44 +188,12 @@ FCropGeneData ACrop::GetGeneData()
 	return GeneticData;
 }
 
-// Called when the game starts or when spawned
-void ACrop::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-
-void ACrop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimeProps) const
-{
-
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ACrop, WaterData);
-	DOREPLIFETIME(ACrop, CurrentWater);
-	DOREPLIFETIME(ACrop, FertilizerData);
-	DOREPLIFETIME(ACrop, CurrentFertilizer);
-	DOREPLIFETIME(ACrop, TempData);
-	DOREPLIFETIME(ACrop, CurrentTemp);
-	DOREPLIFETIME(ACrop, CurrentHealth);
-	DOREPLIFETIME(ACrop, SeedlingGrowthData);
-	DOREPLIFETIME(ACrop, MiddlingGrowthData);
-	DOREPLIFETIME(ACrop, MatureGrowthData);
-	DOREPLIFETIME(ACrop, GeneticData);
-	DOREPLIFETIME(ACrop, DaysToNextGrowthLevel);
-	DOREPLIFETIME(ACrop, WaterConsumptionPerDay);
-	DOREPLIFETIME(ACrop, CurrentGrowthState);
-	DOREPLIFETIME(ACrop, CurrentGrowthData);
-}
-
-
-
 float ACrop::CalculateGeneEffect(EGeneType ActiveGene)
 {
 	switch (ActiveGene)
 	{
 	case EGeneType::EGT_A:
-		return 0.0f;
+		return .8f;
 	case EGeneType::EGT_B:
 		return .9f;
 	case EGeneType::EGT_C:
@@ -152,6 +265,7 @@ FGeneData ACrop::CreateRandomeGene()
 EGeneType ACrop::ConvertIntToGene(int32 GeneInt)
 {
 	EGeneType GeneType;
+	GeneType = EGeneType::EGT_A;
 
 	switch (GeneInt)
 	{
@@ -187,6 +301,7 @@ FGeneData ACrop::GetNewGene(FGeneData GenePairA, FGeneData GenePairB)
 	EGeneType GenePairB_Recessive;
 
 	FGeneData NewGene;
+	NewGene = GenePairA;
 
 	GenePairA_Dominate = GenePairA.ActiveGene;
 	GenePairA_Recessive = GenePairA.RecessiveGene;
@@ -269,11 +384,12 @@ void ACrop::ApplyGrowthStage(FCropGrowthData NewGrowthStageData, EGrowthState Ne
 {
 
 	FCropGrowthData ModifiedGrowthData;
+	ModifiedGrowthData = NewGrowthStageData;
 
 	ApplyGeneticEffect(NewGrowthStageData, ModifiedGrowthData);
 
-	//CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
-	//CropMesh->SetWorldScale3D(ModifiedGrowthData.Scale);
+	CropMesh->SetStaticMesh(ModifiedGrowthData.GrowthLevelMesh);
+	CropMesh->SetWorldScale3D(ModifiedGrowthData.Scale);
 	CurrentGrowthData = ModifiedGrowthData;
 	DaysToNextGrowthLevel = ModifiedGrowthData.DaysToNextGrowthLevel;
 	//TODO add UI and client notify
@@ -323,8 +439,9 @@ void ACrop::CalculateHighLowRanges(float GeneticEffect, float& OutHighModifer, f
 void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& OutModifiedGrowthData)
 {
 	OutModifiedGrowthData = NewGrowthData;
+	
 
-	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * ( 2 - CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene));
+	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
 	OutModifiedGrowthData.Scale = NewGrowthData.Scale * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
 
 	//Update Yeilds

@@ -19,8 +19,6 @@ public:
 	ACrop();
 
 	//Blueprint Accessor Functions
-	
-	
 	UFUNCTION(BlueprintCallable, Category = "Crop Data", meta = (DisplayName = "Get Random Gene Set"))
 	FCropGeneData BP_GetRandomGeneSet();
 
@@ -29,6 +27,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "Set Growth Stage"))
 	void BP_SetGrowhtStage(EGrowthState NewGrowthState);
+
+	UFUNCTION(BlueprintCallable, Category = "Crop Data", meta = (DisplayName = "Get Crop Save Data"))
+	FCropSaveData GetCropSaveData();
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "Load Crop Save Data"))
+	void LoadCropSaveData(FCropSaveData SaveData);
 
 	//GetCropData
 	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Growth Data"))
@@ -45,24 +49,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* CropMesh;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Water Data")
-	FWaterData WaterData;
 	
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Water Data")
 	float CurrentWater;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Water Data")
-	float WaterConsumptionPerDay;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Fertilizer Data")
-	FFertilizerData FertilizerData;
-
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Fertilizer Data")
 	float CurrentFertilizer;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Temp Data")
-	FTempData TempData;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Temp Data")
 	float CurrentTemp;
@@ -88,8 +80,13 @@ protected:
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
 	FCropGrowthData MatureGrowthData;
 
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Genetic Data")
+	bool bRandomizeGenesAtBeginPlay = false;
+
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Crop Data | Genetic Data")
 	FCropGeneData GeneticData;
+
+	void SetDefaultGrowthData();
 
 	float CalculateGeneEffect(EGeneType ActiveGene);
 
