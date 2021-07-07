@@ -19,8 +19,8 @@ UENUM(BlueprintType)
 enum class EWaterState : uint8 {
 
 	EWS_None			UMETA(DisplayName = "None"),
-	EWS_OverWater		UMETA(DisplayName = "Over Watered"),
 	EWS_PerfectWater	UMETA(DisplayName = "Perfectly Watered"),
+	EWS_OverWater		UMETA(DisplayName = "Over Watered"),
 	EWS_UnderWater		UMETA(DisplayName = "Under Watered"),
 };
 
@@ -28,8 +28,8 @@ UENUM(BlueprintType)
 enum class EFertilizerState : uint8 {
 
 	EFS_NoFertilized		UMETA(DisplayName = "No Fertilizer"),
-	EFS_Fertilized			UMETA(DisplayName = "Fertilized"),
 	EFS_PerfectFertilizer	UMETA(DisplayName = "Perfectly Fertilized"),
+	EFS_Fertilized			UMETA(DisplayName = "Fertilized"),
 };
 
 
@@ -37,9 +37,9 @@ UENUM(BlueprintType)
 enum class ETempState : uint8 {
 
 	ETS_None			UMETA(DisplayName = "None"),
+	ETS_JustRight		UMETA(DisplayName = "Just Right"),
 	ETS_ToCold			UMETA(DisplayName = "To Cold"),
 	ETS_ToHot			UMETA(DisplayName = "To Hot"),
-	ETS_JustRight		UMETA(DisplayName = "Just Right"),
 };
 
 UENUM(BlueprintType)
@@ -111,6 +111,14 @@ struct FFertilizerData
 	//Low value of target zone for fertilizer. A fertilizer level in the target zone will provide a buff to growth and yeild
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
 	float TargetFertilzerZoneLow = 50;
+
+	//Health effect for when a plant is fertilized
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
+	float FertilizerHealthEffect = 1.f;
+
+	//Health effect for when a plant is fertilized
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = " Crop Data | Fertilizer Data", meta = (ClampMin = "0.0"))
+	float PerfectFertilizerHealthEffect = 2.f;
 
 };
 
@@ -188,6 +196,9 @@ struct FCropGrowthData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
 	float WaterConsumptionPerDay = 5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
+	float FertilizerConsumptionPerDay = 5;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crop Data | Growth Data")
 	float MaxHealth = 100;
@@ -275,9 +286,6 @@ struct FCropSaveData
 	float SaveData_CurrentFertilizer;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
-	float SaveData_CurrentTemp;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
 	float SaveData_CurrentHealth;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
@@ -291,6 +299,18 @@ struct FCropSaveData
 
 	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
 	FCropGeneData SaveData_GeneticData;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	EWaterState SaveData_WaterState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	ETempState SaveData_TempState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	EFertilizerState SaveData_FertilizerState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	EHealthState SaveData_HealthState;
 
 };
 

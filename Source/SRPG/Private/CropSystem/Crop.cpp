@@ -40,7 +40,6 @@ void ACrop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimePr
 
 	DOREPLIFETIME(ACrop, CurrentWater);
 	DOREPLIFETIME(ACrop, CurrentFertilizer);
-	DOREPLIFETIME(ACrop, CurrentTemp);
 	DOREPLIFETIME(ACrop, CurrentHealth);
 	DOREPLIFETIME(ACrop, SeedlingGrowthData);
 	DOREPLIFETIME(ACrop, MiddlingGrowthData);
@@ -50,8 +49,12 @@ void ACrop::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimePr
 	DOREPLIFETIME(ACrop, CurrentGrowthState);
 	DOREPLIFETIME(ACrop, CurrentGrowthData);
 	DOREPLIFETIME(ACrop, bRandomizeGenesAtBeginPlay);
+	DOREPLIFETIME(ACrop, WaterState);
+	DOREPLIFETIME(ACrop, TempState);
+	DOREPLIFETIME(ACrop, FertilizerState);
+	DOREPLIFETIME(ACrop, HealthState);
+	
 }
-
 
 
 void ACrop::SetDefaultGrowthData()
@@ -61,6 +64,7 @@ void ACrop::SetDefaultGrowthData()
 	SeedlingGrowthData.MaxHealth = 20;
 
 	//Fertilizer Defaults
+	SeedlingGrowthData.FertilizerConsumptionPerDay = 3;
 	SeedlingGrowthData.FertilizerData.FertilizerCap = 20;
 	SeedlingGrowthData.FertilizerData.TargetFertilizerZoneHigh = 15;
 	SeedlingGrowthData.FertilizerData.TargetFertilzerZoneLow = 5;
@@ -86,6 +90,7 @@ void ACrop::SetDefaultGrowthData()
 	MiddlingGrowthData.MaxHealth = 50;
 
 	//Fertilizer Defaults
+	MiddlingGrowthData.FertilizerConsumptionPerDay = 5;
 	MiddlingGrowthData.FertilizerData.FertilizerCap = 50;
 	MiddlingGrowthData.FertilizerData.TargetFertilizerZoneHigh = 35;
 	MiddlingGrowthData.FertilizerData.TargetFertilzerZoneLow = 15;
@@ -111,6 +116,7 @@ void ACrop::SetDefaultGrowthData()
 	MatureGrowthData.MaxHealth = 100;
 
 	//Fertilizer Defaults
+	MatureGrowthData.FertilizerConsumptionPerDay = 10;
 	MatureGrowthData.FertilizerData.FertilizerCap = 100;
 	MatureGrowthData.FertilizerData.TargetFertilizerZoneHigh = 75;
 	MatureGrowthData.FertilizerData.TargetFertilzerZoneLow = 25;
@@ -151,6 +157,16 @@ void ACrop::BP_SetGrowhtStage(EGrowthState NewGrowthState)
 	SetGrowthStage(NewGrowthState);
 }
 
+void ACrop::BP_AddWater(float WaterAmount)
+{
+	AddWater(WaterAmount);
+}
+
+void ACrop::BP_AddFertilizer(float FertilizerAmount)
+{
+	AddFertilizer(FertilizerAmount);
+}
+
 FCropSaveData ACrop::GetCropSaveData()
 {
 	FCropSaveData SaveData;
@@ -158,10 +174,13 @@ FCropSaveData ACrop::GetCropSaveData()
 	SaveData.SaveData_CurrentGrowthState = CurrentGrowthState;
 	SaveData.SaveData_CurrentGrowthStateData = CurrentGrowthData;
 	SaveData.SaveData_CurrentHealth = CurrentHealth;
-	SaveData.SaveData_CurrentTemp = CurrentTemp;
 	SaveData.SaveData_CurrentWater = CurrentWater;
 	SaveData.SaveData_DaysToNextGrowthLevel = DaysToNextGrowthLevel;
 	SaveData.SaveData_GeneticData = GeneticData;
+	SaveData.SaveData_FertilizerState = FertilizerState;
+	SaveData.SaveData_WaterState = WaterState;
+	SaveData.SaveData_TempState = TempState;
+	SaveData.SaveData_HealthState = HealthState;
 
 	return SaveData;
 }
@@ -170,13 +189,22 @@ void ACrop::LoadCropSaveData(FCropSaveData SaveData)
 {
 	CurrentFertilizer = SaveData.SaveData_CurrentFertilizer;
 	CurrentHealth = SaveData.SaveData_CurrentHealth;
-	CurrentTemp = SaveData.SaveData_CurrentTemp;
 	CurrentWater = SaveData.SaveData_CurrentWater;
 	DaysToNextGrowthLevel = SaveData.SaveData_DaysToNextGrowthLevel;
 	GeneticData = SaveData.SaveData_GeneticData;
+	FertilizerState = SaveData.SaveData_FertilizerState;
+	WaterState = SaveData.SaveData_WaterState;
+	TempState = SaveData.SaveData_TempState;
+	HealthState = SaveData.SaveData_HealthState;
 
 	ApplyGrowthStage(SaveData.SaveData_CurrentGrowthStateData, SaveData.SaveData_CurrentGrowthState);
 }
+
+void ACrop::BP_AdvanceDay(float PreviousDayTempaverage)
+{
+	AdvanceDay(PreviousDayTempaverage);
+}
+
 
 FCropGrowthData ACrop::GetCropData()
 {
@@ -414,6 +442,83 @@ void ACrop::SetGrowthStage(EGrowthState NewGrowthState)
 
 }
 
+void ACrop::AdvanceDay(float PreviousDayAverageTemp)
+{
+	//Remove daily Water and Fertilizer used
+	float NewWater;
+	float NewFertilizer;
+
+	NewWater = FMath::Clamp(CurrentWater - CurrentGrowthData.WaterConsumptionPerDay, 0.f, CurrentWater);
+	NewFertilizer = FMath::Clamp(CurrentFertilizer - CurrentGrowthData.FertilizerConsumptionPerDay, 0.f, CurrentFertilizer);
+
+	CurrentWater = NewWater;
+	CurrentFertilizer = NewFertilizer;
+
+	//GetTempState
+	TempState = CalculateTempState(PreviousDayAverageTemp);
+
+	//GetWaterState
+	WaterState = CalculateWaterState();
+
+	//GetFertilizerState
+	FertilizerState = CalculateFertilizerState();
+
+	float ChangeInHealth;
+	CalculateHealthChange(ChangeInHealth);
+
+	//Change current health
+	float NewHealth;
+	NewHealth = FMath::Clamp(CurrentHealth + ChangeInHealth, 0.f, CurrentGrowthData.MaxHealth);
+	CurrentHealth = NewHealth;
+
+	//GetOverallState
+	HealthState = CalculateHealthState(ChangeInHealth);
+
+	//Remove Days to next growth stage
+	if (CurrentGrowthState != EGrowthState::EGS_Mature)
+	{
+		if (CurrentGrowthData.DaysToNextGrowthLevel - 1 == 0)
+		{
+			//Advance to next growth stage
+			switch (CurrentGrowthState)
+			{
+			case EGrowthState::EGS_Seedling:
+				SetGrowthStage(EGrowthState::EGS_Middling);
+				break;
+			case EGrowthState::EGS_Middling:
+				SetGrowthStage(EGrowthState::EGS_Seedling);
+				break;
+			case EGrowthState::EGS_Mature:
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			CurrentGrowthData.DaysToNextGrowthLevel -= 1;
+		}
+	}
+
+
+}
+
+void ACrop::AddWater(float WaterAmount)
+{
+	float NewWater;
+	NewWater = FMath::Clamp(CurrentWater + WaterAmount, 0.f, CurrentGrowthData.WaterData.WaterCap);
+	CurrentWater = NewWater;
+
+}
+
+void ACrop::AddFertilizer(float FertilizerAmount)
+{
+	float NewFertilizer;
+	NewFertilizer = FMath::Clamp(CurrentFertilizer + FertilizerAmount, 0.f, CurrentGrowthData.FertilizerData.FertilizerCap);
+	CurrentFertilizer = NewFertilizer;
+}
+
+
 void ACrop::ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData)
 {
 	for (int32 i = 0; i < CropYieldData.Num(); i++)
@@ -478,6 +583,156 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 	OutModifiedGrowthData.TempData.TempDamage = NewGrowthData.TempData.TempDamage * CalculateGeneEffect(GeneticData.TempDamage.ActiveGene);
 
 }
+
+ETempState ACrop::CalculateTempState(float AverageTemp)
+{
+	ETempState OutTempState;
+	OutTempState = ETempState::ETS_None;
+
+	//If hoter then max temp
+	if (AverageTemp > CurrentGrowthData.TempData.MaxTemp)
+	{
+		OutTempState = ETempState::ETS_ToHot;
+	}
+	//If colder than min temp
+	else if(AverageTemp < CurrentGrowthData.TempData.MinTemp)
+	{
+		OutTempState = ETempState::ETS_ToCold;
+	}
+	//If in target zone (greater than target zone low and less than target zone high)
+	else if (AverageTemp >= CurrentGrowthData.TempData.TargetTempZoneLow && AverageTemp <= CurrentGrowthData.TempData.TargetTempZoneHigh)
+	{
+		OutTempState = ETempState::ETS_JustRight;
+	}
+	else
+	{
+		OutTempState = ETempState::ETS_None;
+	}
+
+
+	return OutTempState;
+}
+
+EFertilizerState ACrop::CalculateFertilizerState()
+{
+	EFertilizerState OutFertilizerState;
+
+	// If no fertilizer
+	if (CurrentFertilizer == 0)
+	{
+		OutFertilizerState = EFertilizerState::EFS_NoFertilized;
+	}
+	//If fertilzer is greater than target zone low and less than target zone high
+	else if (CurrentFertilizer >= CurrentGrowthData.FertilizerData.TargetFertilzerZoneLow && CurrentFertilizer <= CurrentGrowthData.FertilizerData.TargetFertilizerZoneHigh)
+	{
+		OutFertilizerState = EFertilizerState::EFS_PerfectFertilizer;
+	}
+	//Otherwise, normal fertilizer
+	else
+	{
+		OutFertilizerState = EFertilizerState::EFS_Fertilized;
+	}
+
+
+	return OutFertilizerState;
+}
+
+EWaterState ACrop::CalculateWaterState()
+{
+	EWaterState OutWaterState;
+	
+	//If too much water
+	if (CurrentWater > CurrentGrowthData.WaterData.MatxWater)
+	{
+		OutWaterState = EWaterState::EWS_OverWater;
+	}
+	//If not enough water
+	else if(CurrentWater <= CurrentGrowthData.WaterData.MinWater)
+	{
+		OutWaterState = EWaterState::EWS_UnderWater;
+	}
+	//If water in target zone
+	else if (CurrentWater >= CurrentGrowthData.WaterData.MinWater && CurrentWater < CurrentGrowthData.WaterData.MatxWater)
+	{
+		OutWaterState = EWaterState::EWS_PerfectWater;
+	}
+	//Water is not in target zone but not greater than or less than max/min
+	else
+	{
+		OutWaterState = EWaterState::EWS_None;
+	}
+
+
+	return OutWaterState;
+}
+
+EHealthState ACrop::CalculateHealthState(float PreviousDayHealthChange)
+{
+	EHealthState OutHealthState;
+	OutHealthState = EHealthState::EHS_None;
+
+	//If no change and greater than 70% health, then healthy
+	if (PreviousDayHealthChange == 0 && CurrentHealth > CurrentGrowthData.MaxHealth * .7)
+	{
+		OutHealthState = EHealthState::EHS_Healthy;
+	}
+	//If positve change and greter than 70% health, then very healthy
+	else if (PreviousDayHealthChange > 0 && CurrentHealth > CurrentGrowthData.MaxHealth * .7)
+	{
+		OutHealthState = EHealthState::EHS_VeryHealthy;
+	}
+	//If neagtaive change and less than 30% health, then dying
+	else if (PreviousDayHealthChange < 0 && CurrentHealth < CurrentGrowthData.MaxHealth * .3)
+	{
+		OutHealthState = EHealthState::EHS_Dying;
+	}
+	//If negative change or less than 70% health, then not healthy
+	else if (PreviousDayHealthChange <= 0 || CurrentHealth <= CurrentGrowthData.MaxHealth * .7)
+	{
+		OutHealthState = EHealthState::EHS_NotHealthy;
+	}
+
+
+	return OutHealthState;
+}
+
+void ACrop::CalculateHealthChange(float& OutHealthChange)
+{
+
+	//Caculate health effect for temp 
+	if (TempState == ETempState::ETS_ToCold || TempState == ETempState::ETS_ToHot)
+	{
+		//Subtract temp damage
+		OutHealthChange -= CurrentGrowthData.TempData.TempDamage;
+	}
+	else if (TempState == ETempState::ETS_JustRight)
+	{
+		//Add temp damage
+		OutHealthChange += CurrentGrowthData.TempData.TempDamage;
+	}
+
+	//Calculate health effect for fertilizer
+	if (FertilizerState == EFertilizerState::EFS_Fertilized)
+	{
+		OutHealthChange += CurrentGrowthData.FertilizerData.FertilizerHealthEffect;
+	}
+	else if (FertilizerState == EFertilizerState::EFS_PerfectFertilizer)
+	{
+		OutHealthChange += CurrentGrowthData.FertilizerData.PerfectFertilizerHealthEffect;
+	}
+
+	//Calculate health effect for water
+	if (WaterState == EWaterState::EWS_OverWater || WaterState == EWaterState::EWS_UnderWater)
+	{
+		OutHealthChange -= CurrentGrowthData.WaterData.WaterDamage;
+	}
+	else if (WaterState == EWaterState::EWS_PerfectWater)
+	{
+		OutHealthChange += CurrentGrowthData.WaterData.WaterDamage;
+	}
+
+}
+
 
 
 
