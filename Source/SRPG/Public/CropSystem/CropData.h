@@ -294,8 +294,8 @@ struct FCropSaveData
 	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
 	EGrowthState SaveData_CurrentGrowthState;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
-	FCropGrowthData SaveData_CurrentGrowthStateData;
+	//UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
+	//FCropGrowthData SaveData_CurrentGrowthStateData;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Crop Data | Save Data")
 	FCropGeneData SaveData_GeneticData;

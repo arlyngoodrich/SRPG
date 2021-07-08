@@ -174,7 +174,6 @@ FCropSaveData ACrop::GetCropSaveData()
 	FCropSaveData SaveData;
 	SaveData.SaveData_CurrentFertilizer = CurrentFertilizer;
 	SaveData.SaveData_CurrentGrowthState = CurrentGrowthState;
-	SaveData.SaveData_CurrentGrowthStateData = CurrentGrowthData;
 	SaveData.SaveData_CurrentHealth = CurrentHealth;
 	SaveData.SaveData_CurrentWater = CurrentWater;
 	SaveData.SaveData_DaysToNextGrowthLevel = DaysToNextGrowthLevel;
@@ -201,7 +200,7 @@ void ACrop::LoadCropSaveData(FCropSaveData SaveData)
 
 	UE_LOG(LogCropSystem, Log, TEXT("Crop Data Loaded"))
 
-	ApplyGrowthStage(SaveData.SaveData_CurrentGrowthStateData, SaveData.SaveData_CurrentGrowthState);
+	SetGrowthStage(SaveData.SaveData_CurrentGrowthState);
 }
 
 void ACrop::BP_AdvanceDay(float PreviousDayTempaverage)
