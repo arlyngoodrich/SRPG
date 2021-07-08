@@ -15,6 +15,8 @@ ACrop::ACrop()
 	RootComponent = CropMesh;
 	SetDefaultGrowthData();
 	bReplicates = true;
+	CurrentHealth = SeedlingGrowthData.MaxHealth;
+	HealthState = EHealthState::EHS_Healthy;
 }
 
 
@@ -29,6 +31,7 @@ void ACrop::BeginPlay()
 	}
 
 	SetGrowthStage(EGrowthState::EGS_Seedling);
+
 }
 
 
@@ -439,12 +442,15 @@ void ACrop::SetGrowthStage(EGrowthState NewGrowthState)
 	{
 	case EGrowthState::EGS_Seedling:
 		ApplyGrowthStage(SeedlingGrowthData, EGrowthState::EGS_Seedling);
+		CurrentHealth = SeedlingGrowthData.MaxHealth;
 		break;
 	case EGrowthState::EGS_Middling:
 		ApplyGrowthStage(MiddlingGrowthData, EGrowthState::EGS_Middling);
+		CurrentHealth = MiddlingGrowthData.MaxHealth;
 		break;
 	case EGrowthState::EGS_Mature:
 		ApplyGrowthStage(MatureGrowthData, EGrowthState::EGS_Mature);
+		CurrentHealth = MatureGrowthData.MaxHealth;
 		break;
 	default:
 		break;
