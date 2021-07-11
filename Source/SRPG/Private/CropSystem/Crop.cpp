@@ -76,7 +76,7 @@ void ACrop::SetDefaultGrowthData()
 	SeedlingGrowthData.TempData.MinTemp = 0;
 	SeedlingGrowthData.TempData.TargetTempZoneHigh = 20;
 	SeedlingGrowthData.TempData.TargetTempZoneLow = 10;
-	SeedlingGrowthData.TempData.TempDamage = 10;
+	SeedlingGrowthData.TempData.TempDamageGene = 10;
 
 	//Water Defaults
 	SeedlingGrowthData.WaterConsumptionPerDay = 5;
@@ -85,7 +85,7 @@ void ACrop::SetDefaultGrowthData()
 	SeedlingGrowthData.WaterData.MinWater = 5;
 	SeedlingGrowthData.WaterData.TargetWaterZoneHigh = 18;
 	SeedlingGrowthData.WaterData.TargetWaterZoneLow = 6;
-	SeedlingGrowthData.WaterData.WaterDamage = 2;
+	SeedlingGrowthData.WaterData.WaterDamageGene = 2;
 
 	//Middling Growth Defaults ---------//
 	MiddlingGrowthData.DaysToNextGrowthLevel = 7;
@@ -102,7 +102,7 @@ void ACrop::SetDefaultGrowthData()
 	MiddlingGrowthData.TempData.MinTemp = 0;
 	MiddlingGrowthData.TempData.TargetTempZoneHigh = 25;
 	MiddlingGrowthData.TempData.TargetTempZoneLow = 10;
-	MiddlingGrowthData.TempData.TempDamage = 10;
+	MiddlingGrowthData.TempData.TempDamageGene = 10;
 
 	//Water Defaults
 	MiddlingGrowthData.WaterConsumptionPerDay = 10;
@@ -111,7 +111,7 @@ void ACrop::SetDefaultGrowthData()
 	MiddlingGrowthData.WaterData.MinWater = 10;
 	MiddlingGrowthData.WaterData.TargetWaterZoneHigh = 30;
 	MiddlingGrowthData.WaterData.TargetWaterZoneLow = 15;
-	MiddlingGrowthData.WaterData.WaterDamage = 5;
+	MiddlingGrowthData.WaterData.WaterDamageGene = 5;
 
 	//Mature Growth Defaults ---------//
 	MatureGrowthData.DaysToNextGrowthLevel = 7;
@@ -128,7 +128,7 @@ void ACrop::SetDefaultGrowthData()
 	MatureGrowthData.TempData.MinTemp = 0;
 	MatureGrowthData.TempData.TargetTempZoneHigh = 25;
 	MatureGrowthData.TempData.TargetTempZoneLow = 10;
-	MatureGrowthData.TempData.TempDamage = 10;
+	MatureGrowthData.TempData.TempDamageGene = 10;
 
 	//Water Defaults
 	MatureGrowthData.WaterConsumptionPerDay = 15;
@@ -137,8 +137,8 @@ void ACrop::SetDefaultGrowthData()
 	MatureGrowthData.WaterData.MinWater = 10;
 	MatureGrowthData.WaterData.TargetWaterZoneHigh = 60;
 	MatureGrowthData.WaterData.TargetWaterZoneLow = 20;
-	MatureGrowthData.WaterData.WaterDamage = 5;
-
+	MatureGrowthData.WaterData.WaterDamageGene = 5;
+		
 }
 
 FCropGeneData ACrop::BP_GetRandomGeneSet()
@@ -177,7 +177,6 @@ FCropSaveData ACrop::GetCropSaveData()
 	SaveData.SaveData_CurrentHealth = CurrentHealth;
 	SaveData.SaveData_CurrentWater = CurrentWater;
 	SaveData.SaveData_DaysToNextGrowthLevel = DaysToNextGrowthLevel;
-	SaveData.SaveData_GeneticData = GeneticData;
 	SaveData.SaveData_FertilizerState = FertilizerState;
 	SaveData.SaveData_WaterState = WaterState;
 	SaveData.SaveData_TempState = TempState;
@@ -186,13 +185,13 @@ FCropSaveData ACrop::GetCropSaveData()
 	return SaveData;
 }
 
-void ACrop::LoadCropSaveData(FCropSaveData SaveData)
+void ACrop::LoadCropSaveData(FCropSaveData SaveData, FCropGeneData SavedGeneticData)
 {
 	CurrentFertilizer = SaveData.SaveData_CurrentFertilizer;
 	CurrentHealth = SaveData.SaveData_CurrentHealth;
 	CurrentWater = SaveData.SaveData_CurrentWater;
 	DaysToNextGrowthLevel = SaveData.SaveData_DaysToNextGrowthLevel;
-	GeneticData = SaveData.SaveData_GeneticData;
+	GeneticData = SavedGeneticData;
 	FertilizerState = SaveData.SaveData_FertilizerState;
 	WaterState = SaveData.SaveData_WaterState;
 	TempState = SaveData.SaveData_TempState;
@@ -217,6 +216,14 @@ FCropGrowthData ACrop::GetCropData()
 FCropGeneData ACrop::GetGeneData()
 {
 	return GeneticData;
+}
+
+FCropGeneData ACrop::BP_GetCrossBredGeneData(FCropGeneData PartnerGeneData)
+{
+	FCropGeneData OutCrossbredGenes;
+	GetCrossbredSeedGeneticData(PartnerGeneData, OutCrossbredGenes);
+
+	return OutCrossbredGenes;
 }
 
 float ACrop::CalculateGeneEffect(EGeneType ActiveGene)
@@ -246,28 +253,28 @@ void ACrop::GetCrossbredSeedGeneticData(FCropGeneData PartnerGeneData, FCropGene
 {
 	OutGeneticData = GeneticData;
 
-	OutGeneticData.GrowthRate = GetNewGene(GeneticData.GrowthRate, PartnerGeneData.GrowthRate);
-	OutGeneticData.HarvestYield = GetNewGene(GeneticData.HarvestYield, PartnerGeneData.HarvestYield);
-	OutGeneticData.SeedYield = GetNewGene(GeneticData.SeedYield, PartnerGeneData.SeedYield);
-	OutGeneticData.TargetFertilizerZone = GetNewGene(GeneticData.TargetFertilizerZone, PartnerGeneData.TargetFertilizerZone);
-	OutGeneticData.TargetTempZone = GetNewGene(GeneticData.TargetTempZone, PartnerGeneData.TargetTempZone);
-	OutGeneticData.TargetWaterZone = GetNewGene(GeneticData.TargetWaterZone, PartnerGeneData.TargetWaterZone);
-	OutGeneticData.TempDamage = GetNewGene(GeneticData.TempDamage, PartnerGeneData.TempDamage);
-	OutGeneticData.WaterDamage = GetNewGene(GeneticData.WaterDamage, PartnerGeneData.WaterDamage);
+	OutGeneticData.GrowthRateGene = GetNewGene(GeneticData.GrowthRateGene, PartnerGeneData.GrowthRateGene);
+	OutGeneticData.HarvestYieldGene = GetNewGene(GeneticData.HarvestYieldGene, PartnerGeneData.HarvestYieldGene);
+	OutGeneticData.SeedYieldGene = GetNewGene(GeneticData.SeedYieldGene, PartnerGeneData.SeedYieldGene);
+	OutGeneticData.TargetFertilizerZoneGene = GetNewGene(GeneticData.TargetFertilizerZoneGene, PartnerGeneData.TargetFertilizerZoneGene);
+	OutGeneticData.TargetTempZoneGene = GetNewGene(GeneticData.TargetTempZoneGene, PartnerGeneData.TargetTempZoneGene);
+	OutGeneticData.TargetWaterZoneGene = GetNewGene(GeneticData.TargetWaterZoneGene, PartnerGeneData.TargetWaterZoneGene);
+	OutGeneticData.TempDamageGene = GetNewGene(GeneticData.TempDamageGene, PartnerGeneData.TempDamageGene);
+	OutGeneticData.WaterDamageGene = GetNewGene(GeneticData.WaterDamageGene, PartnerGeneData.WaterDamageGene);
 
 	UE_LOG(LogCropSystem, Log, TEXT("Calculated crossbred seed gene data"))
 }
 
 void ACrop::CreateRandomGeneDataSet(FCropGeneData& OutRandomGeneDataSet)
 {
-	OutRandomGeneDataSet.GrowthRate = CreateRandomeGene();
-	OutRandomGeneDataSet.HarvestYield = CreateRandomeGene();
-	OutRandomGeneDataSet.SeedYield = CreateRandomeGene();
-	OutRandomGeneDataSet.TargetFertilizerZone = CreateRandomeGene();
-	OutRandomGeneDataSet.TargetTempZone = CreateRandomeGene();
-	OutRandomGeneDataSet.TargetWaterZone = CreateRandomeGene();
-	OutRandomGeneDataSet.TempDamage = CreateRandomeGene();
-	OutRandomGeneDataSet.WaterDamage = CreateRandomeGene();
+	OutRandomGeneDataSet.GrowthRateGene = CreateRandomeGene();
+	OutRandomGeneDataSet.HarvestYieldGene = CreateRandomeGene();
+	OutRandomGeneDataSet.SeedYieldGene = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetFertilizerZoneGene = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetTempZoneGene = CreateRandomeGene();
+	OutRandomGeneDataSet.TargetWaterZoneGene = CreateRandomeGene();
+	OutRandomGeneDataSet.TempDamageGene = CreateRandomeGene();
+	OutRandomGeneDataSet.WaterDamageGene = CreateRandomeGene();
 
 	UE_LOG(LogCropSystem, Log, TEXT("Calculated random gene data set"))
 }
@@ -551,8 +558,11 @@ void ACrop::AddFertilizer(float FertilizerAmount)
 }
 
 
-void ACrop::ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData)
+void ACrop::ModifyYieldData(float YieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData)
 {
+
+	OutNewYieldData.Empty();
+
 	for (int32 i = 0; i < CropYieldData.Num(); i++)
 	{
 		FCropYieldData NewYield;
@@ -560,8 +570,6 @@ void ACrop::ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<F
 
 		NewYield.MaxYield = CropYieldData[i].MaxYield * YieldModifer;
 		NewYield.MinYield = CropYieldData[i].MinYield * YieldModifer;
-		NewYield.SeedYield = CropYieldData[i].SeedYield * SeedYieldModifer;
-
 		OutNewYieldData.Add(NewYield);
 	}
 }
@@ -577,20 +585,21 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 	OutModifiedGrowthData = NewGrowthData;
 	
 
-	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
-	OutModifiedGrowthData.Scale = NewGrowthData.Scale * CalculateGeneEffect(GeneticData.GrowthRate.ActiveGene);
+	OutModifiedGrowthData.DaysToNextGrowthLevel = NewGrowthData.DaysToNextGrowthLevel * CalculateGeneEffect(GeneticData.GrowthRateGene.ActiveGene);
+	OutModifiedGrowthData.Scale = NewGrowthData.Scale * CalculateGeneEffect(GeneticData.GrowthRateGene.ActiveGene);
 
 	//Update Yeilds
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.FallYield, OutModifiedGrowthData.FallYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.SpringYield, OutModifiedGrowthData.SpringYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.WinterYield, OutModifiedGrowthData.WinterYield);
-	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYield.ActiveGene), CalculateGeneEffect(GeneticData.SeedYield.ActiveGene), NewGrowthData.SummerYield, OutModifiedGrowthData.SummerYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYieldGene.ActiveGene), NewGrowthData.FallYield, OutModifiedGrowthData.FallYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYieldGene.ActiveGene), NewGrowthData.SpringYield, OutModifiedGrowthData.SpringYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYieldGene.ActiveGene), NewGrowthData.WinterYield, OutModifiedGrowthData.WinterYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.HarvestYieldGene.ActiveGene), NewGrowthData.SummerYield, OutModifiedGrowthData.SummerYield);
+	ModifyYieldData(CalculateGeneEffect(GeneticData.SeedYieldGene.ActiveGene), NewGrowthData.SeedYield, OutModifiedGrowthData.SeedYield);
 
 
 	//Fertilizer
 	float FertilizerModiferHigh;
 	float FertilizerModiferLow;
-	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetFertilizerZone.ActiveGene), FertilizerModiferHigh, FertilizerModiferLow);
+	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetFertilizerZoneGene.ActiveGene), FertilizerModiferHigh, FertilizerModiferLow);
 	
 	OutModifiedGrowthData.FertilizerData.TargetFertilizerZoneHigh = NewGrowthData.FertilizerData.TargetFertilizerZoneHigh * FertilizerModiferHigh;
 	OutModifiedGrowthData.FertilizerData.TargetFertilzerZoneLow = NewGrowthData.FertilizerData.TargetFertilzerZoneLow * FertilizerModiferLow;
@@ -598,20 +607,20 @@ void ACrop::ApplyGeneticEffect(FCropGrowthData NewGrowthData, FCropGrowthData& O
 	//Water
 	float WaterModiferHigh;
 	float WaterModiferLow;
-	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetWaterZone.ActiveGene), WaterModiferHigh, WaterModiferLow);
+	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetWaterZoneGene.ActiveGene), WaterModiferHigh, WaterModiferLow);
 
 	OutModifiedGrowthData.WaterData.TargetWaterZoneHigh = NewGrowthData.WaterData.TargetWaterZoneHigh * WaterModiferHigh;
 	OutModifiedGrowthData.WaterData.TargetWaterZoneHigh = NewGrowthData.WaterData.TargetWaterZoneLow * WaterModiferLow;
-	OutModifiedGrowthData.WaterData.WaterDamage = NewGrowthData.WaterData.WaterDamage * CalculateGeneEffect(GeneticData.WaterDamage.ActiveGene);
+	OutModifiedGrowthData.WaterData.WaterDamageGene = NewGrowthData.WaterData.WaterDamageGene * CalculateGeneEffect(GeneticData.WaterDamageGene.ActiveGene);
 
 	//Temp
 	float TempModiferHigh;
 	float TempModiferLow;
-	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetTempZone.ActiveGene), TempModiferHigh, TempModiferLow);
+	CalculateHighLowRanges(CalculateGeneEffect(GeneticData.TargetTempZoneGene.ActiveGene), TempModiferHigh, TempModiferLow);
 
 	OutModifiedGrowthData.TempData.MaxTemp = NewGrowthData.TempData.MaxTemp * TempModiferHigh;
 	OutModifiedGrowthData.TempData.MinTemp = NewGrowthData.TempData.MinTemp * TempModiferLow;
-	OutModifiedGrowthData.TempData.TempDamage = NewGrowthData.TempData.TempDamage * CalculateGeneEffect(GeneticData.TempDamage.ActiveGene);
+	OutModifiedGrowthData.TempData.TempDamageGene = NewGrowthData.TempData.TempDamageGene * CalculateGeneEffect(GeneticData.TempDamageGene.ActiveGene);
 
 }
 
@@ -734,12 +743,12 @@ void ACrop::CalculateHealthChange(float& OutHealthChange)
 	if (TempState == ETempState::ETS_ToCold || TempState == ETempState::ETS_ToHot)
 	{
 		//Subtract temp damage
-		OutHealthChange -= CurrentGrowthData.TempData.TempDamage;
+		OutHealthChange -= CurrentGrowthData.TempData.TempDamageGene;
 	}
 	else if (TempState == ETempState::ETS_JustRight)
 	{
 		//Add temp damage
-		OutHealthChange += CurrentGrowthData.TempData.TempDamage;
+		OutHealthChange += CurrentGrowthData.TempData.TempDamageGene;
 	}
 
 	//Calculate health effect for fertilizer
@@ -755,11 +764,11 @@ void ACrop::CalculateHealthChange(float& OutHealthChange)
 	//Calculate health effect for water
 	if (WaterState == EWaterState::EWS_OverWater || WaterState == EWaterState::EWS_UnderWater)
 	{
-		OutHealthChange -= CurrentGrowthData.WaterData.WaterDamage;
+		OutHealthChange -= CurrentGrowthData.WaterData.WaterDamageGene;
 	}
 	else if (WaterState == EWaterState::EWS_PerfectWater)
 	{
-		OutHealthChange += CurrentGrowthData.WaterData.WaterDamage;
+		OutHealthChange += CurrentGrowthData.WaterData.WaterDamageGene;
 	}
 
 }

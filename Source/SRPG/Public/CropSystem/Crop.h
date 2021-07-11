@@ -42,7 +42,7 @@ public:
 
 	//Helper function to set save data after load
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "Load Crop Save Data"))
-	void LoadCropSaveData(FCropSaveData SaveData);
+	void LoadCropSaveData(FCropSaveData SaveData, FCropGeneData SavedGeneticData);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Crop Data", meta = (DisplayName = "AdvanceDay"))
 	void BP_AdvanceDay(float PreviousDayTempaverage);
@@ -54,6 +54,10 @@ public:
 	//Get's the crop's gene data
 	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Gene Data"))
 	FCropGeneData GetGeneData();
+
+	//Get's the crop's gene data
+	UFUNCTION(BlueprintPure, Category = "Crop Data", meta = (DisplayName = "Get Cross Bred Gene Data"))
+	FCropGeneData BP_GetCrossBredGeneData(FCropGeneData PartnerGeneData);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Crop Data")
 	void OnCropDataUpdate();
@@ -165,7 +169,7 @@ protected:
 	void AddFertilizer(float FertilizerAmount);
 
 	//Apply's genetic effect to harvest and seed yields
-	void ModifyYieldData(float YieldModifer, float SeedYieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData);
+	void ModifyYieldData(float YieldModifer, TArray<FCropYieldData> CropYieldData, TArray<FCropYieldData>& OutNewYieldData);
 
 	//Helper function to convert genetic effect to the high and low ranges for target zones
 	void CalculateHighLowRanges(float GeneticEffect, float& OutHighModifer, float& OutLowModifer);
