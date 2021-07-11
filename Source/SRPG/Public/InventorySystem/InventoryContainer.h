@@ -64,6 +64,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Split Stack")
 	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Remove Quantity of Item")
+	void BP_RemoveQtyOfItem(int32 Quantity, FItemData ItemData, int32 PositionX, int32 PositionY);
+
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID);
 
@@ -208,6 +211,8 @@ protected:
 	bool DifferentInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
 	bool DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
+
+	void RemoveQuantityOfItemFromStack(int32 QtyToRemove,FItemData Item, FVector2D StartingPosition);
 
 	//TODO StackTransfer
 
