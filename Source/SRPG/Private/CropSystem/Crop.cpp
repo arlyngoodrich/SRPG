@@ -25,9 +25,12 @@ void ACrop::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (bRandomizeGenesAtBeginPlay)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		CreateRandomGeneDataSet(GeneticData);
+		if (bRandomizeGenesAtBeginPlay)
+		{
+			CreateRandomGeneDataSet(GeneticData);
+		}
 	}
 
 	SetGrowthStage(EGrowthState::EGS_Seedling);
