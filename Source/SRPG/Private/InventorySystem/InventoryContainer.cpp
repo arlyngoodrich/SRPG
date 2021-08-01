@@ -307,20 +307,35 @@ void UInventoryContainer::BP_SplitStack(FItemData OriginalItem, int32 PositionX,
 	}
 }
 
-void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryData> NewInventory)
+void UInventoryContainer::BP_RemoveQtyOfItem(int32 Quantity, FItemData ItemData, int32 PositionX, int32 PositionY)
 {
-	Inventory = NewInventory;
-	RefreshSlotOccupancy();
+	RemoveQuantityOfItemFromStack(Quantity, ItemData, FVector2D(PositionX, PositionY));
+}
+
+void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID)
+{
+	
+	
+	for (int32 i = 0; i < NewInventory.Num(); i++)
+	{
+		AddItem(NewInventory[i].ItemData, NewInventory[i].Position, false);
+
+	}
+
+	Inventory_AbstractInventoryPairID = NewAbstractInventoryPairID;
 	Client_InventoryUpdate();
 	Internal_OnInventoryUpdate();
 
 	UE_LOG(LogInventorySystem,Log,TEXT("Inventory overwritten from abstract"))
 }
 
-TArray<FInventoryData> UInventoryContainer::GetInventoryForAbstract()
+void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPairID)
 {
-	return Inventory;
+	OutInventoryData = Inventory;
+	OutAbstractInventoryPairID = Inventory_AbstractInventoryPairID;
 }
+
+
 
 bool UInventoryContainer::Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount)
 {
@@ -391,7 +406,7 @@ return FItemData();
 
 void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQuantity, int32& OutQuantityRemoved)
 {
-	if (GetOwnerRole() < ROLE_Authority) { UE_LOG(LogInventorySystem, Warning, TEXT("Canno run 'Remove QTY Of Items Function' on client")) return; }
+	if (GetOwnerRole() < ROLE_Authority) { UE_LOG(LogInventorySystem, Warning, TEXT("Cannot run 'Remove QTY Of Items Function' on client")) return; }
 
 	int32 FoundQuantity;
 	FindTotalQuantityOfItem(Item, FoundQuantity);
@@ -404,14 +419,14 @@ void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQu
 
 	TArray<int32> ItemIndexices;
 	FindAllItemIndexices(Item, ItemIndexices);
-	TArray<FInventoryData> InventoryDataToRemove;
+	TArray<FInventoryItemData> InventoryDataToRemove;
 
 	int32 QuantityNeeded = RequestedQuantity;
 
 	for (int32 i = 0; i < ItemIndexices.Num(); i++)
 	{
 		int32 ActiveItemIndex = ItemIndexices[i];
-		FInventoryData ActiveInventoryData = Inventory[ActiveItemIndex];
+		FInventoryItemData ActiveInventoryData = Inventory[ActiveItemIndex];
 
 		int32 ItemAmount;
 		ItemAmount = ActiveInventoryData.ItemData.StackQuantity;
@@ -565,7 +580,7 @@ bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bChec
 			//Set slots to occupied
 			SetSlotsAsOccupied(ItemData.SizeX, ItemData.SizeY, Position, true);
 
-			FInventoryData InventoryData;
+			FInventoryItemData InventoryData;
 			InventoryData.ItemData = ItemData;
 			InventoryData.Position = Position;
 
@@ -1087,6 +1102,41 @@ bool UInventoryContainer::DirectStack(FItemData IncomingItem, FItemData Receivin
 		UE_LOG(LogInventorySystem, Log, TEXT("Direct stack failed, Receiving Item not valid"))
 			return false;
 	}
+
+}
+
+void UInventoryContainer::RemoveQuantityOfItemFromStack(int32 QtyToRemove, FItemData Item, FVector2D StartingPosition)
+{
+	int32 RemovalAmount;
+	RemovalAmount = FMath::Abs(QtyToRemove);
+
+	if (GetOwnerRole() != ROLE_Authority) { return; }
+
+	int32 ItemIndex;
+	if (FindInventoryItemIndex(Item, StartingPosition, ItemIndex))
+	{
+		int32 NewQty = 0;
+		int32 CurrentQty = Inventory[ItemIndex].ItemData.StackQuantity;
+
+		if (CurrentQty <= RemovalAmount)
+		{
+			RemoveItem(Item, StartingPosition);
+		}
+		else
+		{
+			NewQty = CurrentQty - RemovalAmount;
+			Inventory[ItemIndex].ItemData.StackQuantity = NewQty;
+
+		}
+		Internal_OnInventoryUpdate();
+	}
+
+
+	
+
+
+	
+
 
 }
 

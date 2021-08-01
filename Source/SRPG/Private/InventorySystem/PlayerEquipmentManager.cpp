@@ -532,13 +532,19 @@ bool UPlayerEquipmentManager::FindSlot(EEquipmentSlots TargetSlot, int32& Index)
 	return false;
 }
 
-void UPlayerEquipmentManager::CreateAbstractFromInventory(UInventoryContainer* Inventory, UAbstractInventoryContainer*& OutAbstract)
+void UPlayerEquipmentManager::CreateAbstractFromInventory(UInventoryContainer* TargetInventory, UAbstractInventoryContainer*& OutAbstract)
 {
-	if (Inventory)
+	if (TargetInventory)
 	{
 		UAbstractInventoryContainer* AbstractInvetory = nullptr;
 		AbstractInvetory = NewObject<UAbstractInventoryContainer>();
-		AbstractInvetory->SetInventory(Inventory->GetInventoryForAbstract());
+		
+		TArray<FInventoryItemData>  NewInventory;
+		int32 NewInventoryPaidID;
+
+		TargetInventory->GetInventoryForAbstract(NewInventory, NewInventoryPaidID);
+
+		AbstractInvetory->SetInventory(NewInventory, NewInventoryPaidID);
 		OutAbstract = AbstractInvetory;
 		UE_LOG(LogInventorySystem, Log, TEXT("Abstract created"))
 		return;

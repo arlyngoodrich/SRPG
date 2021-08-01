@@ -24,6 +24,17 @@ enum class EEquipmentSlots : uint8 {
 };
 
 
+UENUM(BlueprintType)
+enum class EItemType : uint8 {
+
+	EIT_None			UMETA(DisplayName = "None"),
+	EIT_Equipment		UMETA(DisplayName = "Equipment"),
+	EIT_Consumable		UMETA(DisplayName = "Consumable"),
+	EIT_Seed			UMETA(DisplayName = "Seed"),
+
+};
+
+
 
 
 USTRUCT(BlueprintType)
@@ -36,6 +47,9 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Info")
 	FText Discription;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Info")
+	EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Info")
 	int32 SizeX;
@@ -98,9 +112,29 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory Configuration")
 	class UAbstractInventoryContainer* AbstractInventory = nullptr;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory Configuration")
+	int32 Inventory_AbstractInventoryPairID;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Abstract Data")
+	class UAbstractDataContainer* AbstractData = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Abstract Data")
+	int32 AbstractDataContainerPairID;
+
 };
 
+USTRUCT(BlueprintType)
+struct FInventoryItemData
+{
+	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
+	FItemData ItemData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item Data")
+	FVector2D Position;
+
+};
 
 USTRUCT(BlueprintType)
 struct FEquipmentSlot

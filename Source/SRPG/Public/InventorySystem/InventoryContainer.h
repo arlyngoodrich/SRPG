@@ -11,18 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
 
-USTRUCT(BlueprintType)
-struct FInventoryData
-{
-	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-	FItemData ItemData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Item Data")
-	FVector2D Position;
-
-};
 
 
 UCLASS(ClassGroup = (Inventory), blueprintable, meta = (BlueprintSpawnableComponent))
@@ -75,11 +64,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Split Stack")
 	void BP_SplitStack(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	void SetInventoryFromAbstract(TArray<FInventoryData> NewInventory);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory", DisplayName = "Remove Quantity of Item")
+	void BP_RemoveQtyOfItem(int32 Quantity, FItemData ItemData, int32 PositionX, int32 PositionY);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
-	TArray<FInventoryData> GetInventoryForAbstract();
+	void SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 Inventory_AbstractInventoryPairID;
 
 protected:
 	//Blueprint server functions
@@ -181,7 +176,7 @@ protected:
 	TArray<bool> bIsSlotOccupied;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
-	TArray<FInventoryData> Inventory;
+	TArray<FInventoryItemData> Inventory;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
 	float MaxWeight;
@@ -216,6 +211,8 @@ protected:
 	bool DifferentInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
 	bool DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
+
+	void RemoveQuantityOfItemFromStack(int32 QtyToRemove,FItemData Item, FVector2D StartingPosition);
 
 	//TODO StackTransfer
 
