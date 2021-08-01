@@ -314,9 +314,15 @@ void UInventoryContainer::BP_RemoveQtyOfItem(int32 Quantity, FItemData ItemData,
 
 void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryItemData> NewInventory, int32 NewAbstractInventoryPairID)
 {
-	Inventory = NewInventory;
+	
+	
+	for (int32 i = 0; i < NewInventory.Num(); i++)
+	{
+		AddItem(NewInventory[i].ItemData, NewInventory[i].Position, false);
+
+	}
+
 	Inventory_AbstractInventoryPairID = NewAbstractInventoryPairID;
-	RefreshSlotOccupancy();
 	Client_InventoryUpdate();
 	Internal_OnInventoryUpdate();
 
