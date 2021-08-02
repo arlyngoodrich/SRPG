@@ -48,10 +48,10 @@ public:
 	float GetDefaultWalkSpeed();
 
 	UPROPERTY(BlueprintAssignable)
-		FWantsToSprint WantsToSprint_OnSprintStart;
+	FWantsToSprint WantsToSprint_OnSprintStart;
 
 	UPROPERTY(BlueprintAssignable)
-		FWantsToNotSprint WantsToNotSprint_OnSptrintStop;
+	FWantsToNotSprint WantsToNotSprint_OnSptrintStop;
 
 	UPROPERTY(BlueprintAssignable)
 		FOnTakeDamageSignature Damage_DamageTaken;

@@ -71,6 +71,10 @@ void UBaseAttributeComponent::ChangeAttributeAmount(FAttributeData InAttribute, 
 			if (!CheckIfEffectIsAlreadyActive(ActiveEffectTrigger.AttributeEffect))
 			{
 				TSubclassOf<UAttributeEffect> OBjectClass = ActiveEffectTrigger.AttributeEffect->StaticClass();
+				
+				//Ensure valid attribute effect
+				if (!OBjectClass) { UE_LOG(LogAttributeSystem, Error, TEXT("Attempting to create invalid attribute effect")) return; }
+
 				UAttributeEffect* NewEffect = NewObject<UAttributeEffect>(this, OBjectClass);
 				AppliedEffects.Add(NewEffect);
 			}
@@ -82,6 +86,10 @@ void UBaseAttributeComponent::ChangeAttributeAmount(FAttributeData InAttribute, 
 			if (!CheckIfEffectIsAlreadyActive(ActiveEffectTrigger.AttributeEffect))
 			{
 				TSubclassOf<UAttributeEffect> OBjectClass = ActiveEffectTrigger.AttributeEffect->StaticClass();
+
+				//Ensure valid attribute effect
+				if (!OBjectClass) { UE_LOG(LogAttributeSystem, Error, TEXT("Attempting to create invalid attribute effect")) return; }
+
 				UAttributeEffect* NewEffect = NewObject<UAttributeEffect>(this, OBjectClass);
 				AppliedEffects.Add(NewEffect);
 			}
