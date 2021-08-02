@@ -40,10 +40,10 @@ public:
 	float GetSprintSpeedModifier();
 
 	UFUNCTION()
-		void SetSprintSpeedModifer(float NewSprintModifer);
+	void SetSprintSpeedModifer(float NewSprintModifer);
 
 	UFUNCTION()
-		void SetWantsToSprint();
+	void SetWantsToSprint();
 
 	float GetDefaultWalkSpeed();
 
@@ -83,7 +83,7 @@ protected:
 	void ToggleCrouch();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void Server_SetWantsToSprint();
+	void Server_SetWantsToSprint();
 	bool Server_SetWantsToSprint_Validate();
 	void Server_SetWantsToSprint_Implementation();
 
