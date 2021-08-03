@@ -8,6 +8,7 @@
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
+#include "..\..\Public\AttributeSystem\StaminaAttribute.h"
 
 
 UStaminaAttribute::UStaminaAttribute()
@@ -158,6 +159,16 @@ void UStaminaAttribute::StartStaminaReGenTimer()
 
 }
 
+void UStaminaAttribute::OnRep_EncumberanceUpdate()
+{
+	OnEncumberanceChange.Broadcast(bIsEncumbered);
+}
+
+void UStaminaAttribute::OnRep_ExhaustedUpdate()
+{
+	OnExhuastionChange.Broadcast(bIsExhausted);
+}
+
 void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 {
 	CurrentStamina = FMath::Clamp(CurrentStamina + ChangeAmount, 0.f, MaxStamina);
@@ -182,6 +193,12 @@ void UStaminaAttribute::SetExhausted()
 	PlayerCharacter->SetSprintSpeedModifer(1.f);
 	PlayerCharacter->SetWantsToSprint();
 
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		OnRep_ExhaustedUpdate();
+	}
+
+
 
 	UE_LOG(LogAttributeSystem,Log,TEXT("Character is exhausted"))
 }
@@ -201,6 +218,11 @@ void UStaminaAttribute::SetStaminaOK()
 		PlayerCharacter->SetSprintSpeedModifer(DefaultSprintModifier);
 	}
 
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		OnRep_ExhaustedUpdate();
+	}
+
 
 	UE_LOG(LogAttributeSystem,Log,TEXT("Stamina is OK"))
 }
@@ -213,6 +235,11 @@ void UStaminaAttribute::SetEncumbered()
 
 	PlayerCharacter->SetSprintSpeedModifer(EncumberanceSprintModifer);
 	UE_LOG(LogAttributeSystem,Log,TEXT("Player is encumbered"))
+
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		OnRep_EncumberanceUpdate();
+	}
 	
 }
 
@@ -224,6 +251,11 @@ void UStaminaAttribute::SetWeightOK()
 
 	PlayerCharacter->SetSprintSpeedModifer(DefaultSprintModifier);
 	UE_LOG(LogAttributeSystem, Log, TEXT("Player weight is Ok "))
+
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		OnRep_EncumberanceUpdate();
+	}
 }
 
 void UStaminaAttribute::ReGenStamina()

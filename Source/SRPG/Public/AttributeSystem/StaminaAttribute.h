@@ -7,7 +7,8 @@
 #include "AttributeSystem/AttributeData.h"
 #include "StaminaAttribute.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEncumberanceChange, bool, bNewEncumberance);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExhaustedChange, bool, bNewExhausted);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UStaminaAttribute : public UActorComponent
@@ -22,8 +23,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Stamina")
 	void UseStamina(float StaminaAmount);
 
-	UFUNCTION(BluePrintCallable, BlueprintAuthorityOnly, Category = "Stamina")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Stamina")
 	void SetWeight(float NewWeight);
+
+	//Client safe function to bind to encumberance update.  Designed for use with UI. 
+	UPROPERTY(BlueprintAssignable)
+	FOnEncumberanceChange OnEncumberanceChange;
+
+	//Client safe function to bind to exhaustion update.  Designed for use with UI. 
+	UPROPERTY(BlueprintAssignable)
+	FOnExhaustedChange OnExhuastionChange;
 
 protected:
 
@@ -37,6 +46,12 @@ protected:
 
 	UFUNCTION()
 	void StartStaminaReGenTimer();
+
+	UFUNCTION()
+	void OnRep_EncumberanceUpdate();
+
+	UFUNCTION()
+	void OnRep_ExhaustedUpdate();
 
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	class UTP_CharacterMovement* CharacterMovementComponent;
@@ -59,7 +74,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
 	float SprintStaminaDecay;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stamina")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ExhaustedUpdate, Category = "Stamina")
 	bool bIsExhausted;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
@@ -68,7 +83,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
 	float EncumberanceSprintModifer;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stamina")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_EncumberanceUpdate, Category = "Stamina")
 	bool bIsEncumbered;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stamina")
