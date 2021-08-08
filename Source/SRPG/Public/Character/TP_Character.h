@@ -54,7 +54,7 @@ public:
 	FWantsToNotSprint WantsToNotSprint_OnSptrintStop;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnTakeDamageSignature Damage_DamageTaken;
+	FOnTakeDamageSignature Damage_DamageTaken;
 
 protected:
 

@@ -8,7 +8,7 @@
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
-#include "..\..\Public\AttributeSystem\StaminaAttribute.h"
+
 
 
 UStaminaAttribute::UStaminaAttribute()
@@ -183,6 +183,8 @@ void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 	{
 		SetStaminaOK();
 	}
+
+	OnStaminaChange.Broadcast(CurrentStamina);
 }
 
 void UStaminaAttribute::SetExhausted()

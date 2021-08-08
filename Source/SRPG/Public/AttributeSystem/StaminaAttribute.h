@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEncumberanceChange, bool, bNewEncumberance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExhaustedChange, bool, bNewExhausted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChange, float, NewStamina);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UStaminaAttribute : public UActorComponent
@@ -33,6 +34,9 @@ public:
 	//Client safe function to bind to exhaustion update.  Designed for use with UI. 
 	UPROPERTY(BlueprintAssignable)
 	FOnExhaustedChange OnExhuastionChange;
+
+	//Server only delegate for stamina updates.  Fairly frequent so not client safe.  
+	FOnStaminaChange OnStaminaChange;
 
 protected:
 
