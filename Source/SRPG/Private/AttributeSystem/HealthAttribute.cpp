@@ -41,24 +41,52 @@ void UHealthAttribute::BeginPlay()
 
 void UHealthAttribute::OnOwnerTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (bIsDead) { return; }
 	UE_LOG(LogAttributeSystem, Log, TEXT("%s took %s damage"), *GetOwner()->GetName(), *FString::SanitizeFloat(Damage))
+	ChangeHealth(-Damage);
+}
 
+void UHealthAttribute::StartReGeneratingHealth(float Frequency, float HealthAmount)
+{
+	if (Frequency <= 0)
+	{
+		UE_LOG(LogAttributeSystem, Error, TEXT("Health Regen frequency for %s must be greater than 0"), *GetOwner()->GetName())
+			return;
+	}
+
+	//Start Health Regen Timer
+	HealthReGenAmount = HealthAmount;
+	GetWorld()->GetTimerManager().SetTimer(HealthRegenerationTimerHandle, this, &UHealthAttribute::ReGenHealth, Frequency, true);
+
+}
+
+void UHealthAttribute::OnRep_HealthChange()
+{
+	UE_LOG(LogAttributeSystem, Log, TEXT("%s new health is: %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(CurrentHealth))
+	Health_OnHealthChange.Broadcast(HealthChangeData.HealthChangeAmount,HealthChangeData.NewHealth);
+	BP_OnHealthChange(HealthChangeData.HealthChangeAmount, HealthChangeData.NewHealth);
+}
+
+void UHealthAttribute::OnRep_IsDead()
+{
+	UE_LOG(LogAttributeSystem, Log, TEXT("%s has died"), *GetOwner()->GetName())
+	BP_OnDeath();
 }
 
 
 void UHealthAttribute::ChangeHealth(float ChangeAmount)
 {
-	if (GetOwnerRole() != ROLE_Authority) 
-	{ 
-		UE_LOG(LogAttributeSystem, Warning, TEXT("%s :Cannot change health on client"), *GetOwner()->GetName())  
-		return;  
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s :Cannot change health on client"), *GetOwner()->GetName())
+			return;
 	}
 
 	float PreviousHealth;
 	PreviousHealth = CurrentHealth;
 
 	CurrentHealth = FMath::Clamp(CurrentHealth + ChangeAmount, 0.f, MaxHealth);
-	
+
 	HealthChangeData.NewHealth = CurrentHealth;
 	HealthChangeData.PreviousHealth = PreviousHealth;
 	HealthChangeData.HealthChangeAmount = CurrentHealth - PreviousHealth;
@@ -73,21 +101,32 @@ void UHealthAttribute::ChangeHealth(float ChangeAmount)
 
 }
 
-
-void UHealthAttribute::OnRep_HealthChange()
+void UHealthAttribute::ReGenHealth()
 {
-	UE_LOG(LogAttributeSystem, Log, TEXT("%s new health is: %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(CurrentHealth))
-	Health_OnHealthChange.Broadcast(HealthChangeData.HealthChangeAmount,HealthChangeData.NewHealth);
-	BP_OnHealthChange(HealthChangeData.HealthChangeAmount, HealthChangeData.NewHealth);
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s cannot regenerate health on client"), *GetOwner()->GetName())
+		return;
+	}
+
+
+	if (HealthReGenAmount == 0.f)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("Regen amount for %s is 0"), *GetOwner()->GetName())
+	}
+
+	ChangeHealth(HealthReGenAmount);
+
+	//When health reaches max health again
+	if (CurrentHealth == MaxHealth)
+	{
+		if (GetWorld()->GetTimerManager().TimerExists(HealthRegenerationTimerHandle))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(HealthRegenerationTimerHandle);
+			HealthReGenAmount = 0.f;
+			UE_LOG(LogAttributeSystem, Log, TEXT("%s finished regenerating health"), *GetOwner()->GetName())
+		}
+	}
 }
-
-
-void UHealthAttribute::OnRep_IsDead()
-{
-	UE_LOG(LogAttributeSystem, Log, TEXT("%s has died"), *GetOwner()->GetName())
-	BP_OnDeath();
-}
-
-
 
 

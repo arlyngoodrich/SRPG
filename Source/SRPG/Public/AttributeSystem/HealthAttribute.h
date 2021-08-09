@@ -40,6 +40,7 @@ public:
 	UHealthAttribute();
 
 	//On Actor take any damange signature
+	UFUNCTION()
 	virtual void OnOwnerTakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	UPROPERTY(BlueprintAssignable)
@@ -61,10 +62,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Health", meta = (DisplayName = "On Health Change"))
 	void BP_OnHealthChange(float ChangeAmount, float NewHealth);
 
-//	UFUNCTION(BlueprintCallable, Category = "Health")
-//	void StartReGeneratingHealth(float Frequency, float HealthAmount);
-
-	FTimerHandle HealthRegenerationHandle;
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Health")
+	void StartReGeneratingHealth(float Frequency, float HealthAmount);
 
 	//Overridable function triggered when owning actor dies.  Runs on client and server.
 	UFUNCTION()
@@ -73,7 +72,6 @@ protected:
 	//Overridable function triggered when health changes.  Runs on client and server. 
 	UFUNCTION()
 	virtual void OnRep_HealthChange();
-
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Health")
 	float MaxHealth;
@@ -91,5 +89,11 @@ protected:
 private:
 
 	void ChangeHealth(float ChangeAmount);
-		
+
+	void ReGenHealth();
+
+	FTimerHandle HealthRegenerationTimerHandle;
+
+	float HealthReGenAmount;
+
 };
