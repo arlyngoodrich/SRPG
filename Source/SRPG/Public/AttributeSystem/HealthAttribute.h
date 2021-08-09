@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "AttributeSystem/BaseAttributeComponent.h"
 #include "HealthAttribute.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
@@ -31,7 +31,7 @@ struct FHealthChangeData
  * 
  */
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
-class SRPG_API UHealthAttribute : public UActorComponent
+class SRPG_API UHealthAttribute : public UBaseAttributeComponent
 {
 	GENERATED_BODY()
 

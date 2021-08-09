@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "AttributeSystem/BaseAttributeComponent.h"
 #include "AttributeSystem/AttributeData.h"
 #include "StaminaAttribute.generated.h"
 
@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExhaustedChange, bool, bNewExhaus
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChange, float, NewStamina);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
-class SRPG_API UStaminaAttribute : public UActorComponent
+class SRPG_API UStaminaAttribute : public UBaseAttributeComponent
 {
 	GENERATED_BODY()
 
