@@ -8,7 +8,7 @@
 #include "BaseAttributeComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Attributes), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Attributes))
 class SRPG_API UBaseAttributeComponent : public UActorComponent
 {
 	GENERATED_BODY()
