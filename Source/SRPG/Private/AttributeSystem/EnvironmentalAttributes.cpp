@@ -16,24 +16,24 @@ void UEnvironmentalAttributes::AdjustHotResitance(float Adjustment)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
 			return;
 	}
 
 	HeatResistance = FMath::Clamp(HeatResistance + Adjustment, 0.f, 0.9f);
-	UE_LOG(LogAttributeSystem,Log,TEXT("%s: Heat Resistance Adjusted to %s"), *GetOwner()->GetName(),*FString::SanitizeFloat(HeatResistance))
+	UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("%s: Heat Resistance Adjusted to %s"), *GetOwner()->GetName(),*FString::SanitizeFloat(HeatResistance))
 }
 
 void UEnvironmentalAttributes::AdjustColdResitance(float Adjustment)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
 			return;
 	}
 
 	ColdResistance = FMath::Clamp(ColdResistance + Adjustment, 0.f, 0.9f);
-	UE_LOG(LogAttributeSystem, Log, TEXT("%s: Cold Resistance Adjusted to %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(ColdResistance))
+	UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: Cold Resistance Adjusted to %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(ColdResistance))
 		
 }
 
@@ -41,12 +41,12 @@ void UEnvironmentalAttributes::AdjustWetnessResitance(float Adjustment)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot asjust resistance from client"), *GetOwner()->GetName())
 			return;
 	}
 
 	WetnessResistance = FMath::Clamp(ColdResistance + Adjustment, 0.f, 0.9f);
-	UE_LOG(LogAttributeSystem, Log, TEXT("%s: Wetness Resistance Adjusted to %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(WetnessResistance))
+	UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: Wetness Resistance Adjusted to %s"), *GetOwner()->GetName(), *FString::SanitizeFloat(WetnessResistance))
 
 
 }
@@ -54,6 +54,8 @@ void UEnvironmentalAttributes::AdjustWetnessResitance(float Adjustment)
 void UEnvironmentalAttributes::BeginPlay()
 {
 	Super::BeginPlay();
+	SetCurrentTemperature(StartingCurrentTemp);
+	SetCurrentWetness(StartingCurrentWetness);
 }
 
 
@@ -79,10 +81,10 @@ void UEnvironmentalAttributes::SampleEnviornment(float SampledTemperature, float
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot sample enviornment from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot sample enviornment from client"), *GetOwner()->GetName())
 			return;
 	}
-	UE_LOG(LogAttributeSystem, Log, TEXT("%s sampled enviornment"), *GetOwner()->GetName())
+	UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s sampled enviornment"), *GetOwner()->GetName())
 	
 	AdjustTemperature(SampledTemperature);
 	AdjustWetness(SampledWetness);
@@ -102,12 +104,26 @@ void UEnvironmentalAttributes::OnRep_WetnessStateUpdate()
 	Wetness_OnStateChange.Broadcast(CurrentWetnessState);
 }
 
+void UEnvironmentalAttributes::SetCurrentTemperature(float NewCurrentTemp)
+{
+	CurrentTemperature = NewCurrentTemp;
+	UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Current temp overrident to: %s"),*FString::SanitizeFloat(CurrentTemperature))
+	SetTempState();
+}
+
+void UEnvironmentalAttributes::SetCurrentWetness(float NewCurrentWetness)
+{
+	CurrentWetness = NewCurrentWetness;
+	UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("Current wetness overrident to: %s"), *FString::SanitizeFloat(CurrentWetness))
+	SetWetnessState();
+}
+
 
 void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot adjsut temperature from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot adjsut temperature from client"), *GetOwner()->GetName())
 			return;
 	}
 
@@ -123,7 +139,7 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 	if (FMath::Abs(CurrentTemperature - TargetTemperature) <= 1.f)
 	{
 		CurrentTemperature = TargetTemperature;
-		UE_LOG(LogAttributeSystem,Log,TEXT("Temp auto set. Current Temp = %s"),*FString::SanitizeFloat(CurrentTemperature))
+		UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Temp auto set. Current Temp = %s"),*FString::SanitizeFloat(CurrentTemperature))
 		return;
 	}
 	else
@@ -149,7 +165,7 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 
 		CurrentTemperature += TempToAdjust;
 
-		UE_LOG(LogAttributeSystem, Log, TEXT("%s Temp Adjustment. Adjustment Temp = %s | Current Temp = %s"),
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s Temp Adjustment. Adjustment Temp = %s | Current Temp = %s"),
 			*FString::SanitizeFloat(TempToAdjust),
 			*FString::SanitizeFloat(CurrentTemperature)
 		)
@@ -162,7 +178,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot adjsut wetness from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot adjsut wetness from client"), *GetOwner()->GetName())
 			return;
 	}
 
@@ -177,7 +193,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 	if (FMath::Abs(TargetWetness - CurrentWetness) <= 1)
 	{
 		CurrentWetness = TargetWetness;
-		UE_LOG(LogAttributeSystem,Log,TEXT("Wetness auto set. Current wetness = %s"),*FString::SanitizeFloat(CurrentWetness))
+		UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Wetness auto set. Current wetness = %s"),*FString::SanitizeFloat(CurrentWetness))
 	}
 	else
 	{
@@ -204,7 +220,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 
 		CurrentWetness += WetnessAdjust;
 
-		UE_LOG(LogAttributeSystem, Log, TEXT("%s Wetness Adjustment. Wetness Adjustment = %s | Current Wetness = %s"),
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s Wetness Adjustment. Wetness Adjustment = %s | Current Wetness = %s"),
 			*FString::SanitizeFloat(WetnessAdjust),
 			*FString::SanitizeFloat(CurrentWetness)
 		)
@@ -217,7 +233,7 @@ void UEnvironmentalAttributes::SetTempState()
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot adjsut temp state from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot adjsut temp state from client"), *GetOwner()->GetName())
 			return;
 	}
 
@@ -255,7 +271,7 @@ void UEnvironmentalAttributes::SetTempState()
 		CurrentTempState = TestTempState;
 		const FString ResourceString = StaticEnum<ETemperatureState>()->GetValueAsString(CurrentTempState);
 		OnRep_TempStateUpdate();
-		UE_LOG(LogAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
 	}
 
 
@@ -265,7 +281,7 @@ void UEnvironmentalAttributes::SetWetnessState()
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot adjsut wetness state from client"), *GetOwner()->GetName())
+		UE_LOG(LogEnvironmentAttributeSystem, Error, TEXT("%s: Cannot adjsut wetness state from client"), *GetOwner()->GetName())
 			return;
 	}
 
@@ -296,7 +312,7 @@ void UEnvironmentalAttributes::SetWetnessState()
 		CurrentWetnessState = TestWetState;
 		const FString ResourceString = StaticEnum<EWetnessState>()->GetValueAsString(CurrentWetnessState);
 		OnRep_WetnessStateUpdate();
-		UE_LOG(LogAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
 
 	}
 

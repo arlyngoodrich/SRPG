@@ -119,11 +119,8 @@ void ABuildingPiece::UpdateBuildStatus(EBuildingPieceStatus NewBuildStatus)
 
 void ABuildingPiece::SetConnectionLevel(EBuildingConnectionLevel NewConnectionLevel)
 {
-
-	const TEnumAsByte<EBuildingConnectionLevel> ByteConnectionLevel = NewConnectionLevel;
-	FString EnumAsString = UEnum::GetValueAsString(ByteConnectionLevel.GetValue());
-
+	const FString ResourceString = StaticEnum<EBuildingConnectionLevel>()->GetValueAsString(NewConnectionLevel);
 	ConnectionLevel = NewConnectionLevel;
-	UE_LOG(LogBuildingSystem, Log, TEXT("Connection Level Changed to %s"),*EnumAsString)
+	UE_LOG(LogBuildingSystem, Log, TEXT("Connection Level Changed to %s"),*ResourceString)
 
 }

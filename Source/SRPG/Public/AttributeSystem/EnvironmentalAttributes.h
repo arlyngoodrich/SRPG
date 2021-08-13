@@ -39,13 +39,13 @@ public:
 
 	UEnvironmentalAttributes();
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Enviornmental Attribute")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
 	void AdjustHotResitance(float Adjustment);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Enviornmental Attribute")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
 	void AdjustColdResitance(float Adjustment);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Enviornmental Attribute")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
 	void AdjustWetnessResitance(float Adjustment);
 
 	UPROPERTY(BlueprintAssignable)
@@ -59,7 +59,7 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Enviornmental Attribute")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
 	void SampleEnviornment(float SampledTemperature, float SampledWetness);
 
 	UFUNCTION()
@@ -69,62 +69,74 @@ protected:
 	void OnRep_WetnessStateUpdate();
 
 	//Called on both client and server
-	UFUNCTION(BlueprintImplementableEvent, Category = "Enviornmental Attribute", meta = (DisplayNanme = "On Temp State Update"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Environmental Attribute", meta = (DisplayNanme = "On Temp State Update"))
 	void BP_OnTempStateUpdate(ETemperatureState NewTempState);
 
 	//Called on both client and server
-	UFUNCTION(BlueprintImplementableEvent, Category = "Enviornmental Attribute", meta = (DisplayNanme = "On Wetness State Update"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Environmental Attribute", meta = (DisplayNanme = "On Wetness State Update"))
 	void BP_OnWetnessStateUpdate(EWetnessState NewWetnessState);
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
+	void SetCurrentTemperature(float NewCurrentTemp);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
+	void SetCurrentWetness(float NewCurrentWetness);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float CurrentTemperature;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(EditDefaultsOnly, Category = "Environmental Attribute")
+	float StartingCurrentTemp = 15.f;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float TargetTemperature;
 
 	//Should be between 0 and 1.  How much resitance to the current temperature increasing to toward the target temperature. 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float HeatResistance;
 
 	//Should be between 0 and 1.  How much resitance to the current temperature raising to toward the target temperature.  
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float ColdResistance;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float CurrentWetness;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(EditDefaultsOnly, Category = "Environmental Attribute")
+	float StartingCurrentWetness = 0.f;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float TargetWetness; 
 
 	//Should be between 0 and 1.  How much resitance to the current wetness moving toward the target wetness. 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
 	float WetnessResistance;
 
 	//Should be between 0 and 1.  If 1 temp will not increase 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float BaseHeatResitance = .1;
 
 	//Should be between 0 and 1.  If 1 temp will not drop. 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float BaseColdResitance = .1;
 
 	//Should be between 0 and 1.  If 1 will not change wetness. 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float BaseWetnessResitance = .1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | State Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | State Effects")
 	float ScorchingEffectOnDrying = 1.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | State Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | State Effects")
 	float HotEffectOnDrying = .5;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | State Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | State Effects")
 	float SoakedEffectOnWarming = 1.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | State Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | State Effects")
 	float WetEffectOnWarniming = .5;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | State Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | State Effects")
 	float DampEffectOnWarniming = .1;
 
 	//All temps in C.  If temp is less than Cold temp..
@@ -132,41 +144,41 @@ protected:
 	//float BaseFreezingTemp;
 
 	//All temps in C. If temp is between cold base and comfortable base.  Freezing if less than this number.  
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Temperature Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Temperature Config")
 	float BaseColdTemp = 0.f;
 
 	//All temps in C. If temp is between Comfortable base and hot base
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Temperature Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Temperature Config")
 	float BaseComfortableTemp = 15.f;
 
 	//All temps in C. If temp is between hot base and Scortching base
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Temperature Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Temperature Config")
 	float BaseHotTemp = 25.f;
 
 	//All temps in C. If temp is greater than scortching base
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Temperature Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Temperature Config")
 	float BaseScortchingTemp = 35.f;
 
 	//On a scale of 0 to 100
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Wetness Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Wetness Config")
 	float BaseDryLevel = 0;
 
 	//Damp if greater than this number
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Wetness Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Wetness Config")
 	float BaseDampLevel = 1;
 
 	//Wet if greater than this number
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Wetness Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Wetness Config")
 	float BaseWetLevel = 20;
 
 	//Soaked if greater than this number
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enviornmental Attribute | Wetness Config")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Environmental Attribute | Wetness Config")
 	float BaseSoakedLevel = 50;
 
-	UPROPERTY(ReplicatedUsing = OnRep_TempStateUpdate, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(ReplicatedUsing = OnRep_TempStateUpdate, BlueprintReadOnly, Category = "Environmental Attribute")
 	ETemperatureState CurrentTempState;
 
-	UPROPERTY(Replicated = OnRep_WetnessStateUpdate, BlueprintReadOnly, Category = "Enviornmental Attribute")
+	UPROPERTY(Replicated = OnRep_WetnessStateUpdate, BlueprintReadOnly, Category = "Environmental Attribute")
 	EWetnessState CurrentWetnessState;
 
 private:
