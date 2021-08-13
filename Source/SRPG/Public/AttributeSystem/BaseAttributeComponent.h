@@ -17,9 +17,19 @@ public:
 	// Sets default values for this component's properties
 	UBaseAttributeComponent();
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
+	void CheckInEffect(class UAttributeEffect* AttributeEffect);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
+	void CheckOutEffect(class UAttributeEffect* AttributeEffect);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+
+
+	UPROPERTY()
+	TArray<class UAttributeEffect*> ActiveEffects;
 
 };

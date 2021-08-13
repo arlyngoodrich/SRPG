@@ -19,6 +19,17 @@ enum class EMetabolismStatus : uint8 {
 	EMS_Full		    UMETA(DisplayName = "Full"),
 };
 
+UENUM(BlueprintType)
+enum class EMetabolicBalanceType : uint8 {
+
+	EMBT_None				UMETA(DisplayName = "Balanced"),
+	EMBT_Carbs				UMETA(DisplayName = "Carb Heavy"),
+	EMBT_Protein		    UMETA(DisplayName = "Protein Heavy"),
+	EMBT_Vitamins		    UMETA(DisplayName = "Vitamin Heavy"),
+};
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBalanceChange, EMetabolicBalanceType, NewMetabolisimBalanceType);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UMetabolismAttribute : public UBaseAttributeComponent
@@ -29,9 +40,27 @@ public:
 
 	UMetabolismAttribute();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnBalanceChange Metabolism_OnBalanceChange;
+
 protected:
 
 	virtual void BeginPlay() override;
+
+	//Triggered by change in Metabolic status.  Runs on both client and server.  
+	UFUNCTION(BlueprintImplementableEvent, Category = "Metabolism", meta = (DisplayName = "On Metabolic Status Update"))
+	void BP_OnMetabolicStatusUpdate(EMetabolismStatus NewMetabolicStatus);
+
+	//Triggered by change in Metabolic balance.  Runs on both client and server.  
+	UFUNCTION(BlueprintImplementableEvent, Category = "Metabolism", meta = (DisplayName = "On Metabolic Balance Update"))
+	void BP_OnMetabolicBalanceUpdate(EMetabolicBalanceType NewBalance);
+
+	UFUNCTION()
+	void OnRep_MetabolicStatusChange();
+
+	UFUNCTION()
+	void OnRep_MetabolicBalanceChange();
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
 	float MaxWater = 100.f;
@@ -58,6 +87,9 @@ protected:
 	float MetabolicFrequency = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
+	float StaminaRegnModifier = .5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
 	float WaterDecayAmount = 0.1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
@@ -76,10 +108,13 @@ protected:
 	float HungerLevel = 25.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
-	float StarvingLevel = 10,f ;
+	float StarvingLevel = 10.f;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Metabolism")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MetabolicStatusChange, Category = "Metabolism")
 	EMetabolismStatus CurrentMetabolismStatus;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MetabolicBalanceChange, Category = "Metabolism")
+	EMetabolicBalanceType CurrentMetabolicBalance;
 
 	void StartMetabolism();
 
@@ -89,10 +124,20 @@ protected:
 
 	void LogFoodLevels();
 
+	class UStaminaAttribute* StaminaAttribute;
+
 private:
 
 	void ChangeFood(float CarbsChange, float VitaminsChange, float ProteinChange, float WaterChange);
 
 	void SetMetabolismStatus();
+
+	void SetMetabolicBalance();
+
+	UFUNCTION()
+	void OnStartStaminaRegen();
+
+	UFUNCTION()
+	void OnStopStaminaRegen();
 	
 };

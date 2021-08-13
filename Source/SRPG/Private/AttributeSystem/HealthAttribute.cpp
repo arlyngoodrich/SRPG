@@ -46,19 +46,35 @@ void UHealthAttribute::OnOwnerTakeDamage(AActor* DamagedActor, float Damage, con
 	ChangeHealth(-Damage);
 }
 
-void UHealthAttribute::StartReGeneratingHealth(float Frequency, float HealthAmount)
+void UHealthAttribute::ModifyHealthReGenAmount(float ModifyAmount)
 {
-	if (Frequency <= 0)
+	if (GetOwnerRole() != ROLE_Authority)
 	{
-		UE_LOG(LogAttributeSystem, Error, TEXT("Health Regen frequency for %s must be greater than 0"), *GetOwner()->GetName())
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s :Cannot modify health regen on client"), *GetOwner()->GetName())
 			return;
 	}
 
-	//Start Health Regen Timer
-	HealthReGenAmount = HealthAmount;
-	GetWorld()->GetTimerManager().SetTimer(HealthRegenerationTimerHandle, this, &UHealthAttribute::ReGenHealth, Frequency, true);
-
+	ReGenModifer += ModifyAmount;
 }
+
+void UHealthAttribute::AddHealth(float HealthAmount)
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s :Cannot add health on client"), *GetOwner()->GetName())
+			return;
+	}
+
+	if (HealthAmount <= 0)
+	{
+		UE_LOG(LogAttributeSystem,Warning,TEXT("Cannot add negative health to %s"),*GetOwner()->GetName())
+		return;
+	}
+
+	ChangeHealth(HealthAmount);
+}
+
+
 
 void UHealthAttribute::OnRep_HealthChange()
 {
@@ -72,6 +88,7 @@ void UHealthAttribute::OnRep_IsDead()
 	UE_LOG(LogAttributeSystem, Log, TEXT("%s has died"), *GetOwner()->GetName())
 	BP_OnDeath();
 }
+
 
 
 void UHealthAttribute::ChangeHealth(float ChangeAmount)
@@ -98,8 +115,29 @@ void UHealthAttribute::ChangeHealth(float ChangeAmount)
 		bIsDead = true;
 		OnRep_IsDead();
 	}
+	else if (bShouldReGenHealth)
+	{
+		//If already regenerating, will disregard
+		StartReGeneratingHealth();
+	}
 
 }
+
+
+void UHealthAttribute::StartReGeneratingHealth()
+{
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(HealthRegenerationTimerHandle))
+	{
+		return;
+	}
+
+	//Start Health Regen Timer
+	GetWorld()->GetTimerManager().SetTimer(HealthRegenerationTimerHandle, this, &UHealthAttribute::ReGenHealth, 1.f, true);
+
+}
+
+
 
 void UHealthAttribute::ReGenHealth()
 {
@@ -110,12 +148,12 @@ void UHealthAttribute::ReGenHealth()
 	}
 
 
-	if (HealthReGenAmount == 0.f)
+	if (BaseHealthRegenAmount == 0.f || ReGenModifer == 0.f)
 	{
 		UE_LOG(LogAttributeSystem, Warning, TEXT("Regen amount for %s is 0"), *GetOwner()->GetName())
 	}
 
-	ChangeHealth(HealthReGenAmount);
+	ChangeHealth(BaseHealthRegenAmount* ReGenModifer);
 
 	//When health reaches max health again
 	if (CurrentHealth == MaxHealth)
@@ -123,7 +161,6 @@ void UHealthAttribute::ReGenHealth()
 		if (GetWorld()->GetTimerManager().TimerExists(HealthRegenerationTimerHandle))
 		{
 			GetWorld()->GetTimerManager().ClearTimer(HealthRegenerationTimerHandle);
-			HealthReGenAmount = 0.f;
 			UE_LOG(LogAttributeSystem, Log, TEXT("%s finished regenerating health"), *GetOwner()->GetName())
 		}
 	}

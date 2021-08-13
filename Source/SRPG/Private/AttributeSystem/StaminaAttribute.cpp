@@ -27,7 +27,7 @@ UStaminaAttribute::UStaminaAttribute()
 
 void UStaminaAttribute::UseStamina(float StaminaAmount)
 {
-	ChangeStaminaAmount(-StaminaAmount);
+	ChangeStaminaAmount(-StaminaAmount*StaminaUseModifer);
 	UE_LOG(LogAttributeSystem,Log,TEXT("Stamina: %s"),*FString::SanitizeFloat(CurrentStamina))
 
 	StartStaminaReGenTimer();
@@ -54,6 +54,29 @@ void UStaminaAttribute::SetWeight(float NewWeight)
 	UE_LOG(LogAttributeSystem,Log,TEXT("New weight: %s"),*FString::SanitizeFloat(CurrentWeight))
 }
 
+void UStaminaAttribute::ModifyStaminaUse(float ModifyAmount)
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot use effect modifer on client"), *this->GetName())
+			return;
+	}
+
+	StaminaUseModifer = FMath::Max(StaminaUseModifer + ModifyAmount, 0.f);
+}
+
+void UStaminaAttribute::ModifyStaminaReGen(float ModifyAmount)
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Error, TEXT("%s: Cannot use effect modifer on client"), *this->GetName())
+			return;
+	}
+
+	StaminaRegenModifer = FMath::Max(StaminaRegenModifer + ModifyAmount, 0.f);
+
+}
+
 // Called when the game starts
 void UStaminaAttribute::BeginPlay()
 {
@@ -71,8 +94,9 @@ void UStaminaAttribute::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& O
 	DOREPLIFETIME(UStaminaAttribute, bIsExhausted);
 	DOREPLIFETIME(UStaminaAttribute, CurrentWeight);
 	DOREPLIFETIME(UStaminaAttribute, bIsEncumbered);
-	
-	
+	DOREPLIFETIME(UStaminaAttribute, StaminaUseModifer);
+	DOREPLIFETIME(UStaminaAttribute, StaminaRegenModifer);
+		
 }
 
 void UStaminaAttribute::Initalize()
@@ -126,10 +150,7 @@ void UStaminaAttribute::StartStaminaSprintDecayTimer()
 
 
 	//Pause regen timer if valid
-	if (StaminaReGentimer.IsValid())
-	{
-		GetWorld()->GetTimerManager().PauseTimer(StaminaReGentimer);
-	}
+	StopStaminaRegen();
 
 }
 
@@ -150,13 +171,23 @@ void UStaminaAttribute::StartStaminaReGenTimer()
 		GetWorld()->GetTimerManager().SetTimer(StaminaReGentimer, this, &UStaminaAttribute::ReGenStamina, 1.f, true);
 	}
 	
+	Stamina_OnStartReGen.Broadcast();
+
 	//Pause Sprint Decay timer if valid
+
 	if (SprintStaminaDecayTimer.IsValid())
 	{
 		GetWorld()->GetTimerManager().PauseTimer(SprintStaminaDecayTimer);
 	}
+}
 
-
+void UStaminaAttribute::StopStaminaRegen()
+{
+	if (StaminaReGentimer.IsValid())
+	{
+		GetWorld()->GetTimerManager().PauseTimer(StaminaReGentimer);
+		Stamina_OnStopReGen.Broadcast();
+	}
 }
 
 void UStaminaAttribute::OnRep_EncumberanceUpdate()
@@ -199,8 +230,6 @@ void UStaminaAttribute::SetExhausted()
 	{
 		OnRep_ExhaustedUpdate();
 	}
-
-
 
 	UE_LOG(LogAttributeSystem,Log,TEXT("Character is exhausted"))
 }
@@ -265,7 +294,7 @@ void UStaminaAttribute::ReGenStamina()
 
 	if (bCanStaminaRegen == false) { return; }
 
-	ChangeStaminaAmount(StaminaRegenAmount);
+	ChangeStaminaAmount(StaminaRegenAmount * StaminaRegenModifer);
 
 	UE_LOG(LogAttributeSystem,Log,TEXT("Stamina: %s"), *FString::SanitizeFloat(CurrentStamina))
 
@@ -275,7 +304,7 @@ void UStaminaAttribute::ReGenStamina()
 		//Pause regen timer if valid
 		if (StaminaReGentimer.IsValid())
 		{
-			GetWorld()->GetTimerManager().PauseTimer(StaminaReGentimer);
+			StopStaminaRegen();
 			UE_LOG(LogAttributeSystem,Log,TEXT("Stamina reached max amount, regen stopped"))
 		}
 	}
@@ -286,7 +315,7 @@ void UStaminaAttribute::UseStaminaWhileSprinting()
 
 	if (bIsExhausted) { return; }
 
-	ChangeStaminaAmount(-SprintStaminaDecay);
+	ChangeStaminaAmount(-SprintStaminaDecay * StaminaUseModifer);
 
 	UE_LOG(LogAttributeSystem, Log, TEXT("Stamina: %s"), *FString::SanitizeFloat(CurrentStamina))
 }

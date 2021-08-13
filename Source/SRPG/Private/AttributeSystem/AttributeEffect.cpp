@@ -5,15 +5,35 @@
 #include "AttributeSystem/BaseAttributeComponent.h"
 #include "LogFiles.h"
 
-
-void UAttributeEffect::InitalizeEffect(class UBaseAttributeComponent* SpawningComponent)
+void UAttributeEffect::InitalizeEffect(class UBaseAttributeComponent* SetSpawningAttributeComponent, class UBaseAttributeComponent* SetTargetAttributeComponent)
 {
-	OriginatingComponent = SpawningComponent;
+	if (SetSpawningAttributeComponent == nullptr || SetTargetAttributeComponent == nullptr)
+	{
+		UE_LOG(LogAttributeSystem, Error, TEXT("Attribute component cannot be negative for attribute effect %s"), *this->GetName())
+			return;
+	}
+
+	SpawningAttributeComponent = SetSpawningAttributeComponent;
+	TargetAttributeComponent = SetTargetAttributeComponent;
+	GetWorld();
+	CheckInEffectToAttribute();
+	OnEffectTriggered();
 }
 
-void UAttributeEffect::OnEffectDeactivated()
-{
-	if (OriginatingComponent == nullptr) { UE_LOG(LogAttributeSystem, Error, TEXT("Attribute Effect Originating Component is Null")) return; }
 
-	
+
+void UAttributeEffect::CheckInEffectToAttribute()
+{
+	if (TargetAttributeComponent == nullptr)
+	{
+		UE_LOG(LogAttributeSystem, Error, TEXT("Attribute Component is null for %s"), *this->GetName())
+			return;
+	}
+	TargetAttributeComponent->CheckInEffect(this);
+
+}
+
+void UAttributeEffect::CheckOutEffectFromAttribute()
+{
+	TargetAttributeComponent->CheckOutEffect(this);
 }

@@ -43,6 +43,13 @@ public:
 	UFUNCTION()
 	virtual void OnOwnerTakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	//Modify amount is added to 1 and muliplied to the base regen amount
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effect")
+	void ModifyHealthReGenAmount(float ModifyAmount);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effect")
+	void AddHealth(float HealthAmount);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeath Death_OnOwnerDeath;
 
@@ -62,9 +69,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Health", meta = (DisplayName = "On Health Change"))
 	void BP_OnHealthChange(float ChangeAmount, float NewHealth);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Health")
-	void StartReGeneratingHealth(float Frequency, float HealthAmount);
-
 	//Overridable function triggered when owning actor dies.  Runs on client and server.
 	UFUNCTION()
 	virtual void OnRep_IsDead();
@@ -79,6 +83,15 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Health")
+	bool bShouldReGenHealth;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Health", meta = (EditCondition = "bShouldReGenHealth"))
+	float BaseHealthRegenAmount = 1.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Health")
+	float ReGenModifer = 1.f;
+
 	UPROPERTY(ReplicatedUsing = OnRep_HealthChange, BlueprintReadOnly, Category = "Health");
 	FHealthChangeData HealthChangeData;
 
@@ -90,10 +103,10 @@ private:
 
 	void ChangeHealth(float ChangeAmount);
 
+	void StartReGeneratingHealth();
+
 	void ReGenHealth();
 
 	FTimerHandle HealthRegenerationTimerHandle;
-
-	float HealthReGenAmount;
 
 };

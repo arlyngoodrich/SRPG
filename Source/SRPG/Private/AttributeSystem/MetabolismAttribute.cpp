@@ -2,6 +2,7 @@
 
 
 #include "AttributeSystem/MetabolismAttribute.h"
+#include "AttributeSystem/StaminaAttribute.h"
 #include "LogFiles.h"
 
 //UE4 Includes
@@ -9,7 +10,7 @@
 
 UMetabolismAttribute::UMetabolismAttribute()
 {
-
+	
 
 }
 
@@ -19,9 +20,30 @@ void UMetabolismAttribute::BeginPlay()
 	
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		ChangeFood(MaxFood / .5, MaxFood / .25, MaxFood / .25, MaxWater);
+		ChangeFood(MaxFood * .25, MaxFood * .5, MaxFood*.25, MaxWater);
 		StartMetabolism();
+
+		UStaminaAttribute* StaminaAttributeTest = GetOwner()->FindComponentByClass<UStaminaAttribute>();
+		if (StaminaAttributeTest != nullptr)
+		{
+			StaminaAttribute = StaminaAttributeTest;
+			StaminaAttribute->Stamina_OnStartReGen.AddDynamic(this, &UMetabolismAttribute::OnStartStaminaRegen);
+			StaminaAttribute->Stamina_OnStopReGen.AddDynamic(this, &UMetabolismAttribute::OnStopStaminaRegen);
+		}
+
 	}
+}
+
+void UMetabolismAttribute::OnRep_MetabolicStatusChange()
+{
+	BP_OnMetabolicStatusUpdate(CurrentMetabolismStatus);
+
+}
+
+void UMetabolismAttribute::OnRep_MetabolicBalanceChange()
+{
+	BP_OnMetabolicBalanceUpdate(CurrentMetabolicBalance);
+	Metabolism_OnBalanceChange.Broadcast(CurrentMetabolicBalance);
 }
 
 
@@ -37,7 +59,8 @@ void UMetabolismAttribute::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >
 	DOREPLIFETIME(UMetabolismAttribute, CurrentVitamins);
 	DOREPLIFETIME(UMetabolismAttribute, CurrentProtein);
 	DOREPLIFETIME(UMetabolismAttribute, CurrentMetabolismStatus);
-	
+	DOREPLIFETIME(UMetabolismAttribute, CurrentMetabolicBalance);
+
 }
 
 
@@ -56,6 +79,7 @@ void UMetabolismAttribute::ChangeFood(float CarbsChange, float VitaminsChange, f
 
 	CurrentFood = CurrentCarbs + CurrentVitamins + CurrentProtein;
 	SetMetabolismStatus();
+	SetMetabolicBalance();
 
 	LogFoodLevels();
 
@@ -69,7 +93,7 @@ void UMetabolismAttribute::StartMetabolism()
 
 void UMetabolismAttribute::Metabolize()
 {
-	ChangeFood(CarbDecayAmount, VitaminDecayAmount, ProteinDecayAmount, WaterDecayAmount);
+	ChangeFood(-CarbDecayAmount, -VitaminDecayAmount, -ProteinDecayAmount, -WaterDecayAmount);
 }
 
 
@@ -82,29 +106,92 @@ void UMetabolismAttribute::SetMetabolismStatus()
 		return; 
 	}
 
+	EMetabolismStatus MetabolismStatusCheck;
+
 	//If full
 	if (CurrentFood >= FullLevel)
 	{
-		CurrentMetabolismStatus = EMetabolismStatus::EMS_Full;
+		MetabolismStatusCheck = EMetabolismStatus::EMS_Full;
 	}
 	//If content - greater than hungry but lass than full
 	else if (CurrentFood >= HungerLevel && CurrentFood < FullLevel)
 	{
-		CurrentMetabolismStatus = EMetabolismStatus::EMS_Content;
+		MetabolismStatusCheck = EMetabolismStatus::EMS_Content;
 	}
 	// If hungry -  greater than starving level but less than hungry level
 	else if (CurrentFood >= StarvingLevel && CurrentFood < HungerLevel )
 	{
-		CurrentMetabolismStatus = EMetabolismStatus::EMS_Hungry;
+		MetabolismStatusCheck = EMetabolismStatus::EMS_Hungry;
 	}
 	// If starving - less than starving level
 	else if (CurrentFood < StarvingLevel)
 	{
-		CurrentMetabolismStatus = EMetabolismStatus::EMS_Starving;
+		MetabolismStatusCheck = EMetabolismStatus::EMS_Starving;
 	}
 
-	FString MetabolismStatusString = UEnum::GetValueAsString<EMetabolismStatus>(CurrentMetabolismStatus);
-	UE_LOG(LogAttributeSystem,Log,TEXT("%s new metabolism status: %s"),*GetOwner()->GetName(),*MetabolismStatusString)
+	if (MetabolismStatusCheck != CurrentMetabolismStatus)
+	{
+		CurrentMetabolismStatus = MetabolismStatusCheck;
+		OnRep_MetabolicStatusChange();
+		FString MetabolismStatusString = UEnum::GetValueAsString<EMetabolismStatus>(CurrentMetabolismStatus);
+		UE_LOG(LogAttributeSystem, Log, TEXT("%s new metabolism status: %s"), *GetOwner()->GetName(), *MetabolismStatusString)
+	}
+
+
+}
+
+void UMetabolismAttribute::SetMetabolicBalance()
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s - cannot set metabolic balance from client"), *GetOwner()->GetName())
+		return;
+	}
+
+	EMetabolicBalanceType MetabolicBalanceTest;
+
+	//If carb heavy
+	if (CurrentCarbs / CurrentFood > .5)
+	{
+		MetabolicBalanceTest = EMetabolicBalanceType::EMBT_Carbs;
+	}
+	//If vitamin heavy
+	else if (CurrentVitamins / CurrentFood > .5)
+	{
+		MetabolicBalanceTest = EMetabolicBalanceType::EMBT_Vitamins;
+	}
+	//If Protein heavy
+	else if (CurrentProtein / CurrentFood > .5)
+	{
+		MetabolicBalanceTest = EMetabolicBalanceType::EMBT_Protein;
+	}
+	else
+	{
+		MetabolicBalanceTest = EMetabolicBalanceType::EMBT_None;
+	}
+
+	if (CurrentMetabolicBalance != MetabolicBalanceTest)
+	{
+		CurrentMetabolicBalance = MetabolicBalanceTest;
+		OnRep_MetabolicBalanceChange();
+		FString MetabolicBalanceString = UEnum::GetValueAsString<EMetabolicBalanceType>(CurrentMetabolicBalance);
+		UE_LOG(LogAttributeSystem,Log,TEXT("%s new metabolic balance: %s"), *GetOwner()->GetName(),*MetabolicBalanceString)
+	}
+
+}
+
+void UMetabolismAttribute::OnStartStaminaRegen()
+{
+
+	GetWorld()->GetTimerManager().ClearTimer(MetabolismTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(MetabolismTimerHandle, this, &UMetabolismAttribute::Metabolize, MetabolicFrequency*StaminaRegnModifier, true);
+
+}
+
+void UMetabolismAttribute::OnStopStaminaRegen()
+{
+	GetWorld()->GetTimerManager().ClearTimer(MetabolismTimerHandle);
+	StartMetabolism();
 }
 
 
