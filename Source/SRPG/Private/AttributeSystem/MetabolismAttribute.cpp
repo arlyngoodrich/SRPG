@@ -107,6 +107,7 @@ void UMetabolismAttribute::SetMetabolismStatus()
 	}
 
 	EMetabolismStatus MetabolismStatusCheck;
+	MetabolismStatusCheck = CurrentMetabolismStatus;
 
 	//If full
 	if (CurrentFood >= FullLevel)
@@ -133,8 +134,8 @@ void UMetabolismAttribute::SetMetabolismStatus()
 	{
 		CurrentMetabolismStatus = MetabolismStatusCheck;
 		OnRep_MetabolicStatusChange();
-		FString MetabolismStatusString = UEnum::GetValueAsString<EMetabolismStatus>(CurrentMetabolismStatus);
-		UE_LOG(LogAttributeSystem, Log, TEXT("%s new metabolism status: %s"), *GetOwner()->GetName(), *MetabolismStatusString)
+		const FString ResourceString = StaticEnum<EMetabolismStatus>()->GetValueAsString(CurrentMetabolismStatus);
+		UE_LOG(LogAttributeSystem, Log, TEXT("%s new metabolism status: %s"), *GetOwner()->GetName(), *ResourceString)
 	}
 
 
@@ -149,6 +150,7 @@ void UMetabolismAttribute::SetMetabolicBalance()
 	}
 
 	EMetabolicBalanceType MetabolicBalanceTest;
+	MetabolicBalanceTest = CurrentMetabolicBalance;
 
 	//If carb heavy
 	if (CurrentCarbs / CurrentFood > .5)
@@ -174,8 +176,8 @@ void UMetabolismAttribute::SetMetabolicBalance()
 	{
 		CurrentMetabolicBalance = MetabolicBalanceTest;
 		OnRep_MetabolicBalanceChange();
-		FString MetabolicBalanceString = UEnum::GetValueAsString<EMetabolicBalanceType>(CurrentMetabolicBalance);
-		UE_LOG(LogAttributeSystem,Log,TEXT("%s new metabolic balance: %s"), *GetOwner()->GetName(),*MetabolicBalanceString)
+		const FString ResourceString = StaticEnum<EMetabolicBalanceType>()->GetValueAsString(CurrentMetabolicBalance);
+		UE_LOG(LogAttributeSystem,Log,TEXT("%s new metabolic balance: %s"), *GetOwner()->GetName(),*ResourceString)
 	}
 
 }
