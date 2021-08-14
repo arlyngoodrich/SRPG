@@ -56,6 +56,9 @@ void UEnvironmentalAttributes::BeginPlay()
 	Super::BeginPlay();
 	SetCurrentTemperature(StartingCurrentTemp);
 	SetCurrentWetness(StartingCurrentWetness);
+	AdjustHotResitance(BaseHeatResitance);
+	AdjustColdResitance(BaseColdResitance);
+	AdjustWetnessResitance(BaseWetnessResitance);
 }
 
 
@@ -136,7 +139,7 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 	}
 
 	//If target temp and current temp are less than 1 degree apart, auto set current to target. 
-	if (FMath::Abs(CurrentTemperature - TargetTemperature) <= 1.f)
+	if (FMath::Abs(CurrentTemperature - TargetTemperature) <= 0.1f)
 	{
 		CurrentTemperature = TargetTemperature;
 		UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Temp auto set. Current Temp = %s"),*FString::SanitizeFloat(CurrentTemperature))
@@ -150,12 +153,14 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 		float ActiveResistance;
 		if (TempDiff > 0)
 		{
-			ActiveResistance = FMath::Clamp(HeatResistance + GetWetnessEffectOnWarming(),1.f,0.f);
+			ActiveResistance = FMath::Clamp(HeatResistance + GetWetnessEffectOnWarming(),0.f,1.f);
 		}
 		else
 		{
 			ActiveResistance = ColdResistance;
 		}
+
+		UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Active Resistance = %s"), *FString::SanitizeFloat(ActiveResistance))
 
 		float TempToAdjust;
 		TempToAdjust = TempDiff - (TempDiff * ActiveResistance);
@@ -163,9 +168,10 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 		float OldTemp;
 		OldTemp = CurrentTemperature;
 
-		CurrentTemperature += TempToAdjust;
+		CurrentTemperature = TempToAdjust + CurrentTemperature;
 
-		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s Temp Adjustment. Adjustment Temp = %s | Current Temp = %s"),
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("Sampled Temp = %s | Adjustment Temp = %s | Current Temp = %s"),
+			*FString::SanitizeFloat(SampledTemperature),
 			*FString::SanitizeFloat(TempToAdjust),
 			*FString::SanitizeFloat(CurrentTemperature)
 		)
@@ -182,7 +188,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 			return;
 	}
 
-	TargetWetness = FMath::Clamp(SampledWetness, 0.f, 100.f);
+	TargetWetness = FMath::Clamp(SampledWetness + CurrentWetness, 0.f, 50.f);
 
 	//If the same, then return
 	if (TargetWetness == CurrentWetness)
@@ -190,7 +196,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 		return;
 	}
 
-	if (FMath::Abs(TargetWetness - CurrentWetness) <= 1)
+	if (FMath::Abs(TargetWetness - CurrentWetness) <= 0.1f)
 	{
 		CurrentWetness = TargetWetness;
 		UE_LOG(LogEnvironmentAttributeSystem,Log,TEXT("Wetness auto set. Current wetness = %s"),*FString::SanitizeFloat(CurrentWetness))
@@ -207,7 +213,7 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 		if (TargetWetness > CurrentWetness)
 		{
 			//This should make drying quicker if wet unless 0 wetness resistance
-			UsedWetnessResitance = WetnessResistance - (WetnessResistance * GetHeatEffectOnDrying());
+			UsedWetnessResitance = -WetnessResistance - (WetnessResistance * GetHeatEffectOnDrying());
 		}
 		//If getting wetter
 		else
@@ -215,12 +221,14 @@ void UEnvironmentalAttributes::AdjustWetness(float SampledWetness)
 			UsedWetnessResitance = WetnessResistance;
 		}
 
+		UE_LOG(LogAttributeSystem,Log,TEXT("Active Wetness Resistance: %s"), *FString::SanitizeFloat(UsedWetnessResitance))
+
 		float WetnessAdjust;
 		WetnessAdjust = WetnessDiff - (WetnessDiff * UsedWetnessResitance);
 
-		CurrentWetness += WetnessAdjust;
+		CurrentWetness = FMath::Clamp(CurrentWetness + WetnessAdjust, 0.f, 50.f);
 
-		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s Wetness Adjustment. Wetness Adjustment = %s | Current Wetness = %s"),
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("Wetness Adjustment = %s | Current Wetness = %s"),
 			*FString::SanitizeFloat(WetnessAdjust),
 			*FString::SanitizeFloat(CurrentWetness)
 		)
@@ -271,7 +279,7 @@ void UEnvironmentalAttributes::SetTempState()
 		CurrentTempState = TestTempState;
 		const FString ResourceString = StaticEnum<ETemperatureState>()->GetValueAsString(CurrentTempState);
 		OnRep_TempStateUpdate();
-		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: %s"), *GetOwner()->GetName(), *ResourceString);
 	}
 
 
@@ -312,7 +320,7 @@ void UEnvironmentalAttributes::SetWetnessState()
 		CurrentWetnessState = TestWetState;
 		const FString ResourceString = StaticEnum<EWetnessState>()->GetValueAsString(CurrentWetnessState);
 		OnRep_WetnessStateUpdate();
-		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: "), *GetOwner()->GetName(), *ResourceString);
+		UE_LOG(LogEnvironmentAttributeSystem, Log, TEXT("%s: new temp state: %s"), *GetOwner()->GetName(), *ResourceString);
 
 	}
 

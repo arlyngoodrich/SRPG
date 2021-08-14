@@ -19,10 +19,10 @@ enum class ETemperatureState : uint8 {
 UENUM(BlueprintType)
 enum class EWetnessState : uint8 {
 
-	EWS_Dry			UMETA(DisplayName = "Freezing"),
-	EWS_Damp		UMETA(DisplayName = "Cold"),
-	EWS_Wet		    UMETA(DisplayName = "Comfortable"),
-	EWS_Soaked		UMETA(DisplayName = "Hot"),
+	EWS_Dry			UMETA(DisplayName = "Dry"),
+	EWS_Damp		UMETA(DisplayName = "Damp"),
+	EWS_Wet		    UMETA(DisplayName = "Wet"),
+	EWS_Soaked		UMETA(DisplayName = "Soaked"),
 
 };
 
@@ -30,7 +30,7 @@ enum class EWetnessState : uint8 {
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTempStateChange, ETemperatureState, NewTempState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWetnessStateChange, EWetnessState, NewWetnessState);
 
-UCLASS()
+UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UEnvironmentalAttributes : public UBaseAttributeComponent
 {
 	GENERATED_BODY()
