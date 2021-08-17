@@ -9,3 +9,6 @@ DEFINE_LOG_CATEGORY(LogBuildingSystem);
 DEFINE_LOG_CATEGORY(LogEnviornmentSystem);
 DEFINE_LOG_CATEGORY(LogCraftingSystem);
 DEFINE_LOG_CATEGORY(LogCropSystem);
+DEFINE_LOG_CATEGORY(LogAttributeSystem);
+DEFINE_LOG_CATEGORY(LogEnvironmentAttributeSystem);
+
