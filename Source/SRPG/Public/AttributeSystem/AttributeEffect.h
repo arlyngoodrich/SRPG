@@ -42,6 +42,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Attribute Effect")
 	void OnEffectTriggered();
 
+	virtual void Internal_OnEffectTriggered();
+
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effect")
 	void CheckOutEffectFromAttribute();
 

@@ -18,6 +18,7 @@ void UAttributeEffect::InitalizeEffect(class UBaseAttributeComponent* SetSpawnin
 	GetWorld();
 	CheckInEffectToAttribute();
 	OnEffectTriggered();
+	Internal_OnEffectTriggered();
 }
 
 
@@ -31,6 +32,10 @@ void UAttributeEffect::CheckInEffectToAttribute()
 	}
 	TargetAttributeComponent->CheckInEffect(this);
 
+}
+
+void UAttributeEffect::Internal_OnEffectTriggered()
+{
 }
 
 void UAttributeEffect::CheckOutEffectFromAttribute()

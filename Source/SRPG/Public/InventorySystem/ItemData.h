@@ -84,6 +84,18 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment Data")
 	bool bIsEquipable;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Decay Data")
+	bool bDecays;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Decay Data", meta = (EditCondition = "bDecays"))
+	float DecayTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Consumable Data")
+	bool bIsConsumable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Consumable Data", meta = (EditCondition = "bIsConsumable"))
+	TSubclassOf<class UConsumeEffect> Consumable;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment Data", meta = (EditCondition = "bIsEquipable"))
 	TArray<EEquipmentSlots> EligibleSlots;
 

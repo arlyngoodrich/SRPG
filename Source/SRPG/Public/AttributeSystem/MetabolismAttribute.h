@@ -43,6 +43,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnBalanceChange Metabolism_OnBalanceChange;
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
+	void OnConsume(float CarbsChange, float VitaminsChange, float ProteinChange, float WaterChange);
+
 protected:
 
 	virtual void BeginPlay() override;

@@ -14,6 +14,18 @@ UMetabolismAttribute::UMetabolismAttribute()
 
 }
 
+void UMetabolismAttribute::OnConsume(float CarbsChange, float VitaminsChange, float ProteinChange, float WaterChange)
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		UE_LOG(LogAttributeSystem, Warning, TEXT("%s cannot change food level from client"), *GetOwner()->GetName())
+			return;
+	}
+
+	ChangeFood(CarbsChange, VitaminsChange, ProteinChange, WaterChange);
+
+}
+
 void UMetabolismAttribute::BeginPlay()
 {
 	Super::BeginPlay();
