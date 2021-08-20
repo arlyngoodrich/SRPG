@@ -51,7 +51,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStaminaStopReGen Stamina_OnStopReGen;
 
-	//Server only delegate for stamina updates.  Fairly frequent so not client safe.  
+	UPROPERTY(BlueprintAssignable)
 	FOnStaminaChange OnStaminaChange;
 
 protected:
@@ -76,6 +76,9 @@ protected:
 	UFUNCTION()
 	void OnRep_ExhaustedUpdate();
 
+	UFUNCTION()
+	void OnRep_StaminaChange();
+
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	class UTP_CharacterMovement* CharacterMovementComponent;
 
@@ -85,7 +88,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
 	float MaxStamina;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Stamina")
+	UPROPERTY(ReplicatedUsing = OnRep_StaminaChange, BlueprintReadOnly, Category = "Stamina")
 	float CurrentStamina;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")

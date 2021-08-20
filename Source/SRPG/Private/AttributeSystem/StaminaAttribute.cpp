@@ -200,6 +200,11 @@ void UStaminaAttribute::OnRep_ExhaustedUpdate()
 	OnExhuastionChange.Broadcast(bIsExhausted);
 }
 
+void UStaminaAttribute::OnRep_StaminaChange()
+{
+	OnStaminaChange.Broadcast(CurrentStamina);
+}
+
 void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 {
 	CurrentStamina = FMath::Clamp(CurrentStamina + ChangeAmount, 0.f, MaxStamina);
@@ -215,7 +220,7 @@ void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 		SetStaminaOK();
 	}
 
-	OnStaminaChange.Broadcast(CurrentStamina);
+	OnRep_StaminaChange();
 }
 
 void UStaminaAttribute::SetExhausted()
