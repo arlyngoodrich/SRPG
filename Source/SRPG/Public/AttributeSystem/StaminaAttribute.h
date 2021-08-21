@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEncumberanceChange, bool, bNewEncumberance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExhaustedChange, bool, bNewExhausted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChange, float, NewStamina);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeightChange, float, NewWeight);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaStartReGen);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaStopReGen);
 
@@ -54,6 +55,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStaminaChange OnStaminaChange;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnWeightChange OnWeightChange;
+
 protected:
 
 	// Called when the game starts
@@ -78,6 +82,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_StaminaChange();
+
+	UFUNCTION()
+	void OnRep_WeightChange();
 
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	class UTP_CharacterMovement* CharacterMovementComponent;
@@ -114,7 +121,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_EncumberanceUpdate, Category = "Stamina")
 	bool bIsEncumbered;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stamina")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WeightChange, Category = "Stamina")
 	float CurrentWeight;
 
 	//----------------- Effect Modifers ----------------------//

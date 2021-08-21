@@ -30,6 +30,8 @@ enum class EMetabolicBalanceType : uint8 {
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBalanceChange, EMetabolicBalanceType, NewMetabolisimBalanceType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFoodUpdate, float, NewTotalFood);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaterUpdate, float, NewTotalWater);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UMetabolismAttribute : public UBaseAttributeComponent
@@ -42,6 +44,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnBalanceChange Metabolism_OnBalanceChange;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFoodUpdate Metabolism_OnFoodUpdate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnWaterUpdate Metabolism_OnWaterUpdate;
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
 	void OnConsume(float CarbsChange, float VitaminsChange, float ProteinChange, float WaterChange);
@@ -64,6 +72,11 @@ protected:
 	UFUNCTION()
 	void OnRep_MetabolicBalanceChange();
 
+	UFUNCTION()
+	void OnRep_WaterChange();
+
+	UFUNCTION()
+	void OnRep_FoodChange();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
 	float MaxWater = 100.f;
@@ -71,13 +84,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Metabolism")
 	float MaxFood = 100.f;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Metabolism")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WaterChange, Category = "Metabolism")
 	float CurrentWater;	
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Metabolism")
 	float CurrentFood;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Metabolism")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FoodChange, Category = "Metabolism")
 	float CurrentCarbs;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Metabolism")

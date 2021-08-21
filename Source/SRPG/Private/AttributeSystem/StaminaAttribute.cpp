@@ -8,6 +8,7 @@
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
+#include "..\..\Public\AttributeSystem\StaminaAttribute.h"
 
 
 
@@ -36,9 +37,11 @@ void UStaminaAttribute::UseStamina(float StaminaAmount)
 void UStaminaAttribute::SetWeight(float NewWeight)
 {
 	if (PlayerCharacter == nullptr) { return; }
+	if (CurrentWeight == NewWeight) { return; }
 
 
 	CurrentWeight = NewWeight;
+	OnRep_WeightChange();
 
 	//Check if newly encumbered
 	if (CurrentWeight > EncumberanceWeight)
@@ -203,6 +206,11 @@ void UStaminaAttribute::OnRep_ExhaustedUpdate()
 void UStaminaAttribute::OnRep_StaminaChange()
 {
 	OnStaminaChange.Broadcast(CurrentStamina);
+}
+
+void UStaminaAttribute::OnRep_WeightChange()
+{
+	OnWeightChange.Broadcast(CurrentWeight);
 }
 
 void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
