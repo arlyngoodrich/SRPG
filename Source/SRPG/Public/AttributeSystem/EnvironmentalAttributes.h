@@ -29,6 +29,7 @@ enum class EWetnessState : uint8 {
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTempStateChange, ETemperatureState, NewTempState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWetnessStateChange, EWetnessState, NewWetnessState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTempUpdate, float, NewTemp);
 
 UCLASS(ClassGroup = (Attributes), blueprintable, meta = (BlueprintSpawnableComponent))
 class SRPG_API UEnvironmentalAttributes : public UBaseAttributeComponent
@@ -54,6 +55,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnWetnessStateChange Wetness_OnStateChange;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnTempUpdate Temp_OnUpdate;
+
 
 protected:
 
@@ -67,6 +71,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_WetnessStateUpdate();
+
+	UFUNCTION()
+	void OnRep_TempUpdate();
 
 	//Called on both client and server
 	UFUNCTION(BlueprintImplementableEvent, Category = "Environmental Attribute", meta = (DisplayNanme = "On Temp State Update"))
@@ -82,7 +89,7 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Environmental Attribute")
 	void SetCurrentWetness(float NewCurrentWetness);
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Environmental Attribute")
+	UPROPERTY(ReplicatedUsing = OnRep_TempUpdate, BlueprintReadOnly, Category = "Environmental Attribute")
 	float CurrentTemperature;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Environmental Attribute")
