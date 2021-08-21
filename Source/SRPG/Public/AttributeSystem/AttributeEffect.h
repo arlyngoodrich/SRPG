@@ -18,9 +18,18 @@ public:
 
 	UFUNCTION(BlueprintCallable,BlueprintAuthorityOnly, Category = "Attribute Effect")
 	void InitalizeEffect(class UBaseAttributeComponent* SetSpawningAttributeComponent, class UBaseAttributeComponent* SetTargetAttributeComponent);
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute Effect")
 	UTexture2D* EffectIcon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute Effect")
+	FColor IconColor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute Effect")
+	FColor BackgroundColor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute Effect")
+	FName EffectName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute Effect")
 	FText EffectDescription;

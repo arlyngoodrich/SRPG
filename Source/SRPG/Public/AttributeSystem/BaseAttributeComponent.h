@@ -26,8 +26,21 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	
+	UFUNCTION(Client, Reliable)
+	void Client_InternalAddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
+	void Client_InternalAddEffectToUI_Implementation(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
+
+	UFUNCTION(Client, Reliable)
+	void Client_InternalRemoveEffectFromUI(FName EffectName);
+	void Client_InternalRemoveEffectFromUI_Implementation(FName EffectName);
 
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Attribute Effects")
+	void AddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Attribute Effects")
+	void RemoveEffectFromUI(FName EffectName);
 
 	UPROPERTY()
 	TArray<class UAttributeEffect*> ActiveEffects;
