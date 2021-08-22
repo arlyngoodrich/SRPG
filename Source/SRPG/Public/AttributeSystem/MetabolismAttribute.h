@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
 	void OnConsume(float CarbsChange, float VitaminsChange, float ProteinChange, float WaterChange);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Attribute Effects")
+	void ModifyDecayAmounts(float CarbDecayMod, float ProteinDecayMod, float VitaminDecayMod, float WaterDecayMod);
+
 protected:
 
 	virtual void BeginPlay() override;

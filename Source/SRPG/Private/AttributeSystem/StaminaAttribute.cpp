@@ -66,6 +66,7 @@ void UStaminaAttribute::ModifyStaminaUse(float ModifyAmount)
 	}
 
 	StaminaUseModifer = FMath::Max(StaminaUseModifer + ModifyAmount, 0.f);
+	UE_LOG(LogAttributeSystem,Log,TEXT("StaminaUse Modified by: %s"),*FString::SanitizeFloat(ModifyAmount))
 }
 
 void UStaminaAttribute::ModifyStaminaReGen(float ModifyAmount)
@@ -77,6 +78,7 @@ void UStaminaAttribute::ModifyStaminaReGen(float ModifyAmount)
 	}
 
 	StaminaRegenModifer = FMath::Max(StaminaRegenModifer + ModifyAmount, 0.f);
+	UE_LOG(LogAttributeSystem, Log, TEXT("StaminaRegen Modified by: %s"), *FString::SanitizeFloat(ModifyAmount))
 
 }
 

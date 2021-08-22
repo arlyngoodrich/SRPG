@@ -28,9 +28,9 @@ void UBaseAttributeComponent::BeginPlay()
 	
 }
 
-void UBaseAttributeComponent::Client_InternalAddEffectToUI_Implementation(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName)
+void UBaseAttributeComponent::Client_InternalAddEffectToUI_Implementation(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName, const FText& Discription)
 {
-	AddEffectToUI(IconTexutre, IconColor, BackgroundColor, EffectName);
+	AddEffectToUI(IconTexutre, IconColor, BackgroundColor, EffectName, Discription);
 }
 
 void UBaseAttributeComponent::Client_InternalRemoveEffectFromUI_Implementation(FName EffectName)
@@ -56,7 +56,7 @@ void UBaseAttributeComponent::CheckInEffect(UAttributeEffect* AttributeEffect)
 	}
 
 	ActiveEffects.Add(AttributeEffect);
-	Client_InternalAddEffectToUI(AttributeEffect->EffectIcon, AttributeEffect->IconColor, AttributeEffect->BackgroundColor, AttributeEffect->EffectName);
+	Client_InternalAddEffectToUI(AttributeEffect->EffectIcon, AttributeEffect->IconColor, AttributeEffect->BackgroundColor, AttributeEffect->EffectName, AttributeEffect->EffectDescription);
 	UE_LOG(LogAttributeSystem,Log,TEXT("%s effect checked into %s"),*AttributeEffect->GetName(),*GetOwner()->GetName())
 }
 

@@ -26,6 +26,22 @@ void UMetabolismAttribute::OnConsume(float CarbsChange, float VitaminsChange, fl
 
 }
 
+void UMetabolismAttribute::ModifyDecayAmounts(float CarbDecayMod, float ProteinDecayMod, float VitaminDecayMod, float WaterDecayMod)
+{
+	CarbDecayAmount += CarbDecayMod;
+	ProteinDecayAmount += ProteinDecayMod;
+	VitaminDecayAmount += VitaminDecayMod;
+	WaterDecayAmount += WaterDecayMod;
+
+	UE_LOG(LogAttributeSystem,Log,TEXT(
+		"Decay Amount's Modified CarbDecayMod: %s | ProteinDecayMod: %s | VitaminDecayMod: %s | WaterDecayMod: %s"),
+		*FString::SanitizeFloat(CarbDecayMod),
+		*FString::SanitizeFloat(ProteinDecayMod),
+		*FString::SanitizeFloat(VitaminDecayMod),
+		*FString::SanitizeFloat(WaterDecayMod))
+
+}
+
 void UMetabolismAttribute::BeginPlay()
 {
 	Super::BeginPlay();

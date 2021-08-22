@@ -28,8 +28,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 	UFUNCTION(Client, Reliable)
-	void Client_InternalAddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
-	void Client_InternalAddEffectToUI_Implementation(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
+	void Client_InternalAddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName,const FText& Discription);
+	void Client_InternalAddEffectToUI_Implementation(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName, const FText& Discription);
 
 	UFUNCTION(Client, Reliable)
 	void Client_InternalRemoveEffectFromUI(FName EffectName);
@@ -37,7 +37,7 @@ protected:
 
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Attribute Effects")
-	void AddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName);
+	void AddEffectToUI(UTexture2D* IconTexutre, FColor IconColor, FColor BackgroundColor, FName EffectName, const FText& Discription);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Attribute Effects")
 	void RemoveEffectFromUI(FName EffectName);
