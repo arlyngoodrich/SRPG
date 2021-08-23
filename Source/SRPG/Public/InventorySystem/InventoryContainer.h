@@ -10,6 +10,14 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
+UENUM(BlueprintType)
+enum class EInventoryFilterType : uint8 {
+
+	EIT_None			UMETA(DisplayName = "None"),
+	EIT_BlackList		UMETA(DisplayName = "BlackList"),
+	EIT_WhiteList		UMETA(DisplayName = "WhiteList"),
+
+};
 
 
 
@@ -166,6 +174,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
 	int32 InventorySizeY;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	EInventoryFilterType FilterType = EInventoryFilterType::EIT_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	TArray<TSubclassOf<class AItemBase>> FilterClasses;
+
 	UPROPERTY(Replicated)
 	FVector2D InventorySize;
 
@@ -213,6 +227,12 @@ protected:
 	bool DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
 	void RemoveQuantityOfItemFromStack(int32 QtyToRemove,FItemData Item, FVector2D StartingPosition);
+
+	bool PerformFilterCheck(FItemData Item);
+
+	bool IsItemInFilterList(FItemData Item);
+
+	bool IsItemValidSubClass(FItemData Item, TSubclassOf<class AItemBase> FilterClass);
 
 	//TODO StackTransfer
 

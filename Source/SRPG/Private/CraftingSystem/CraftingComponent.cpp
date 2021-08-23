@@ -208,8 +208,8 @@ bool UCraftingComponent::CanRecipeBeCrafted(FCraftingRecipe Recipe)
 		EnoughIngredients.Add(CheckIfIngredientIsAvailable(Inputs[Index]));
 	}
 
-	// If there is not enough of one ingredient, return false
-	if (EnoughIngredients.Contains(false))
+	// If there is not enough of one ingredient or not enough spasce for the crafted recipe
+	if (EnoughIngredients.Contains(false) || !EnoughSpaceForCraftedRecipe(Recipe))
 	{
 		return false;
 	}
@@ -519,19 +519,19 @@ void UCraftingComponent::GetQuantityOfIngredientFromInventory(FCraftingPart Ingr
 
 			FString ItemClassName = ItemClass->GetName();
 			FString InputClassName = InputClass->GetName();
-			UE_LOG(LogCraftingSystem,Log,TEXT("Item class = %s"),*ItemClassName)
-			UE_LOG(LogCraftingSystem, Log, TEXT("Input class = %s"), *InputClassName)
+			UE_LOG(LogCraftingSystem,Verbose,TEXT("Item class = %s"),*ItemClassName)
+			UE_LOG(LogCraftingSystem, Verbose, TEXT("Input class = %s"), *InputClassName)
 
 
 			//If it is the ingredient we are looking for, add to quantity found
 			if (ItemClass->IsChildOf(InputClass) || ItemClass == InputClass)
 			{
 				OutQuantityFound += TargetItem.StackQuantity;
-				UE_LOG(LogCraftingSystem,Log,TEXT("%d found"), OutQuantityFound)
+				UE_LOG(LogCraftingSystem, Verbose,TEXT("%d found"), OutQuantityFound)
 			}
 			else
 			{
-				UE_LOG(LogCraftingSystem,Log,TEXT("Classes do not match"))
+				UE_LOG(LogCraftingSystem, Verbose,TEXT("Classes do not match"))
 			}
 		}
 	}

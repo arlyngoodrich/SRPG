@@ -3,6 +3,7 @@
 
 #include "InventorySystem/InventoryContainer.h"
 #include "LogFiles.h"
+#include "ItemSystem/ItemBase.h"
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
@@ -491,6 +492,7 @@ void UInventoryContainer::InitalizeSlots()
 
 bool UInventoryContainer::CheckIfItemFitsInPosition(FItemData Item, FVector2D Position)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
 
 	int32 InitalPositionIndex;
 
@@ -550,6 +552,8 @@ bool UInventoryContainer::CheckIfItemFitsInPosition(FItemData Item, FVector2D Po
 bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 {
 	
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	if (CheckIfWeightOK(Item))
 	{
 
@@ -569,6 +573,8 @@ bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 
 bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bCheckWeight)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
+	
 	FItemData ItemData;
 	ItemData = GetServerVersionOfItem(Item, this, Position);
 
@@ -731,6 +737,8 @@ bool UInventoryContainer::SplitStack(FItemData OriginalItem, FVector2D StartingP
 bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem)
 {
 
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	bool bWasFullyStacked = false;
 	FItemData RemainingItem;
 
@@ -891,6 +899,8 @@ void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacke
 bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated)
 {
 
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	//Need to save reference to original item in case it is rotated during transit.  
 	FItemData OriginalItem;
 	OriginalItem = Item;
@@ -945,6 +955,8 @@ bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosit
 
 bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	if (IsValidItem(Item, StartingPosition) && ReceivingInventory)
 	{
 		FItemData ItemData;
@@ -1009,6 +1021,7 @@ bool UInventoryContainer::SameInventoryStack(FItemData IncomingItem, FVector2D I
 
 bool UInventoryContainer::DifferentInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData)
 {
+	if (!PerformFilterCheck(IncomingItem)) { return false; }
 
 	int32 IncomingItemIndex;
 	if (FindInventoryItemIndex(IncomingItem, IncomingItemPos, IncomingItemIndex) == false)
@@ -1052,6 +1065,7 @@ bool UInventoryContainer::DifferentInventoryStack(FItemData IncomingItem, FVecto
 
 bool UInventoryContainer::DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D ReceivingItemPos, FItemData& OutLefOverItemData)
 {
+	if (!PerformFilterCheck(IncomingItem)) { return false; }
 
 	OutLefOverItemData = IncomingItem;
 
@@ -1140,7 +1154,73 @@ void UInventoryContainer::RemoveQuantityOfItemFromStack(int32 QtyToRemove, FItem
 
 }
 
+bool UInventoryContainer::PerformFilterCheck(FItemData Item)
+{
 
+	switch (FilterType)
+	{
+	case EInventoryFilterType::EIT_None:
+
+		return true;
+		break;
+	case EInventoryFilterType::EIT_BlackList:
+
+		//Check if item is in filter list.  If item IS in filter, list return false.  
+		if (IsItemInFilterList(Item))
+		{
+			UE_LOG(LogInventorySystem,Log,TEXT("Blacklist filter rejected %s"), *Item.DisplayName.ToString())
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+
+		break;
+	case EInventoryFilterType::EIT_WhiteList:
+
+		//Check if item is in filter list.  If item IS in filter list, returnt true.
+		if (IsItemInFilterList(Item))
+		{
+			return true;
+		}
+		else
+		{
+			UE_LOG(LogInventorySystem, Log, TEXT("Whitelist filter rejected %s"), *Item.DisplayName.ToString())
+			return false;
+		}
+
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool UInventoryContainer::IsItemInFilterList(FItemData Item)
+{
+	TArray<bool> bClassChecks;
+
+	for (int32 i = 0; i < FilterClasses.Num(); i++)
+	{
+		bClassChecks.Add(IsItemValidSubClass(Item, FilterClasses[i]));
+	}
+
+	return bClassChecks.Contains(true);
+}
+
+
+
+
+
+bool UInventoryContainer::IsItemValidSubClass(FItemData Item, TSubclassOf<class AItemBase> FilterClass)
+{
+	UClass* ItemClass = Item.InWorldActorClass.Get();
+	UClass* ExactFilterClass = FilterClass.Get();
+		
+	return ItemClass->IsChildOf(FilterClass);
+}
 
 void UInventoryContainer::SetSlotsAsOccupied(int32 SizeX, int32 SizeY, FVector2D Position, bool bIsOccupied)
 {

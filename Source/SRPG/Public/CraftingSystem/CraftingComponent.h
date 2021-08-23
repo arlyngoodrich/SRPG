@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crafting")
 	void CraftRecipe(FCraftingRecipe Recipe);
 
+	UFUNCTION(BlueprintCallable, Category = "Crafting")
+	bool CanRecipeBeCrafted(FCraftingRecipe Recipe);
+
 	UFUNCTION(BlueprintPure, Category = "Crafting Information")
 	TArray<FCraftingRecipe> GetCraftingRecipes();
 
@@ -67,9 +70,7 @@ protected:
 	void Server_CraftRecipe(FCraftingRecipe Recipe);
 	bool Server_CraftRecipe_Validate(FCraftingRecipe Recipe);
 	void Server_CraftRecipe_Implementation(FCraftingRecipe Recipe);
-
-	bool CanRecipeBeCrafted(FCraftingRecipe Recipe);
-
+	
 	bool EnoughSpaceForCraftedRecipe(FCraftingRecipe Recipe);
 
 	bool IsItemPartOfRecipe(FItemData Item, FCraftingRecipe Recipe);
