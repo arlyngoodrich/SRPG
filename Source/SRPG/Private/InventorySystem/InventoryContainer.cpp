@@ -151,7 +151,7 @@ void UInventoryContainer::BP_AutoTransfer(FItemData Item, int32 StartXPos, int32
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		AutoTransfer(Item, FVector2D(StartXPos, StartYPox), RecievingInventory);
+		AutoTransfer(Item, FVector2D(StartXPos, StartYPox), RecievingInventory,true);
 	}
 	else
 	{
@@ -192,40 +192,43 @@ bool UInventoryContainer::Server_TransferAll_Validate(UInventoryContainer* Recie
 
 void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer* RecievingInventory)
 {
-	if (RecievingInventory)
-	{
 
-		TArray<bool> InventoryIndexiesToRemove;
-		TArray<FItemData> LeftOverItemDataArray;
+	if (!RecievingInventory) { return; }
+	
+	TArray<FItemData> LeftOverItemDataArray;
+	TArray<FVector2D> Positions;
+	TArray<bool> bShouldFullyRemoves;
 
 	for (int32 Index = 0; Index != Inventory.Num(); Index++)
+	{
+		if (RecievingInventory->PerformFilterCheck(Inventory[Index].ItemData))
 		{
-			FItemData LeftOverItemData;
-			InventoryIndexiesToRemove.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, LeftOverItemData));
-			LeftOverItemDataArray.Add(LeftOverItemData);
-		}
-
-		
-	for (int32 Index = Inventory.Num() - 1; Index > -1; Index--)
-		{
-			if (InventoryIndexiesToRemove[Index])
-			{//was fully removed
-
-				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
-			}
-			else
-			{//Was not fully removed
-
-				Inventory[Index].ItemData = LeftOverItemDataArray[Index];
-		
-			}
-		}
-
-	Internal_OnInventoryUpdate();
-
+			FItemData RemainingItem;
+			bShouldFullyRemoves.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, RemainingItem));
+			LeftOverItemDataArray.Add(RemainingItem);
+			Positions.Add(Inventory[Index].Position);
+		}	
 	}
 
+	for (int32 Index = Positions.Num(); Index-- > 0; )
+	{
+		FItemData TargetItem;
+		int32 TargetIndex;
+		TargetItem = GetItemAtPosition(Positions[Index]);
+		FindInventoryItemIndex(TargetItem, Positions[Index], TargetIndex);
 
+		if (bShouldFullyRemoves[Index])
+		{
+			RemoveItem(TargetItem, Positions[Index]);
+		}
+		else
+		{
+			Inventory[TargetIndex].ItemData = LeftOverItemDataArray[Index];
+		}
+	}
+	
+	Internal_OnInventoryUpdate();
+	
 }
 
 // BP AutoAdd Item //
@@ -787,7 +790,7 @@ bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FIt
 		//Item could not be fully stacked or placed as new item
 
 		UE_LOG(LogInventorySystem, Log, TEXT("%s was not fully added, %d quantity remains"), *Item.DisplayName.ToString(), RemainingItem.StackQuantity)
-			OutRemainingItem = RemainingItem;
+		OutRemainingItem = RemainingItem;
 		return false;
 	}
 
@@ -953,7 +956,7 @@ bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosit
 
 }
 
-bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory)
+bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory,bool UpdateUI)
 {
 	if (!PerformFilterCheck(Item)) { return false; }
 
@@ -966,7 +969,7 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 		if (ReceivingInventory->AutoAddItem(ItemData, ItemData.bCanBeStacked, LeftOverItem))
 		{
 			RemoveItem(ItemData, StartingPosition);
-			Internal_OnInventoryUpdate();
+			if (UpdateUI) { Internal_OnInventoryUpdate(); }
 			UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
 		}
@@ -977,7 +980,7 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 			int32 ItemIndex;
 			FindInventoryItemIndex(ItemData, StartingPosition, ItemIndex);
 			Inventory[ItemIndex].ItemData = LeftOverItem;
-			Internal_OnInventoryUpdate();
+			if (UpdateUI) { Internal_OnInventoryUpdate(); }
 			return true;
 
 		}

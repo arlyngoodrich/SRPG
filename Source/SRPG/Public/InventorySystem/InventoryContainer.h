@@ -32,25 +32,25 @@ public:
 	UInventoryContainer();
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Fits")
-		bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
+	bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Could be added")
-		bool BP_CheckIfItemCouldBeAdded(FItemData Item);
+	bool BP_CheckIfItemCouldBeAdded(FItemData Item);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Valid Item")
-		bool BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY);
+	bool BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Add Item")
-		void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
+	void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Remove Item")
-		void BP_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
+	void BP_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Move Item")
-		void BP_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void BP_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Direct Transfer Item")
-		void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Auto Transfer Item")
 	void BP_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
@@ -218,7 +218,7 @@ protected:
 
 	bool DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated);
 
-	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory);
+	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory, bool UpdateUI);
 
 	bool SameInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
