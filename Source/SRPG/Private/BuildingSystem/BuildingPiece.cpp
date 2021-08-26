@@ -79,18 +79,20 @@ void ABuildingPiece::DistributeItemsToInventories(TArray<FItemData> InItems, TAr
 			UInventoryContainer* TargetInventoryContainer = TargetInventories[ii];
 			if (TargetInventoryContainer == nullptr) { break; }
 
-			bool bHasLeftOverItems;
+			bool bWasFullyPlaced;
 		
-			TargetInventoryContainer->BP_AutoAddItem(ActiveItemData, bHasLeftOverItems, ActiveItemData);
+			TargetInventoryContainer->BP_AutoAddItem(ActiveItemData, bWasFullyPlaced, ActiveItemData);
 
-			if (bHasLeftOverItems == true) 
+
+			if (bWasFullyPlaced == true) 
 			{ 
-				bFullyPlaced = false;
-				break; 
+				bFullyPlaced = true;
+				break;
 			}
 			else
 			{
 				bFullyPlaced = false;
+			
 			}
 		}
 
