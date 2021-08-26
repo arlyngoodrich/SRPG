@@ -81,6 +81,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void RemoveQuantityOfClass(TSubclassOf<class AItemBase> Class, int32 QuantityToRemove, int32& QuantityRemaining);
+
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	int32 Inventory_AbstractInventoryPairID;
 

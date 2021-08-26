@@ -339,6 +339,64 @@ void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryItemData>& Ou
 	OutAbstractInventoryPairID = Inventory_AbstractInventoryPairID;
 }
 
+void UInventoryContainer::RemoveQuantityOfClass(TSubclassOf<class AItemBase> Class, int32 QuantityToRemove, int32& QuantityRemaining)
+{
+	UE_LOG(LogInventorySystem,Log,TEXT("Removing %s of %s"), *Class.Get()->GetName(),*FString::SanitizeFloat(QuantityToRemove))
+
+	UClass* ClassToRemove = Class.Get();
+	QuantityRemaining = QuantityToRemove;
+
+	for (int32 Index = Inventory.Num() - 1; Index > -1; Index--)
+	{
+		UClass* TargetItemClass;
+		TargetItemClass = Inventory[Index].ItemData.InWorldActorClass.Get();
+
+		if (TargetItemClass->IsChildOf(ClassToRemove))
+		{
+
+			UE_LOG(LogInventorySystem,Log,TEXT("%s is valid child of %s"), *TargetItemClass->GetName(),*ClassToRemove->GetName())
+
+			int32 QuantityInTargetStack;
+			QuantityInTargetStack = Inventory[Index].ItemData.StackQuantity;
+
+			//If can fully supply quantity and have leftover.  Remove quantity to remove from inventory, set quantity remaining to 0, and end loop.
+			if (QuantityInTargetStack > QuantityToRemove)
+			{
+				Inventory[Index].ItemData.StackQuantity = QuantityInTargetStack - QuantityToRemove;
+
+				UE_LOG(LogInventorySystem,Log,TEXT("Stack Quantity Updated to %s"),*FString::SanitizeFloat(QuantityInTargetStack-QuantityToRemove))
+
+				QuantityRemaining = 0;
+				break;
+			}
+			// If can fully or partially supply with no leftover, update quantity remaining, remove item from inventory
+			if (QuantityInTargetStack <= QuantityToRemove)
+			{
+				QuantityRemaining = QuantityToRemove - QuantityInTargetStack;
+				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
+
+				//If the quantity remining to be removed is greater than 0, update Quantity to remove
+				if (QuantityRemaining > 0)
+				{
+					QuantityToRemove = QuantityRemaining;
+				}
+				//If quantity remaining is 0, then end loop
+				else
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogInventorySystem, Log, TEXT("%s is not a valid child of %s"), *TargetItemClass->GetName(), *ClassToRemove->GetName())
+		}
+	}
+
+	
+	Internal_OnInventoryUpdate();
+}
+
 
 
 bool UInventoryContainer::Server_SplitStack_Validate(FItemData OriginalItem, int32 PositionX, int32 PositionY, int32 NewStackAmount)
