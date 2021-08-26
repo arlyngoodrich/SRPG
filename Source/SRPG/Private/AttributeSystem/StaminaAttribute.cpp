@@ -8,6 +8,7 @@
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
+#include "..\..\Public\AttributeSystem\StaminaAttribute.h"
 
 
 
@@ -36,9 +37,11 @@ void UStaminaAttribute::UseStamina(float StaminaAmount)
 void UStaminaAttribute::SetWeight(float NewWeight)
 {
 	if (PlayerCharacter == nullptr) { return; }
+	if (CurrentWeight == NewWeight) { return; }
 
 
 	CurrentWeight = NewWeight;
+	OnRep_WeightChange();
 
 	//Check if newly encumbered
 	if (CurrentWeight > EncumberanceWeight)
@@ -63,6 +66,7 @@ void UStaminaAttribute::ModifyStaminaUse(float ModifyAmount)
 	}
 
 	StaminaUseModifer = FMath::Max(StaminaUseModifer + ModifyAmount, 0.f);
+	UE_LOG(LogAttributeSystem,Log,TEXT("StaminaUse Modified by: %s"),*FString::SanitizeFloat(ModifyAmount))
 }
 
 void UStaminaAttribute::ModifyStaminaReGen(float ModifyAmount)
@@ -74,6 +78,7 @@ void UStaminaAttribute::ModifyStaminaReGen(float ModifyAmount)
 	}
 
 	StaminaRegenModifer = FMath::Max(StaminaRegenModifer + ModifyAmount, 0.f);
+	UE_LOG(LogAttributeSystem, Log, TEXT("StaminaRegen Modified by: %s"), *FString::SanitizeFloat(ModifyAmount))
 
 }
 
@@ -200,6 +205,16 @@ void UStaminaAttribute::OnRep_ExhaustedUpdate()
 	OnExhuastionChange.Broadcast(bIsExhausted);
 }
 
+void UStaminaAttribute::OnRep_StaminaChange()
+{
+	OnStaminaChange.Broadcast(CurrentStamina);
+}
+
+void UStaminaAttribute::OnRep_WeightChange()
+{
+	OnWeightChange.Broadcast(CurrentWeight);
+}
+
 void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 {
 	CurrentStamina = FMath::Clamp(CurrentStamina + ChangeAmount, 0.f, MaxStamina);
@@ -215,7 +230,7 @@ void UStaminaAttribute::ChangeStaminaAmount(float ChangeAmount)
 		SetStaminaOK();
 	}
 
-	OnStaminaChange.Broadcast(CurrentStamina);
+	OnRep_StaminaChange();
 }
 
 void UStaminaAttribute::SetExhausted()

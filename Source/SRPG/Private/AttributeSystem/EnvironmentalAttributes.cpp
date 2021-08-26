@@ -107,6 +107,11 @@ void UEnvironmentalAttributes::OnRep_WetnessStateUpdate()
 	Wetness_OnStateChange.Broadcast(CurrentWetnessState);
 }
 
+void UEnvironmentalAttributes::OnRep_TempUpdate()
+{
+	Temp_OnUpdate.Broadcast(CurrentTemperature);
+}
+
 void UEnvironmentalAttributes::SetCurrentTemperature(float NewCurrentTemp)
 {
 	CurrentTemperature = NewCurrentTemp;
@@ -176,7 +181,8 @@ void UEnvironmentalAttributes::AdjustTemperature(float SampledTemperature)
 			*FString::SanitizeFloat(CurrentTemperature)
 		)
 	}
-	
+
+	OnRep_TempUpdate();
 	SetTempState();
 }
 

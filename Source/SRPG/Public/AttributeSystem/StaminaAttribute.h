@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEncumberanceChange, bool, bNewEncumberance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExhaustedChange, bool, bNewExhausted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChange, float, NewStamina);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeightChange, float, NewWeight);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaStartReGen);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaStopReGen);
 
@@ -51,8 +52,11 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStaminaStopReGen Stamina_OnStopReGen;
 
-	//Server only delegate for stamina updates.  Fairly frequent so not client safe.  
+	UPROPERTY(BlueprintAssignable)
 	FOnStaminaChange OnStaminaChange;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnWeightChange OnWeightChange;
 
 protected:
 
@@ -76,6 +80,12 @@ protected:
 	UFUNCTION()
 	void OnRep_ExhaustedUpdate();
 
+	UFUNCTION()
+	void OnRep_StaminaChange();
+
+	UFUNCTION()
+	void OnRep_WeightChange();
+
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	class UTP_CharacterMovement* CharacterMovementComponent;
 
@@ -85,7 +95,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
 	float MaxStamina;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Stamina")
+	UPROPERTY(ReplicatedUsing = OnRep_StaminaChange, BlueprintReadOnly, Category = "Stamina")
 	float CurrentStamina;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Stamina Config")
@@ -111,7 +121,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_EncumberanceUpdate, Category = "Stamina")
 	bool bIsEncumbered;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stamina")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WeightChange, Category = "Stamina")
 	float CurrentWeight;
 
 	//----------------- Effect Modifers ----------------------//

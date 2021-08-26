@@ -3,6 +3,7 @@
 
 #include "InventorySystem/InventoryContainer.h"
 #include "LogFiles.h"
+#include "ItemSystem/ItemBase.h"
 
 //UE4 Includes
 #include "Net/UnrealNetwork.h"
@@ -150,7 +151,7 @@ void UInventoryContainer::BP_AutoTransfer(FItemData Item, int32 StartXPos, int32
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		AutoTransfer(Item, FVector2D(StartXPos, StartYPox), RecievingInventory);
+		AutoTransfer(Item, FVector2D(StartXPos, StartYPox), RecievingInventory,true);
 	}
 	else
 	{
@@ -191,40 +192,43 @@ bool UInventoryContainer::Server_TransferAll_Validate(UInventoryContainer* Recie
 
 void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer* RecievingInventory)
 {
-	if (RecievingInventory)
-	{
 
-		TArray<bool> InventoryIndexiesToRemove;
-		TArray<FItemData> LeftOverItemDataArray;
+	if (!RecievingInventory) { return; }
+	
+	TArray<FItemData> LeftOverItemDataArray;
+	TArray<FVector2D> Positions;
+	TArray<bool> bShouldFullyRemoves;
 
 	for (int32 Index = 0; Index != Inventory.Num(); Index++)
+	{
+		if (RecievingInventory->PerformFilterCheck(Inventory[Index].ItemData))
 		{
-			FItemData LeftOverItemData;
-			InventoryIndexiesToRemove.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, LeftOverItemData));
-			LeftOverItemDataArray.Add(LeftOverItemData);
-		}
-
-		
-	for (int32 Index = Inventory.Num() - 1; Index > -1; Index--)
-		{
-			if (InventoryIndexiesToRemove[Index])
-			{//was fully removed
-
-				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
-			}
-			else
-			{//Was not fully removed
-
-				Inventory[Index].ItemData = LeftOverItemDataArray[Index];
-		
-			}
-		}
-
-	Internal_OnInventoryUpdate();
-
+			FItemData RemainingItem;
+			bShouldFullyRemoves.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, RemainingItem));
+			LeftOverItemDataArray.Add(RemainingItem);
+			Positions.Add(Inventory[Index].Position);
+		}	
 	}
 
+	for (int32 Index = Positions.Num(); Index-- > 0; )
+	{
+		FItemData TargetItem;
+		int32 TargetIndex;
+		TargetItem = GetItemAtPosition(Positions[Index]);
+		FindInventoryItemIndex(TargetItem, Positions[Index], TargetIndex);
 
+		if (bShouldFullyRemoves[Index])
+		{
+			RemoveItem(TargetItem, Positions[Index]);
+		}
+		else
+		{
+			Inventory[TargetIndex].ItemData = LeftOverItemDataArray[Index];
+		}
+	}
+	
+	Internal_OnInventoryUpdate();
+	
 }
 
 // BP AutoAdd Item //
@@ -333,6 +337,64 @@ void UInventoryContainer::GetInventoryForAbstract(TArray<FInventoryItemData>& Ou
 {
 	OutInventoryData = Inventory;
 	OutAbstractInventoryPairID = Inventory_AbstractInventoryPairID;
+}
+
+void UInventoryContainer::RemoveQuantityOfClass(TSubclassOf<class AItemBase> Class, int32 QuantityToRemove, int32& QuantityRemaining)
+{
+	UE_LOG(LogInventorySystem,Log,TEXT("Removing %s of %s"), *Class.Get()->GetName(),*FString::SanitizeFloat(QuantityToRemove))
+
+	UClass* ClassToRemove = Class.Get();
+	QuantityRemaining = QuantityToRemove;
+
+	for (int32 Index = Inventory.Num() - 1; Index > -1; Index--)
+	{
+		UClass* TargetItemClass;
+		TargetItemClass = Inventory[Index].ItemData.InWorldActorClass.Get();
+
+		if (TargetItemClass->IsChildOf(ClassToRemove))
+		{
+
+			UE_LOG(LogInventorySystem,Log,TEXT("%s is valid child of %s"), *TargetItemClass->GetName(),*ClassToRemove->GetName())
+
+			int32 QuantityInTargetStack;
+			QuantityInTargetStack = Inventory[Index].ItemData.StackQuantity;
+
+			//If can fully supply quantity and have leftover.  Remove quantity to remove from inventory, set quantity remaining to 0, and end loop.
+			if (QuantityInTargetStack > QuantityToRemove)
+			{
+				Inventory[Index].ItemData.StackQuantity = QuantityInTargetStack - QuantityToRemove;
+
+				UE_LOG(LogInventorySystem,Log,TEXT("Stack Quantity Updated to %s"),*FString::SanitizeFloat(QuantityInTargetStack-QuantityToRemove))
+
+				QuantityRemaining = 0;
+				break;
+			}
+			// If can fully or partially supply with no leftover, update quantity remaining, remove item from inventory
+			if (QuantityInTargetStack <= QuantityToRemove)
+			{
+				QuantityRemaining = QuantityToRemove - QuantityInTargetStack;
+				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
+
+				//If the quantity remining to be removed is greater than 0, update Quantity to remove
+				if (QuantityRemaining > 0)
+				{
+					QuantityToRemove = QuantityRemaining;
+				}
+				//If quantity remaining is 0, then end loop
+				else
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogInventorySystem, Log, TEXT("%s is not a valid child of %s"), *TargetItemClass->GetName(), *ClassToRemove->GetName())
+		}
+	}
+
+	
+	Internal_OnInventoryUpdate();
 }
 
 
@@ -491,6 +553,7 @@ void UInventoryContainer::InitalizeSlots()
 
 bool UInventoryContainer::CheckIfItemFitsInPosition(FItemData Item, FVector2D Position)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
 
 	int32 InitalPositionIndex;
 
@@ -550,6 +613,8 @@ bool UInventoryContainer::CheckIfItemFitsInPosition(FItemData Item, FVector2D Po
 bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 {
 	
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	if (CheckIfWeightOK(Item))
 	{
 
@@ -569,6 +634,8 @@ bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 
 bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bCheckWeight)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
+	
 	FItemData ItemData;
 	ItemData = GetServerVersionOfItem(Item, this, Position);
 
@@ -731,6 +798,8 @@ bool UInventoryContainer::SplitStack(FItemData OriginalItem, FVector2D StartingP
 bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem)
 {
 
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	bool bWasFullyStacked = false;
 	FItemData RemainingItem;
 
@@ -779,7 +848,7 @@ bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FIt
 		//Item could not be fully stacked or placed as new item
 
 		UE_LOG(LogInventorySystem, Log, TEXT("%s was not fully added, %d quantity remains"), *Item.DisplayName.ToString(), RemainingItem.StackQuantity)
-			OutRemainingItem = RemainingItem;
+		OutRemainingItem = RemainingItem;
 		return false;
 	}
 
@@ -891,6 +960,8 @@ void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacke
 bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated)
 {
 
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	//Need to save reference to original item in case it is rotated during transit.  
 	FItemData OriginalItem;
 	OriginalItem = Item;
@@ -943,8 +1014,10 @@ bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosit
 
 }
 
-bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory)
+bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory,bool UpdateUI)
 {
+	if (!PerformFilterCheck(Item)) { return false; }
+
 	if (IsValidItem(Item, StartingPosition) && ReceivingInventory)
 	{
 		FItemData ItemData;
@@ -954,7 +1027,7 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 		if (ReceivingInventory->AutoAddItem(ItemData, ItemData.bCanBeStacked, LeftOverItem))
 		{
 			RemoveItem(ItemData, StartingPosition);
-			Internal_OnInventoryUpdate();
+			if (UpdateUI) { Internal_OnInventoryUpdate(); }
 			UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
 		}
@@ -965,7 +1038,7 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 			int32 ItemIndex;
 			FindInventoryItemIndex(ItemData, StartingPosition, ItemIndex);
 			Inventory[ItemIndex].ItemData = LeftOverItem;
-			Internal_OnInventoryUpdate();
+			if (UpdateUI) { Internal_OnInventoryUpdate(); }
 			return true;
 
 		}
@@ -1009,6 +1082,7 @@ bool UInventoryContainer::SameInventoryStack(FItemData IncomingItem, FVector2D I
 
 bool UInventoryContainer::DifferentInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, UInventoryContainer* RecievingInventory, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData)
 {
+	if (!PerformFilterCheck(IncomingItem)) { return false; }
 
 	int32 IncomingItemIndex;
 	if (FindInventoryItemIndex(IncomingItem, IncomingItemPos, IncomingItemIndex) == false)
@@ -1052,6 +1126,7 @@ bool UInventoryContainer::DifferentInventoryStack(FItemData IncomingItem, FVecto
 
 bool UInventoryContainer::DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D ReceivingItemPos, FItemData& OutLefOverItemData)
 {
+	if (!PerformFilterCheck(IncomingItem)) { return false; }
 
 	OutLefOverItemData = IncomingItem;
 
@@ -1140,7 +1215,73 @@ void UInventoryContainer::RemoveQuantityOfItemFromStack(int32 QtyToRemove, FItem
 
 }
 
+bool UInventoryContainer::PerformFilterCheck(FItemData Item)
+{
 
+	switch (FilterType)
+	{
+	case EInventoryFilterType::EIT_None:
+
+		return true;
+		break;
+	case EInventoryFilterType::EIT_BlackList:
+
+		//Check if item is in filter list.  If item IS in filter, list return false.  
+		if (IsItemInFilterList(Item))
+		{
+			UE_LOG(LogInventorySystem,Log,TEXT("Blacklist filter rejected %s"), *Item.DisplayName.ToString())
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+
+		break;
+	case EInventoryFilterType::EIT_WhiteList:
+
+		//Check if item is in filter list.  If item IS in filter list, returnt true.
+		if (IsItemInFilterList(Item))
+		{
+			return true;
+		}
+		else
+		{
+			UE_LOG(LogInventorySystem, Log, TEXT("Whitelist filter rejected %s"), *Item.DisplayName.ToString())
+			return false;
+		}
+
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool UInventoryContainer::IsItemInFilterList(FItemData Item)
+{
+	TArray<bool> bClassChecks;
+
+	for (int32 i = 0; i < FilterClasses.Num(); i++)
+	{
+		bClassChecks.Add(IsItemValidSubClass(Item, FilterClasses[i]));
+	}
+
+	return bClassChecks.Contains(true);
+}
+
+
+
+
+
+bool UInventoryContainer::IsItemValidSubClass(FItemData Item, TSubclassOf<class AItemBase> FilterClass)
+{
+	UClass* ItemClass = Item.InWorldActorClass.Get();
+	UClass* ExactFilterClass = FilterClass.Get();
+		
+	return ItemClass->IsChildOf(FilterClass);
+}
 
 void UInventoryContainer::SetSlotsAsOccupied(int32 SizeX, int32 SizeY, FVector2D Position, bool bIsOccupied)
 {

@@ -10,6 +10,14 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
+UENUM(BlueprintType)
+enum class EInventoryFilterType : uint8 {
+
+	EIT_None			UMETA(DisplayName = "None"),
+	EIT_BlackList		UMETA(DisplayName = "BlackList"),
+	EIT_WhiteList		UMETA(DisplayName = "WhiteList"),
+
+};
 
 
 
@@ -24,25 +32,25 @@ public:
 	UInventoryContainer();
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Fits")
-		bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
+	bool BP_CheckIfItemFitsInPosition(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Item Could be added")
-		bool BP_CheckIfItemCouldBeAdded(FItemData Item);
+	bool BP_CheckIfItemCouldBeAdded(FItemData Item);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Check If Valid Item")
-		bool BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY);
+	bool BP_CheckIfValidItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Add Item")
-		void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
+	void BP_AddItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Remove Item")
-		void BP_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
+	void BP_RemoveItem(FItemData Item, int32 PosX, int32 PosY);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Move Item")
-		void BP_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void BP_MoveItem(FItemData Item, int32 StartPosX, int32 StartPosY, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Direct Transfer Item")
-		void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
+	void BP_DirectTransfer(FItemData Item, int32 StartXPos, int32 StartYPos, UInventoryContainer* RecievingInventory, int32 EndPosX, int32 EndPosY, bool bIsRotated);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", DisplayName = "Auto Transfer Item")
 	void BP_AutoTransfer(FItemData Item, int32 StartXPos, int32 StartYPox, UInventoryContainer* RecievingInventory);
@@ -72,6 +80,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void GetInventoryForAbstract(TArray<FInventoryItemData>& OutInventoryData, int32& OutAbstractInventoryPaidID);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void RemoveQuantityOfClass(TSubclassOf<class AItemBase> Class, int32 QuantityToRemove, int32& QuantityRemaining);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	int32 Inventory_AbstractInventoryPairID;
@@ -166,6 +177,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ClampMin = 1), meta = (ExposeOnSpawn = "true"))
 	int32 InventorySizeY;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	EInventoryFilterType FilterType = EInventoryFilterType::EIT_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory Configuration", meta = (ExposeOnSpawn = "true"))
+	TArray<TSubclassOf<class AItemBase>> FilterClasses;
+
 	UPROPERTY(Replicated)
 	FVector2D InventorySize;
 
@@ -204,7 +221,7 @@ protected:
 
 	bool DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated);
 
-	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory);
+	bool AutoTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* ReceivingInventory, bool UpdateUI);
 
 	bool SameInventoryStack(FItemData IncomingItem, FVector2D IncomingItemPos, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
@@ -213,6 +230,12 @@ protected:
 	bool DirectStack(FItemData IncomingItem, FItemData ReceivingItem, FVector2D TargetPosition, FItemData& OutLefOverItemData);
 
 	void RemoveQuantityOfItemFromStack(int32 QtyToRemove,FItemData Item, FVector2D StartingPosition);
+
+	bool PerformFilterCheck(FItemData Item);
+
+	bool IsItemInFilterList(FItemData Item);
+
+	bool IsItemValidSubClass(FItemData Item, TSubclassOf<class AItemBase> FilterClass);
 
 	//TODO StackTransfer
 

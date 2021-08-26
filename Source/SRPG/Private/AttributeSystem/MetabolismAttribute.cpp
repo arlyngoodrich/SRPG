@@ -26,6 +26,22 @@ void UMetabolismAttribute::OnConsume(float CarbsChange, float VitaminsChange, fl
 
 }
 
+void UMetabolismAttribute::ModifyDecayAmounts(float CarbDecayMod, float ProteinDecayMod, float VitaminDecayMod, float WaterDecayMod)
+{
+	CarbDecayAmount += CarbDecayMod;
+	ProteinDecayAmount += ProteinDecayMod;
+	VitaminDecayAmount += VitaminDecayMod;
+	WaterDecayAmount += WaterDecayMod;
+
+	UE_LOG(LogAttributeSystem,Log,TEXT(
+		"Decay Amount's Modified CarbDecayMod: %s | ProteinDecayMod: %s | VitaminDecayMod: %s | WaterDecayMod: %s"),
+		*FString::SanitizeFloat(CarbDecayMod),
+		*FString::SanitizeFloat(ProteinDecayMod),
+		*FString::SanitizeFloat(VitaminDecayMod),
+		*FString::SanitizeFloat(WaterDecayMod))
+
+}
+
 void UMetabolismAttribute::BeginPlay()
 {
 	Super::BeginPlay();
@@ -58,6 +74,16 @@ void UMetabolismAttribute::OnRep_MetabolicBalanceChange()
 	Metabolism_OnBalanceChange.Broadcast(CurrentMetabolicBalance);
 }
 
+void UMetabolismAttribute::OnRep_WaterChange()
+{
+	Metabolism_OnWaterUpdate.Broadcast(CurrentWater);
+}
+
+void UMetabolismAttribute::OnRep_FoodChange()
+{
+	Metabolism_OnFoodUpdate.Broadcast(CurrentFood);
+}
+
 
 
 void UMetabolismAttribute::GetLifetimeReplicatedProps(TArray<FLifetimeProperty >& OutLifetimeProps) const
@@ -84,12 +110,28 @@ void UMetabolismAttribute::ChangeFood(float CarbsChange, float VitaminsChange, f
 			return;
 	}
 
+	
+	float OldWater = CurrentWater;
 	CurrentWater = FMath::Clamp(CurrentWater + WaterChange, 0.f, MaxWater);
+
+	if (OldWater != CurrentWater)
+	{
+		OnRep_WaterChange();
+	}
+
+
 	CurrentCarbs = FMath::Clamp(CurrentCarbs + CarbsChange, 0.f, MaxFood - CurrentProtein - CurrentVitamins);
 	CurrentVitamins = FMath::Clamp(CurrentVitamins + VitaminsChange, 0.f, MaxFood - CurrentCarbs - CurrentProtein);
 	CurrentProtein = FMath::Clamp(CurrentProtein + ProteinChange, 0.f, MaxFood - CurrentCarbs - CurrentVitamins);
 
+	float OldFood = CurrentFood;
 	CurrentFood = CurrentCarbs + CurrentVitamins + CurrentProtein;
+
+	if (CurrentFood != OldFood)
+	{
+		OnRep_FoodChange();
+	}
+
 	SetMetabolismStatus();
 	SetMetabolicBalance();
 

@@ -59,7 +59,7 @@ struct FBuildingCost : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-	FName ResourceName;
+	TSubclassOf<class AItemBase> ResourceItem;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data", meta = (ClampMin = 0))
 	int32 Quantity;
@@ -76,10 +76,19 @@ struct FBuildingPieceData : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-		FName BuildingPieceName;
+		FName BuildingDisplayName;
 
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
-		TSubclassOf<ABuildingPiece> InWorldActorClass;
+		UTexture2D* BuildingIcon;
+
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+		FColor IconBackgroundColor;
+
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+		FText Description;
+
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
+		bool bCanPullResourceFromStockPile;
 
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 		TArray<FBuildingCost> BuildingCosts;

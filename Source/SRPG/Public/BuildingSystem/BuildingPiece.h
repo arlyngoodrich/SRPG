@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BuildingData.h"
+#include "InventorySystem/ItemData.h"
 #include "BuildingPiece.generated.h"
 
 UCLASS(ClassGroup = (BuildingSystem))
@@ -19,6 +20,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Building Piece Data")
+	void GetItemDataFromClassAndQty(TSubclassOf<class AItemBase> ItemClass, int32 Quantity, TArray<FItemData>& Items);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Building Piece Data")
+	void DistributeItemsToInventories(TArray<FItemData> InItems, TArray<class UInventoryContainer*> TargetInventories, bool& OutHasLeftOver, TArray<FItemData>& OutRemainingItems);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Building Piece Data")
 	EBuildingTypes BuildingType;
