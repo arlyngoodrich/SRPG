@@ -62,7 +62,7 @@ void UInventoryContainer::BP_AddItem(FItemData Item, int32 PosX, int32 PosY)
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		AddItem(Item, FVector2D(PosX, PosY), false);
+		AddItem(Item, FVector2D(PosX, PosY), false,false);
 	}
 	else
 	{
@@ -88,7 +88,7 @@ void UInventoryContainer::BP_RemoveItem(FItemData Item, int32 PosX, int32 PosY)
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		RemoveItem(Item, FVector2D(PosX, PosY));
+		RemoveItem(Item, FVector2D(PosX, PosY),false);
 	}
 	else
 	{
@@ -204,7 +204,7 @@ void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer*
 		if (RecievingInventory->PerformFilterCheck(Inventory[Index].ItemData))
 		{
 			FItemData RemainingItem;
-			bShouldFullyRemoves.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, RemainingItem));
+			bShouldFullyRemoves.Add(RecievingInventory->AutoAddItem(Inventory[Index].ItemData, true, RemainingItem,true));
 			LeftOverItemDataArray.Add(RemainingItem);
 			Positions.Add(Inventory[Index].Position);
 		}	
@@ -219,16 +219,27 @@ void UInventoryContainer::Server_TransferAll_Implementation(UInventoryContainer*
 
 		if (bShouldFullyRemoves[Index])
 		{
-			RemoveItem(TargetItem, Positions[Index]);
+			RemoveItem(TargetItem, Positions[Index],true);
 		}
 		else
 		{
 			Inventory[TargetIndex].ItemData = LeftOverItemDataArray[Index];
 		}
 	}
+
+	UE_LOG(LogInventorySystem, Log, TEXT("Calling Delay Timer"))
+	ReceivingInventoryTemp = RecievingInventory;
+	FTimerHandle Delay;
+	GetWorld()->GetTimerManager().SetTimer(Delay, this, &UInventoryContainer::UpdateUIDelay,.1, false, .1);
 	
+}
+
+void UInventoryContainer::UpdateUIDelay()
+{
+	UE_LOG(LogInventorySystem,Log,TEXT("Update UI called"))
+	ReceivingInventoryTemp->Internal_OnInventoryUpdate();
 	Internal_OnInventoryUpdate();
-	
+	ReceivingInventoryTemp = nullptr;
 }
 
 // BP AutoAdd Item //
@@ -237,7 +248,7 @@ void UInventoryContainer::BP_AutoAddItem(FItemData Item, bool& bOutWasFullyAdded
 {
 	if (GetOwnerRole() >= ROLE_Authority)
 	{
-		bOutWasFullyAdded = AutoAddItem(Item, true, OutRemainingItem);
+		bOutWasFullyAdded = AutoAddItem(Item, true, OutRemainingItem,false);
 	}
 }
 
@@ -322,7 +333,7 @@ void UInventoryContainer::SetInventoryFromAbstract(TArray<FInventoryItemData> Ne
 	
 	for (int32 i = 0; i < NewInventory.Num(); i++)
 	{
-		AddItem(NewInventory[i].ItemData, NewInventory[i].Position, false);
+		AddItem(NewInventory[i].ItemData, NewInventory[i].Position, false,false);
 
 	}
 
@@ -373,7 +384,7 @@ void UInventoryContainer::RemoveQuantityOfClass(TSubclassOf<class AItemBase> Cla
 			if (QuantityInTargetStack <= QuantityToRemove)
 			{
 				QuantityRemaining = QuantityToRemove - QuantityInTargetStack;
-				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position);
+				RemoveItem(Inventory[Index].ItemData, Inventory[Index].Position,true);
 
 				//If the quantity remining to be removed is greater than 0, update Quantity to remove
 				if (QuantityRemaining > 0)
@@ -514,7 +525,7 @@ void UInventoryContainer::RemoveQuantityOfItem(FItemData Item, int32 RequestedQu
 	//Remove Data
 	for (int32 Index = InventoryDataToRemove.Num() - 1; Index > -1; Index--)
 	{
-		RemoveItem(InventoryDataToRemove[Index].ItemData, InventoryDataToRemove[Index].Position);
+		RemoveItem(InventoryDataToRemove[Index].ItemData, InventoryDataToRemove[Index].Position,true);
 	}
 
 	Internal_OnInventoryUpdate();
@@ -632,7 +643,7 @@ bool UInventoryContainer::CheckIfItemCouldBeAdded(FItemData Item)
 	return false;
 }
 
-bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bCheckWeight)
+bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bCheckWeight, bool bDeferUIUpdate)
 {
 	if (!PerformFilterCheck(Item)) { return false; }
 	
@@ -655,7 +666,7 @@ bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bChec
 
 
 			UE_LOG(LogInventorySystem, Log, TEXT("%s added to positon (%s,%s)"), *ItemData.DisplayName.ToString(), *FString::SanitizeFloat(Position.X), *FString::SanitizeFloat(Position.Y))
-			Internal_OnInventoryUpdate();
+			if (!bDeferUIUpdate) { Internal_OnInventoryUpdate(); }
 			return true;
 		}
 		else
@@ -672,7 +683,7 @@ bool UInventoryContainer::AddItem(FItemData Item, FVector2D Position, bool bChec
 
 }
 
-bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position)
+bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position, bool bDeferUIUpdate)
 {
 
 	for (int32 Index = 0; Index != Inventory.Num(); Index++)
@@ -688,7 +699,7 @@ bool UInventoryContainer::RemoveItem(FItemData Item, FVector2D Position)
 			Inventory.RemoveAt(Index);
 
 			UE_LOG(LogInventorySystem, Log, TEXT("%s removed from (%s,%s)"), *Item.DisplayName.ToString(), *FString::SanitizeFloat(Position.X), *FString::SanitizeFloat(Position.Y))
-			Internal_OnInventoryUpdate();
+			if (!bDeferUIUpdate) { Internal_OnInventoryUpdate(); }
 			return true;
 		}
 
@@ -775,7 +786,7 @@ bool UInventoryContainer::SplitStack(FItemData OriginalItem, FVector2D StartingP
 			if (CheckIfItemFitsInPosition(NewStack, InventorySlots[Index]))
 			{
 
-				if (AddItem(NewStack, InventorySlots[Index], false))
+				if (AddItem(NewStack, InventorySlots[Index], false,false))
 				{
 					Inventory[OriginalItemIndex].ItemData.StackQuantity = OriginalStackAmount - NewStackAmount;
 					Internal_OnInventoryUpdate();
@@ -795,7 +806,7 @@ bool UInventoryContainer::SplitStack(FItemData OriginalItem, FVector2D StartingP
 
 }
 
-bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem)
+bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem, bool bDeferUIUpdate)
 {
 
 	if (!PerformFilterCheck(Item)) { return false; }
@@ -807,7 +818,7 @@ bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FIt
 	{
 		if (CheckIfWeightOK(Item))
 		{
-			AutoStackItem(Item, bWasFullyStacked, RemainingItem);
+			AutoStackItem(Item, bWasFullyStacked, RemainingItem, bDeferUIUpdate);
 		}
 		else
 		{
@@ -831,7 +842,7 @@ bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FIt
 			if (CheckIfItemFitsInPosition(RemainingItem, InventorySlots[Index]))
 			{
 				//Add Item to first availabe slot
-				if (AddItem(RemainingItem, InventorySlots[Index], true))
+				if (AddItem(RemainingItem, InventorySlots[Index], true, bDeferUIUpdate))
 				{
 
 					UE_LOG(LogInventorySystem, Log, TEXT("%s added as new item"), *Item.DisplayName.ToString())
@@ -854,7 +865,7 @@ bool UInventoryContainer::AutoAddItem(FItemData Item, bool bShouldStackItem, FIt
 
 }
 
-void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData)
+void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData, bool bDeferUIUpdate)
 {
 	TArray<int32>EligibleIndexices;
 	FItemData ItemToAdd;
@@ -884,7 +895,7 @@ void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacke
 				UE_LOG(LogInventorySystem, Log, TEXT("Item successfully stacked"))
 
 				OutItemFullyStacked = true;
-				Internal_OnInventoryUpdate();
+				if (!bDeferUIUpdate) { Internal_OnInventoryUpdate(); }
 				return;
 			}
 
@@ -928,7 +939,7 @@ void UInventoryContainer::AutoStackItem(FItemData Item, bool& OutItemFullyStacke
 			OutLeftOverItemData = ItemToAdd;
 
 			UE_LOG(LogInventorySystem, Log, TEXT("Partially stacked %s, %d remain"), *ItemToAdd.DisplayName.ToString(), RemainingQuantity)
-				Internal_OnInventoryUpdate();
+			if (!bDeferUIUpdate) { Internal_OnInventoryUpdate(); }
 			return;
 
 
@@ -998,7 +1009,7 @@ bool UInventoryContainer::DirectTransfer(FItemData Item, FVector2D StartingPosit
 	}
 
 
-	if (RecievingInventory->AddItem(ItemData, EndingPosition, true) && RemoveItem(OriginalItem, StartingPosition))
+	if (RecievingInventory->AddItem(ItemData, EndingPosition, true,false) && RemoveItem(OriginalItem, StartingPosition,false))
 	{
 		UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
@@ -1024,9 +1035,9 @@ bool UInventoryContainer::AutoTransfer(FItemData Item, FVector2D StartingPositio
 		ItemData = GetServerVersionOfItem(Item, this, StartingPosition);
 
 		FItemData LeftOverItem;
-		if (ReceivingInventory->AutoAddItem(ItemData, ItemData.bCanBeStacked, LeftOverItem))
+		if (ReceivingInventory->AutoAddItem(ItemData, ItemData.bCanBeStacked, LeftOverItem,!UpdateUI))
 		{
-			RemoveItem(ItemData, StartingPosition);
+			RemoveItem(ItemData, StartingPosition,!UpdateUI);
 			if (UpdateUI) { Internal_OnInventoryUpdate(); }
 			UE_LOG(LogInventorySystem, Log, TEXT("Transfer of %s succeeded"), *ItemData.DisplayName.ToString())
 			return true;
@@ -1060,7 +1071,7 @@ bool UInventoryContainer::SameInventoryStack(FItemData IncomingItem, FVector2D I
 		if (DirectStack(IncomingItem, ReceivingItem, ReceivingItemPos, RemainingItemData))
 		{
 			//Item fully stacked into receiving item, OK to remove incoming item
-			RemoveItem(IncomingItem, IncomingItemPos);
+			RemoveItem(IncomingItem, IncomingItemPos,false);
 			Internal_OnInventoryUpdate();
 			return true;
 		}
@@ -1109,7 +1120,7 @@ bool UInventoryContainer::DifferentInventoryStack(FItemData IncomingItem, FVecto
 	if (RecievingInventory->DirectStack(IncomingItem, ReceivingItem, TargetPosition, RemainingItemData))
 	{
 		//Item fully stacked into receiving item, OK to remove incoming item
-		RemoveItem(IncomingItem, IncomingItemPos);
+		RemoveItem(IncomingItem, IncomingItemPos,false);
 		Internal_OnInventoryUpdate();
 		return true;
 	}
@@ -1195,7 +1206,7 @@ void UInventoryContainer::RemoveQuantityOfItemFromStack(int32 QtyToRemove, FItem
 
 		if (CurrentQty <= RemovalAmount)
 		{
-			RemoveItem(Item, StartingPosition);
+			RemoveItem(Item, StartingPosition,false);
 		}
 		else
 		{
@@ -1486,4 +1497,6 @@ FItemData UInventoryContainer::GetServerVersionOfItem(FItemData ClientItem, UInv
 	return ClientItem;
 
 }
+
+
 

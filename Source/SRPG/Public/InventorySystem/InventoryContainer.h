@@ -162,6 +162,8 @@ public:
 	//Must be run on server
 	void RemoveQuantityOfItem(FItemData Item, int32 RequestedQuantity, int32& QuantityRemoved);
 
+	void Internal_OnInventoryUpdate();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -207,17 +209,17 @@ protected:
 
 	bool CheckIfItemCouldBeAdded(FItemData Item);
 
-	bool AddItem(FItemData Item, FVector2D Position, bool bCheckWeight);
+	bool AddItem(FItemData Item, FVector2D Position, bool bCheckWeight, bool bDeferUIUpdate);
 
-	bool RemoveItem(FItemData Item, FVector2D Position);
+	bool RemoveItem(FItemData Item, FVector2D Position, bool bDeferUIUpdate);
 
 	bool MoveItem(FItemData Item, FVector2D StartingPosition, FVector2D EndingPosition, bool bIsRotated);
 
 	bool SplitStack(FItemData OriginalItem, FVector2D StartingPosition, int32 NewStackAmount);
 
-	bool AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem);
+	bool AutoAddItem(FItemData Item, bool bShouldStackItem, FItemData& OutRemainingItem, bool bDeferUIIpdate);
 
-	void AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData);
+	void AutoStackItem(FItemData Item, bool& OutItemFullyStacked, FItemData& OutLeftOverItemData,bool bDeferUIUpdate);
 
 	bool DirectTransfer(FItemData Item, FVector2D StartingPosition, UInventoryContainer* RecievingInventory, FVector2D EndingPosition, bool bIsRotated);
 
@@ -263,11 +265,12 @@ protected:
 	void Client_InventoryUpdate();
 	void Client_InventoryUpdate_Implementation();
 
-
 	UFUNCTION()
 	void OnRep_InventoryUpdated();
 
-	void Internal_OnInventoryUpdate();
-
 	FItemData GetServerVersionOfItem(FItemData ClientItem, UInventoryContainer* TargetInventory, FVector2D Position);
+
+	UInventoryContainer* ReceivingInventoryTemp;
+
+	void UpdateUIDelay();
 };

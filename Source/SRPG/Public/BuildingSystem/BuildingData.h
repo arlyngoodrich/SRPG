@@ -35,6 +35,7 @@ enum class EBuildingTypes : uint8 {
 	BTE_Fireplace		UMETA(DisplayName = "Fireplace"),
 	BTE_Field			UMETA(DisplayName = "Field"),
 	BTE_Crop			UMETA(DisplayName = "Crop"),
+	BTE_Stockpile		UMETA(DisplayName = "Stockpile"),
 };
 
 

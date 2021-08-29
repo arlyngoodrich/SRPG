@@ -72,7 +72,7 @@ void ABuildingPiece::DistributeItemsToInventories(TArray<FItemData> InItems, TAr
 	for (int32 i = 0; i < InItems.Num(); i++)
 	{
 		FItemData ActiveItemData = InItems[i];
-		bool bFullyPlaced;
+		bool bFullyPlaced = false;
 
 		for (int32 ii = 0; ii < TargetInventories.Num(); ii++)
 		{
